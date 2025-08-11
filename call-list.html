@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Call List</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    /*body, html {*/
+    /*  user-select: none;*/
+    /*  -webkit-user-select: none;*/
+    /*  -moz-user-select: none;*/
+    /*  -ms-user-select: none;*/
+    /*}*/
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px #00000060;
+      text-align: center;
+      position: relative;
+    }
+
+    .header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #d6006d;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .call-card {
+      display: flex;
+      align-items: center;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    .call-card img {
+      width: 45px;
+      height: 45px;
+      border-radius: 10px;
+      object-fit: cover;
+      margin-right: 10px;
+    }
+
+    .call-info {
+      text-align: left;
+      flex: 1;
+    }
+
+    .call-info h3 {
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #222;
+    }
+
+    .call-info p {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .icon {
+      color: #d6006d;
+      font-size: 14px;
+      margin-right: 4px;
+    }
+
+    /* Waiting for Approval Box */
+    .waiting-box {
+      background: #fff0f6;
+      border: 2px dashed #d6006d;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #a00050;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .footer-graphic {
+      margin-top: 30px;
+      opacity: 0.2;
+    }
+
+    .footer-graphic img {
+      width: 80%;
+    }
+
+    .footer-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: #e04a86;
+    }
+    
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f84d91;
+      width: 100%;
+      max-width: 400px;
+      height: 60px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: 0 -2px 10px #00000030;
+      z-index: 1000;
+    }
+
+    .footer-item {
+      width: 40px;
+      height: 40px;
+      background: #ffffffaa;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px #00000020;
+      cursor: pointer;
+    }
+
+    .footer-item img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-center {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 8px #00000030;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .footer-center img {
+      width: 30px;
+      height: 30px;
+    }
+    
+    .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media (max-width: 480px) {
+      .call-card img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .call-info h3 {
+        font-size: 13px;
+      }
+
+      .call-info p {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+       <div id="google_translate_element"></div>
+    <div class="header">Call List</div>
+
+    <!-- Call Entry 1 -->
+    <!--<div class="call-card">-->
+    <!--  <img src="https://i.imgur.com/VzX1y0w.jpeg" alt="Anjali Singh" />-->
+    <!--  <div class="call-info">-->
+    <!--    <h3>Anjali Singh</h3>-->
+    <!--    <p><span class="icon">📞</span> June 5, 2025 - 3:15 PM</p>-->
+    <!--  </div>-->
+    <!--</div>-->
+
+    <!-- Call Entry 2 -->
+    <!--<div class="call-card">-->
+    <!--  <img src="https://i.imgur.com/CcMqlfM.jpeg" alt="Blkram Rathore" />-->
+    <!--  <div class="call-info">-->
+    <!--    <h3>Blkram Rathore</h3>-->
+    <!--    <p><span class="icon">📞</span> June 5, 2025 - 3:15 PM</p>-->
+    <!--  </div>-->
+    <!--</div>-->
+
+    <!-- Waiting for Approval Box -->
+    <div class="waiting-box">
+      ⏳ Waiting for Approval by Admin.  <br>You will be notified soon.
+    </div>
+
+    <!-- Footer Placeholder Graphic -->
+    <div class="footer-graphic">
+      <div class="footer-text">TM</div>
+      <img src="imgs/female1.jpg" alt="Silhouette" />
+    </div>
+    
+      <!-- Footer Navigation -->
+  <div class="footer-nav">
+    <div class="footer-item"><a href="call-list.html"><img src="icons/video.png" alt="Video"></a></div>
+    <div class="footer-item"><a href="my-chats.html"><img src="icons/chat.png" alt="Chat"></a></div>
+
+    <div class="footer-center">
+     <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
+    </div>
+
+    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+    <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
+  </div>
+    
+    
+    
+  </div>
+  
+  <!-- Google Translate -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+   <script>
+    // 🚫 Disable right-click context menu
+    // document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 🚫 Disable PrintScreen key (attempted workaround)
+    document.addEventListener('keyup', function (e) {
+      if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('');
+        alert('Screenshot disabled on this page.');
+      }
+    });
+
+    // 🚫 Disable Ctrl+U, Ctrl+Shift+I, Ctrl+S, F12, etc.
+    document.addEventListener('keydown', function(e) {
+      if (
+        (e.ctrlKey && e.key === 'u') || // View Source
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || // Dev Tools
+        (e.ctrlKey && e.key === 's') || // Save Page
+        (e.key === 'F12')
+      ) {
+        e.preventDefault();
+        alert('This action is disabled.');
+      }
+    });
+
+    // ✅ Safe clipboard write (no read, no popup)
+    // function copyText(text) {
+    //   navigator.clipboard.writeText(text)
+    //     .then(() => alert("Text copied safely."))
+    //     .catch(err => console.error("Copy failed", err));
+    // }
+
+    // Example copy button
+    // const copyBtn = document.createElement('button');
+    // copyBtn.textContent = "Copy Message";
+    // copyBtn.onclick = () => copyText("This is protected content.");
+    // document.body.appendChild(copyBtn);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION BEGIN
+PassengerAppRoot "/home1/yvysduaz/repositories/lets-talk-node"
+PassengerBaseURI "/"
+PassengerNodejs "/home1/yvysduaz/nodevenv/repositories/lets-talk-node/20/bin/node"
+PassengerAppType node
+PassengerStartupFile dist/app.js
+PassengerAppLogFile "/home1/yvysduaz/logs/passenger.log"
+# DO NOT REMOVE. CLOUDLINUX PASSENGER CONFIGURATION END
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php83” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION BEGIN
+<IfModule Litespeed>
+SetEnv DB_HOST localhost
+SetEnv DB_PORT 3306
+SetEnv DB_NAME yvysduaz_leta_talk_dbName
+SetEnv DB_USER yvysduaz_leta_talk_userName
+SetEnv DB_PASS yvysduaz_leta_talk_password
+SetEnv JWT_SECRET b2djdjtulykgu20tgo12_mysql_services_clever_cloud
+SetEnv AGORA_APP_ID 3e4ca836f1e941468c4b93b85d3127ec
+SetEnv AGORA_APP_CERTIFICATE e129dc0ff03f4007bf6f7d913fa9bc10
+</IfModule>
+# DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END

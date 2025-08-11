@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Profile Page</title>
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <!-- SweetAlert2 for better modals -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <style>
+    .glow-star {
+      margin-left: 6px;
+      animation: glow 1.2s ease-in-out infinite alternate;
+      color: #ff5ca7;
+      font-size: 20px;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff8ac9, 0 0 30px #ff8ac9, 0 0 40px #ff8ac9;
+      }
+      to {
+        text-shadow: 0 0 15px #fff, 0 0 30px #ff5ca7, 0 0 45px #ff5ca7, 0 0 60px #ff5ca7;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background-color: #f9c7d7;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .header {
+      background-color: #f9c7d7;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+    }
+
+    .name {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+
+    .interest {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .switch-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .switch-label {
+      margin-left: 8px;
+      font-size: 0.9em;
+    }
+
+    .list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-top: 1px solid #ddd;
+      background-color: #fff;
+      color: #000;
+      text-decoration: none;
+    }
+
+    .list-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .list-item:last-child {
+      border-bottom: 1px solid #ddd;
+    }
+
+    .icon {
+      margin-right: 10px;
+      font-size: 1.2em;
+    }
+
+    .footer {
+      background-color: #f9c7d7;
+      padding: 20px;
+      text-align: center;
+      color: #555;
+      font-size: 0.9em;
+    }
+
+    .link-wrapper {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logout-btn {
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 20px;
+      width: calc(100% - 40px);
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .auth-error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin: 20px;
+    }
+
+    .beauty-toggle {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .beauty-toggle label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1em;
+    }
+
+    .beauty-toggle button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #000;
+      font-size: 0.85em;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin: 20px;
+    }
+
+    .profile-info {
+      margin-top: 10px;
+    }
+
+    .profile-info p {
+      margin: 5px 0;
+      font-size: 0.9em;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="google_translate_element" style="justify-items: center; margin-top:1em;"></div>
+
+    <!-- Header section -->
+    <div class="header">
+      <img src="imgs/music-14.jpg" alt="Profile Picture" class="profile-pic" id="profilePic" />
+      <div class="name" id="userName">Loading...</div>
+      <div class="interest" id="userInterest">Loading...</div>
+      <div class="profile-info" id="profileInfo">
+        <!-- Additional profile information will be loaded here -->
+      </div>
+      <div class="switch-container">
+        <input type="checkbox" id="interestSwitch" />
+        <label for="interestSwitch" class="switch-label">On/Off</label>
+      </div>
+    </div>
+
+    <!-- Profile options list -->
+    <ul class="list">
+    
+      <!--<a href="earnings.html" class="link-wrapper">-->
+      <!--  <li class="list-item">-->
+      <!--    <div style="display:flex; align-items:center;">-->
+      <!--      <span class="icon">🛍️</span>-->
+      <!--      <span>My Earning</span>-->
+      <!--    </div>-->
+      <!--    <span>&gt;</span>-->
+      <!--  </li>-->
+      <!--</a>-->
+
+
+    
+
+      <!--<a href="settings.html" class="link-wrapper">-->
+      <!--  <li class="list-item">-->
+      <!--    <div style="display:flex; align-items:center;">-->
+      <!--      <span class="icon">⚙️</span>-->
+      <!--      <span>Settings<span class="glow-star">✨</span></span>-->
+      <!--    </div>-->
+      <!--    <span>&gt;</span>-->
+      <!--  </li>-->
+      <!--</a>-->
+
+      <!-- ✅ New Beauty Filters Toggle Section -->
+      <li class="list-item">
+        <div class="beauty-toggle">
+          <label for="beautyFilterToggle">
+            <span>Beauty filters:</span>
+            <input type="checkbox" id="beautyFilterToggle" checked />
+          </label>
+          <button onclick="showBeautyFilterDemo()">Try and see</button>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- Logout Button -->
+    <button class="logout-btn" onclick="logout()">🚪 LOGOUT</button>
+
+    <!-- Footer -->
+    <div class="footer">
+    
+      CopyRight © 2025 Friends Club. All Rights Reserved.
+    </div>
+  </div>
+
+  <!-- Authentication Check and Logout Script -->
+  <script>
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (checkAuth()) {
+        loadUserDetails();
+      }
+    });
+
+    function checkAuth() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showAuthError();
+        return false;
+      }
+      return true;
+    }
+
+    function showAuthError() {
+      const container = document.querySelector('.container');
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'auth-error';
+      errorDiv.innerHTML = `
+        <h3>⚠️ Authentication Required</h3>
+        <p>Please login to access this page.</p>
+        <button onclick="window.location.href='login.html'" style="background: #d6006d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Go to Login</button>
+      `;
+      container.insertBefore(errorDiv, container.firstChild);
+    }
+
+    async function loadUserDetails() {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        // Show loading state
+        document.getElementById('userName').textContent = 'Loading...';
+        document.getElementById('userInterest').textContent = 'Loading...';
+
+        // Call the /single/types_wise API endpoint
+        const imageResponse = await fetch(API_CONFIG.getImageUrl('/single/types_wise'), {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ image_type: 'profile_photo' })
+        });
+
+        if (!imageResponse.ok) {
+          throw new Error(`HTTP error! status: ${imageResponse.status}`);
+        }
+
+        const jsonData = await imageResponse.json();
+        
+        if (!jsonData.success || jsonData.success !== 200) {
+          throw new Error('API response indicates failure');
+        }
+
+        let data = jsonData.data[0];
+        if (!data) {
+          throw new Error('No user data found');
+        }
+
+        console.log('User details loaded:', data);
+
+        // Update the UI with user details
+        updateUserInterface(data);
+
+        // Show success message
+        showSuccessMessage('Profile loaded successfully!');
+
+      } catch (error) {
+        console.error('Error loading user details:', error);
+        showErrorMessage('Failed to load user details. Please try again.');
+        
+        // Set default values if API fails
+        document.getElementById('userName').textContent = 'User';
+        document.getElementById('userInterest').textContent = 'Interest not available';
+      }
+    }
+
+    function updateUserInterface(data) {
+      try {
+        // Update user name
+        if (data.User && data.User.name) {
+          const name = data.User.name;
+          document.getElementById('userName').textContent = name;
+        }
+
+        // Update user interest
+        if (data.User && data.User.gender) {
+          const interest = data.User.gender === "male" ? "Female" : "Male";
+          document.getElementById('userInterest').textContent = `Interest in ${interest}`;
+        }
+
+        // Update profile picture if available
+        if (data.url) {
+          const profilePic = document.getElementById('profilePic');
+          profilePic.src = data.url;
+          profilePic.alt = 'Profile Picture';
+        }
+
+        // Update additional profile information
+        const profileInfo = document.getElementById('profileInfo');
+        let infoHTML = '';
+
+        if (data.User && data.User.email) {
+          infoHTML += `<p>📧 ${data.User.email}</p>`;
+        }
+
+        if (data.User && data.User.phone) {
+          infoHTML += `<p>📱 ${data.User.phone}</p>`;
+        }
+
+        if (data.User && (data.User.location || data.User.city)) {
+          const location = data.User.location || data.User.city;
+          infoHTML += `<p>📍 ${location}</p>`;
+        }
+
+        if (data.User && (data.User.bio || data.User.description)) {
+          const bio = data.User.bio || data.User.description;
+          infoHTML += `<p>💬 ${bio}</p>`;
+        }
+
+        if (infoHTML) {
+          profileInfo.innerHTML = infoHTML;
+        }
+
+        // Update interest switch if available
+        if (data.isActive !== undefined) {
+          document.getElementById('interestSwitch').checked = data.isActive;
+        }
+
+      } catch (error) {
+        console.error('Error updating user interface:', error);
+      }
+    }
+
+    function showErrorMessage(message) {
+      Swal.fire({
+        title: '⚠️ Error',
+        text: message,
+        icon: 'error',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#ff4444'
+      });
+    }
+
+    function showSuccessMessage(message) {
+      Swal.fire({
+        title: '✅ Success',
+        text: message,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+      });
+    }
+
+    function showBeautyFilterDemo() {
+      Swal.fire({
+        title: '✨ Beauty Filter Demo',
+        text: 'This is a demo of the beauty filter feature. In the full version, you can adjust various beauty settings like skin smoothing, eye enhancement, and more.',
+        icon: 'info',
+        confirmButtonText: 'Got it!',
+        confirmButtonColor: '#ff5ca7'
+      });
+    }
+
+    async function logout() {
+      try {
+        // Show loading state
+        const logoutBtn = document.querySelector('.logout-btn');
+        const originalText = logoutBtn.textContent;
+        logoutBtn.textContent = '🔄 Logging out...';
+        logoutBtn.disabled = true;
+
+        // Use the comprehensive logout utility from logout-utils.js
+        await performLogout(API_CONFIG.getAuthUrl('/logout'));
+
+      } catch (error) {
+        console.error('Error during logout:', error);
+        
+        // Reset button state
+        const logoutBtn = document.querySelector('.logout-btn');
+        logoutBtn.textContent = '🚪 LOGOUT';
+        logoutBtn.disabled = false;
+        
+        // Show error message
+        showErrorMessage('Error during logout. Please try again.');
+      }
+    }
+
+    function redirectToLogin() {
+      window.location.href = 'login.html';
+    }
+  </script>
+
+  <!-- Google Translate -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
+  <!-- Logout Utilities -->
+  <script src="js/logout-utils.js"></script>
+
+</body>
+</html>

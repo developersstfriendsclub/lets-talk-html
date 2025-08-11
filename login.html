@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Login</title>
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+    body {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      max-width: 400px;
+      width: 100%;
+      padding: 40px 20px 60px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00000060;
+      position: relative;
+      text-align: center;
+    }
+
+    .logo {
+      width: 90px;
+      margin: 20px auto;
+    }
+
+    form {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    label {
+      font-size: 14px;
+      margin-bottom: 5px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+
+    .password-container {
+      position: relative;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 16px;
+      color: #555;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background-color: #d6006d;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+
+    .login-btn:hover {
+      background-color: #b8005a;
+    }
+
+    .response-msg {
+      margin-top: 15px;
+      font-size: 14px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .copyright {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .footer-text {
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #444;
+      text-shadow: 1px 1px 1px #fff;
+    }
+
+    .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 30px 15px 50px; }
+      .logo { width: 70px; }
+      .login-btn { font-size: 15px; }
+      .footer-text { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <img src="imgs/logo11.png" alt="Logo" class="logo">
+  <div id="google_translate_element"></div>
+
+  <form id="loginForm">
+    <label for="emailOrPhone">Email</label>
+    <input type="email" id="emailOrPhone" placeholder="Enter email" required>
+
+    <label for="password">Password</label>
+    <div class="password-container">
+      <input type="password" id="password" placeholder="Enter password" required>
+      <span class="toggle-password" onclick="togglePassword()">👁️</span>
+    </div>
+
+    <button type="submit" class="login-btn">LOGIN</button>
+    <div id="responseMsg" class="response-msg"></div>
+  </form>
+
+  <div class="copyright">CopyRight© 2025 Friends Club. All Rights Reserved.</div>
+  <div class="footer-text">Let's 📍 Talk</div>
+</div>
+
+<!-- LOGIN SCRIPT -->
+<script>
+  function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById('emailOrPhone').value.trim();
+  const password = document.getElementById('password').value;
+  const responseMsg = document.getElementById("responseMsg");
+
+  const payload = { email, password };
+
+  try {
+          const res = await fetch(API_CONFIG.getAuthUrl('/sign-in'), {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload)
+});
+
+    const data = await res.json();
+
+    if (res.ok && data.data && data.data.token) {
+      localStorage.setItem("authToken", data.data.token);
+      // localStorage.setItem("userInfo", JSON.stringify(data.data.user));
+
+      responseMsg.style.color = "green";
+      responseMsg.innerText = data.message || "Login successful! Redirecting...";
+
+      setTimeout(() => {
+        window.location.href = "host-users.html";
+      }, 1000);
+    } else {
+      responseMsg.style.color = "red";
+      responseMsg.innerText = data.message || "Login failed!";
+    }
+  } catch (error) {
+    responseMsg.style.color = "red";
+    responseMsg.innerText = "Network error. Try again.";
+    console.error("Login Error:", error);
+  }
+});
+</script>
+
+<!-- Google Translate (Optional) -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>

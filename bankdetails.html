@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Withdrawl Details</title>
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+  <style>
+    body {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 0 10px #00000050;
+    }
+    h2 {
+      color: deeppink;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: deeppink;
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #c2185b;
+    }
+     .footer {
+      margin-top: 40px;
+      opacity: 0.2;
+    }
+
+    .footer img {
+      width: 100%;
+      /* filter: drop-shadow(0 0 8px #ff5e92); */
+    }
+
+    .footer-text {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d6006d;
+      margin-top: 5px;
+    }
+    #responseMsg {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+    
+      .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+    @media (max-width: 480px) {
+     
+
+      .footer img {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+       <div id="google_translate_element"></div>
+    <h2>My Wallet</h2>
+
+    <input type="text" id="holderName" placeholder="Account Holder Name" required />
+    <input type="text" id="accountNumber" placeholder="Account Number" required />
+    <input type="text" id="ifsc" placeholder="IFSC Code" required />
+    <input type="text" id="bankName" placeholder="Bank Name" required />
+    <input type="text" id="branchName" placeholder="Branch Name" required />
+     <input type="hidden" id="bankaccountid"  />
+    
+    <button onclick="submitBank()">Save / Update</button>
+    <div id="responseMsg"></div>
+       <!-- Footer Graphic -->
+  
+  </div>
+
+  <script>
+    const token = localStorage.getItem("authToken");
+    const apiUrl = API_CONFIG.getBankAccountUrl('');
+    let data = null;
+    if (!token) {
+      alert("Login required. Redirecting to login...");
+      window.location.href = "login.html";
+    }
+
+    const responseMsg = document.getElementById("responseMsg");
+
+    // Get current bank details on load
+    window.onload = async () => {
+      try {
+        const res = await fetch(apiUrl + "?page=1&limit=10", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+         console.log("res",res)
+        data = await res.json();
+         console.log("data",data);
+        //  console.log(data.data.bankAccounts[0].accountNumber)
+        if (data?.data?.bankAccounts.length > 0) {
+          const bank = data.data.bankAccounts[0];
+          console.log(bank)
+          document.getElementById("holderName").value = bank.accountHolderName || "";
+          document.getElementById("accountNumber").value = bank.accountNumber || "";
+          document.getElementById("ifsc").value = bank.ifscCode || "";
+          document.getElementById("bankName").value = bank.bankName || "";
+          document.getElementById("branchName").value = bank.branchCode || "";//
+        // localStorage.setItem("bankId", bank.id); // Save for update
+        document.getElementById("bankaccountid").value = bank.id;
+        }
+      } catch (err) {
+        console.error("Error fetching bank details:", err);
+      }
+    };
+        // const bankId = localStorage.getItem("bankId");
+     
+      console.log("data22",document.getElementById("bankaccountid").value);
+    // Submit bank info (POST or PUT)
+    async function submitBank() {
+      const payload = {
+        accountHolderName: document.getElementById("holderName").value,
+        accountNumber: document.getElementById("accountNumber").value,
+        ifscCode: document.getElementById("ifsc").value,
+        bankName: document.getElementById("bankName").value,
+        branchCode: document.getElementById("branchName").value,
+        isActive: true
+      };
+
+      // const bankId = localStorage.getItem("bankId");
+      
+      const method = document.getElementById("bankaccountid").value ? "PUT" : "POST";
+      const endpoint = document.getElementById("bankaccountid").value ? `${apiUrl}/${document.getElementById("bankaccountid").value}` : apiUrl;
+
+      try {
+        const res = await fetch(endpoint, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          responseMsg.style.color = "green";
+          responseMsg.innerText = data.message || "Bank details saved!";
+       
+        } else {
+          responseMsg.style.color = "red";
+          responseMsg.innerText = data.message || "Failed to save!";
+        }
+      } catch (err) {
+        responseMsg.style.color = "red";
+        responseMsg.innerText = "Server error!";
+        console.error("Submit error:", err);
+      }
+    }
+  </script>
+    <!-- Google Translate (Optional) -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <div class="footer">
+        <div class="footer-text"></div>
+      <img src="imgs/female1.jpg" alt="Silhouette" />
+      
+    </div>
+</body>
+</html>

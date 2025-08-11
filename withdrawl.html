@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Wallet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #f9b2c5, #f67db0);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    h2 {
+      color: white;
+      margin-top: 20px;
+      background: #e8a5b8;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 1.5rem;
+    }
+
+    .wallet-card {
+      background: #e64592;
+      padding: 20px;
+      border-radius: 20px;
+      margin: 20px 0;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .wallet-card h3 {
+      margin: 0;
+    }
+
+    .wallet-card img {
+      vertical-align: middle;
+      width: 20px;
+      margin-right: 5px;
+    }
+
+    #withdrawBtn {
+      background: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    #formSection {
+      display: none;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      color: white;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #methodInput {
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button[type="submit"] {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .silhouette {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .footer img {
+      width: 100%;
+    }
+
+    .footer-text {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d6006d;
+      margin-top: 5px;
+    }
+
+    label img {
+     vertical-align: middle;
+    margin-left: 10%;
+    width: 18%;
+    }
+    
+        .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media (max-width: 480px) {
+      .footer img {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 400px) {
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      .wallet-card {
+        padding: 15px;
+      }
+
+      input[type="text"], input[type="number"] {
+        padding: 8px;
+      }
+
+      #withdrawBtn, button[type="submit"] {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>WITHDRAWL</h2>
+    
+     <div id="google_translate_element"></div>
+
+    <div class="wallet-card">
+      <h3>My Wallet</h3>
+      <p><img src="https://cdn-icons-png.flaticon.com/512/263/263100.png" alt="coin"> <span id="walletBalance">Loading...</span></p>
+    </div>
+
+     <p><strong>Disclaimer:</strong>1 minute = 1 point</p>
+    <button id="withdrawBtn">WITHDRAWL</button>
+
+    <div id="formSection">
+      <form id="withdrawForm">
+        <label>Amount:
+          <input type="number" id="amount" required>
+        </label>
+
+        <label>Phone Number:
+          <input type="text" id="phone" required>
+        </label>
+
+        <label>
+          <input type="radio" name="method" value="UPI">
+          UPI <img src="imgs/upi-icon.png" alt="UPI">
+        </label>
+
+        <label>
+          <input type="radio" name="method" value="GPay">
+          GPay <img src="imgs/gpay.png" alt="GPay">
+        </label>
+
+        <label>
+          <input type="radio" name="method" value="PhonePe">
+          PhonePe <img src="imgs/phonepay.png" alt="PhonePe">
+        </label>
+
+        <div id="methodInput" class="hidden">
+          <label id="methodLabel">Enter ID:
+            <input type="text" id="methodValue" required>
+          </label>
+        </div>
+
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer" style="margin-top:8em;">
+      <div class="footer-text" style="margin-top:4em;">TM</div>
+      <img src="imgs/female1.jpg" alt="Silhouette" /><br>
+       CopyRight © 2025 Friends Club. All Rights Reserved.
+    </div>
+  </div>
+
+  <script>
+    // Simulate wallet balance fetch
+    document.addEventListener("DOMContentLoaded", () => {
+      setTimeout(() => {
+        document.getElementById("walletBalance").innerText = "0";
+      }, 1000);
+    });
+
+    // Show form
+    document.getElementById("withdrawBtn").addEventListener("click", () => {
+      document.getElementById("formSection").style.display = "block";
+    });
+
+    // Update input label based on method
+    const methodRadios = document.querySelectorAll('input[name="method"]');
+    methodRadios.forEach(radio => {
+      radio.addEventListener('change', () => {
+        const method = radio.value;
+        const inputDiv = document.getElementById("methodInput");
+        const label = document.getElementById("methodLabel");
+        inputDiv.classList.remove("hidden");
+        label.innerHTML = `Enter ${method} ID: <input type="text" id="methodValue" required>`;
+      });
+    });
+
+    // Form submission
+    document.getElementById("withdrawForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const amount = document.getElementById("amount").value;
+      const phone = document.getElementById("phone").value;
+      const method = document.querySelector('input[name="method"]:checked');
+      const methodValue = document.getElementById("methodValue").value;
+
+      if (!method) {
+        alert("Please select a withdrawal method.");
+        return;
+      }
+
+      alert(`Submitting withdrawal:\nAmount: ₹${amount}\nPhone: ${phone}\nMethod: ${method.value}\nID: ${methodValue}`);
+    });
+  </script>
+  
+      <!-- Google Translate (Optional) -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

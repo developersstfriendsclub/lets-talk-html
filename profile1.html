@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Profile Page</title>
+  
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <style>
+    /* Your existing styles remain unchanged */
+    .glow-star {
+      margin-left: 6px;
+      animation: glow 1.2s ease-in-out infinite alternate;
+      color: #ff5ca7;
+      font-size: 20px;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff8ac9, 0 0 30px #ff8ac9, 0 0 40px #ff8ac9;
+      }
+      to {
+        text-shadow: 0 0 15px #fff, 0 0 30px #ff5ca7, 0 0 45px #ff5ca7, 0 0 60px #ff5ca7;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background-color: #f9c7d7;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    .back-button {
+      background-color: #ff5ca7;
+      color: white;
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .header {
+      background-color: #f9c7d7;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+      cursor: pointer;
+    }
+
+    .name {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+
+    .interest {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .switch-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .switch-label {
+      margin-left: 8px;
+      font-size: 0.9em;
+    }
+
+    .list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .profile-pic {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #fff;
+  cursor: pointer;
+}
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-top: 1px solid #ddd;
+      background-color: #fff;
+      cursor: pointer;
+      color: #000;
+      text-decoration: none;
+    }
+
+    .list-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .icon {
+      font-size: 1.2em;
+      margin-right: 10px;
+    }
+
+    .footer {
+      background-color: pink;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.8em;
+    }
+    
+     .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media(max-width: 500px){
+      .profile-pic {
+        width: 70px;
+        height: 70px;
+      }
+      .name {
+        font-size: 1em;
+      }
+    }
+
+    a.link-wrapper {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div style="text-align: left;">
+    <button onclick="window.location.href='host-users.html'" class="back-button">← Back</button>
+     <div id="google_translate_element" style="justify-items: right; margin-top:-2em;"></div>
+  </div>
+
+ 
+
+  <div class="header">
+    <!-- ✅ Clickable profile picture -->
+    <!--<img src="imgs/music-14.jpg" id="profileImage" alt="Profile Picture" class="profile-pic" onclick="triggerImageUpload()" title="Click to upload new photo"/>-->
+    <!--<input type="file" id="imageInput" accept="image/*" style="display:none" onchange="uploadProfileImage(event)"/>-->
+
+
+
+<!-- 👤 Profile Picture with Edit Icon -->
+<div style="position: relative; display: inline-block;">
+  <img src="imgs/music-14.jpg" id="profileImage" alt="Profile Picture"
+       class="profile-pic" title="Click to upload new photo"/>
+
+  <!-- ✏️ Edit Icon Overlay -->
+  <span onclick="triggerImageUpload()"
+        title="Edit Profile Photo"
+        style="position: absolute; bottom: 0; right: 0; background: #ff5ca7; color: white; border-radius: 50%; padding: 4px; font-size: 14px; cursor: pointer; box-shadow: 0 0 4px rgba(0,0,0,0.3);">
+    ✏️
+  </span>
+
+  <!-- Hidden File Input -->
+  <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="uploadProfileImage(event)"/>
+</div>
+
+
+
+    <h5 id="user_profile_id">host id</h5>
+    <div class="name" id="name">Anjali Singh</div>
+    <div class="interest">Interest in <span id="gender"></span></div>
+    <div class="switch-container">
+      <input type="checkbox" id="interestSwitch" />
+      <label for="interestSwitch" class="switch-label">On/Off</label>
+    </div>
+  </div>
+
+  <ul class="list">
+    <a href="myprofile.html" class="link-wrapper">
+      <li class="list-item">
+        <div style="display:flex; align-items:center;">
+          <span class="icon">👤</span>
+          <span>My Profile <span class="glow-star">✨</span></span>
+        </div>
+        <span>&gt;</span>
+      </li>
+    </a>
+
+    <a href="https://clientfriendclub.com/image-video.html" class="link-wrapper">
+      <li class="list-item">
+        <div style="display:flex; align-items:center;">
+          <span class="icon">🖼️</span>
+          <span>My Picture & Video<span class="glow-star">✨</span></span>
+        </div>
+        <span>&gt;</span>
+      </li>
+    </a>
+
+  <a href="callrate.html" class="link-wrapper">
+    <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">💛</span><span>My Call Rate</span></div><span>&gt;</span></li></a>
+
+    <a href="earnings.html" class="link-wrapper">
+      <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">🛍️</span><span>My Earning</span></div><span>&gt;</span></li>
+    </a>
+
+    <a href="bankdetails.html" class="link-wrapper">
+      <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">🏦</span><span>Bank Account Details<span class="glow-star">✨</span></span></div><span>&gt;</span></li>
+    </a>
+
+    <a href="withdrawl.html" class="link-wrapper">
+      <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">💰</span><span>My Withdrawal<span class="glow-star">✨</span></span></div><span>&gt;</span></li>
+    </a>
+
+    <a href="settings.html" class="link-wrapper">
+      <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">⚙️</span><span>Settings<span class="glow-star">✨</span></span></div><span>&gt;</span></li>
+    </a>
+
+    <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">👥</span><span>My Followers</span></div><span>&gt;</span></li>
+    <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">🎥</span><span>My Fan</span></div><span>&gt;</span></li>
+    <a href="refer.html" class="link-wrapper"> <li class="list-item"><div style="display:flex; align-items:center;"><span class="icon">🔗</span><span>Refer Users & Earn</span></div><span>&gt;</span></li></a>
+  </ul>
+
+  <div class="footer">
+    CopyRight © 2025 Friends Club. All Rights Reserved.
+  </div>
+</div>
+
+<script>
+  // Check authentication on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!checkAuth()) {
+      return;
+    }
+    loadProfile();
+  });
+
+  function checkAuth() {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      showAuthError();
+      return false;
+    }
+    return true;
+  }
+
+  function showAuthError() {
+    Swal.fire({
+      title: '⚠️ Authentication Required',
+      text: 'Please login to access this page.',
+      icon: 'warning',
+      confirmButtonText: 'Go to Login',
+      confirmButtonColor: '#d6006d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = 'login.html';
+      }
+    });
+  }
+
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    Swal.fire({
+      title: 'Authentication Required',
+      text: 'Please login to access this page.',
+      icon: 'warning',
+      confirmButtonText: 'Go to Login',
+      confirmButtonColor: '#d6006d'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "login.html";
+      }
+    });
+  }
+
+async function loadProfile() {
+  try {
+    // Show loading state
+    Swal.fire({
+      title: "Loading Profile...",
+      text: "Please wait",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    // First try to get profile data
+    const profileResponse = await fetch(API_CONFIG.getAuthUrl('/show-profile'), {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!profileResponse.ok) {
+      throw new Error(`Profile API failed: ${profileResponse.status}`);
+    }
+
+    const profileData = await profileResponse.json();
+    console.log('Profile API response:', profileData);
+
+    if (profileData.success && profileData.data) {
+      const user = profileData.data;
+      
+      // Update profile fields
+      document.getElementById('user_profile_id').textContent = user.user_profile_id || 'N/A';
+      document.getElementById('name').textContent = user.name || 'N/A';
+      
+      if (user.gender) {
+        document.getElementById('gender').textContent = 
+          user.gender.toLowerCase() === 'male' ? 'Female' : 'Male';
+      }
+
+      // Try to get profile image
+      if (user.Images && Array.isArray(user.Images) && user.Images.length > 0) {
+        const profileImage = user.Images.find(img => img.image_type === 'profile_photo') || user.Images[user.Images.length - 1];
+        if (profileImage && profileImage.url) {
+          document.getElementById('profileImage').src = profileImage.url;
+        }
+      }
+    }
+
+    // Also try to get profile image from types_wise endpoint as backup
+    try {
+      const imageResponse = await fetch(API_CONFIG.getImageUrl('/single/types_wise'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ image_type: 'profile_photo' })
+      });
+
+      if (imageResponse.ok) {
+        const imageData = await imageResponse.json();
+        console.log('Image API response:', imageData);
+        
+        if (imageData.success && imageData.data && imageData.data.length > 0) {
+          const imageUrl = imageData.data[0].url;
+          if (imageUrl) {
+            document.getElementById('profileImage').src = imageUrl;
+          }
+        }
+      }
+    } catch (imageError) {
+      console.log('Image API failed, using profile data only:', imageError);
+    }
+
+    // Check for cached updated image
+    // const cachedUrl = localStorage.getItem('updatedProfileImage');
+    // if (cachedUrl) {
+    //   document.getElementById('profileImage').src = cachedUrl;
+    // }
+
+    // Close loading dialog and show success
+    Swal.fire("Success", "Profile loaded successfully!", "success");
+
+  } catch (error) {
+    console.error('Error loading profile:', error);
+    
+    // Close loading dialog
+    Swal.close();
+    
+    // Show user-friendly error message
+    if (error.message.includes('401')) {
+      Swal.fire({
+        title: 'Session Expired',
+        text: 'Your session has expired. Please login again.',
+        icon: 'error',
+        confirmButtonText: 'Go to Login',
+        confirmButtonColor: '#d6006d'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = "login.html";
+        }
+      });
+    } else {
+      Swal.fire("Error", "Failed to load profile. Please try again later.", "error");
+    }
+  }
+}
+
+  function triggerImageUpload() {
+    document.getElementById("imageInput").click();
+  }
+
+async function uploadProfileImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    Swal.fire("Error", "File size should be less than 5MB", "error");
+    return;
+  }
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    Swal.fire("Error", "Please select an image file", "error");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+  formData.append("title", "Profile Photo");
+  formData.append("description", "User profile photo");
+  formData.append("image_type", "profile_photo");
+  formData.append("isPublic", "true");
+
+  try {
+    // Show loading state
+    Swal.fire({
+      title: "Uploading Image...",
+      text: "Please wait",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    
+    const res = await fetch(API_CONFIG.getImageUrl('/single'), {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    });
+
+    const contentType = res.headers.get("content-type");
+    
+    if (contentType && contentType.includes("application/json")) {
+      const result = await res.json();
+      
+      if (res.ok && result.success && result.data?.url) {
+        // Update image and cache
+        document.getElementById('profileImage').src = result.data.url;
+        // localStorage.setItem('updatedProfileImage', result.data.url);
+        Swal.fire("Success", "Profile photo updated successfully!", "success");
+      } else {
+        Swal.fire("Failed", result.message || "Image upload failed. Please try again.", "error");
+      }
+    } else {
+      throw new Error('Server returned non-JSON response');
+    }
+
+  } catch (err) {
+    console.error("Upload failed:", err);
+    Swal.fire("Error", "Image upload failed. Please check your connection and try again.", "error");
+  }
+}
+
+
+  loadProfile();
+</script>
+
+<!-- Google Translate -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
+  <!-- Logout Utilities -->
+  <script src="js/logout-utils.js"></script>
+</body>
+</html>

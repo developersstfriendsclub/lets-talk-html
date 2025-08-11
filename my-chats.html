@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>My Chats</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+     background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px #00000060;
+      text-align: center;
+      position: relative;
+    }
+
+    .header {
+      font-size: 18px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #d6006d;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .chat-card {
+      display: flex;
+      align-items: flex-start;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+    }
+
+    .chat-card img {
+      width: 45px;
+      height: 45px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-right: 10px;
+    }
+
+    .chat-info {
+      text-align: left;
+      flex: 1;
+    }
+
+    .chat-info h3 {
+      font-size: 14px;
+      margin-bottom: 3px;
+      color: #222;
+    }
+
+    .chat-info p {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 2px;
+    }
+
+    .icon {
+      color: #d6006d;
+      font-size: 14px;
+      margin-right: 4px;
+    }
+    
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f84d91;
+      width: 100%;
+      max-width: 400px;
+      height: 60px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: 0 -2px 10px #00000030;
+      z-index: 1000;
+    }
+
+    .footer-item {
+      width: 40px;
+      height: 40px;
+      background: #ffffffaa;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px #00000020;
+      cursor: pointer;
+    }
+
+    .footer-item img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-center {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 8px #00000030;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .footer-center img {
+      width: 30px;
+      height: 30px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      opacity: 0.2;
+    }
+
+    .footer img {
+      width: 80%;
+      /* filter: drop-shadow(0 0 8px #ff5e92); */
+    }
+
+    .footer-text {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d6006d;
+      margin-top: 5px;
+    }
+    
+     .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+    
+    /* Waiting for Approval Box */
+    .waiting-box {
+      background: #fff0f6;
+      border: 2px dashed #d6006d;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #a00050;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    @media (max-width: 480px) {
+      .chat-card img {
+        width: 40px;
+        height: 40px;
+      }
+
+      .chat-info h3 {
+        font-size: 13px;
+      }
+
+      .chat-info p {
+        font-size: 11px;
+      }
+
+      .footer img {
+        width: 130px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+       <div id="google_translate_element"></div>
+    <div class="header">My Chats</div>
+
+    <!-- Chat Entry 1 -->
+    <!--<div class="chat-card">-->
+    <!--  <img src="https://i.imgur.com/VzX1y0w.jpeg" alt="Anjali Singh" />-->
+    <!--  <div class="chat-info">-->
+    <!--    <h3>Anjali Singh</h3>-->
+    <!--    <p><span class="icon">💬</span> June 5, 2025 - 3:15 PM</p>-->
+    <!--    <p>Hi, how are you?</p>-->
+    <!--  </div>-->
+    <!--</div>-->
+
+    <!-- Chat Entry 2 -->
+    <!--<div class="chat-card">-->
+    <!--  <img src="https://i.imgur.com/7kS77t1.jpeg" alt="Aman Gupta" />-->
+    <!--  <div class="chat-info">-->
+    <!--    <h3>Aman Gupta</h3>-->
+    <!--    <p><span class="icon">💬</span> June 5, 2025 - 3:15 PM</p>-->
+    <!--    <p>Hi, how are you?</p>-->
+    <!--  </div>-->
+    <!--</div>-->
+    
+     <!-- Waiting for Approval Box -->
+    <div class="waiting-box">
+      ⏳ Waiting for Approval by Admin.  <br>You will be notified soon.
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+         <div class="footer-text">TM</div>
+     <img src="imgs/female1.jpg" alt="Silhouette" />
+     
+    </div>
+      <!-- Footer Navigation -->
+  <div class="footer-nav">
+    <div class="footer-item"><a href="call-list.html"><img src="icons/video.png" alt="Video"></a></div>
+    <div class="footer-item"><a href="my-chats.html"><img src="icons/chat.png" alt="Chat"></a></div>
+
+    <div class="footer-center">
+     <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
+    </div>
+
+    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+    <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
+  </div>
+  </div>
+   <!-- Google Translate (Optional) -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>
+

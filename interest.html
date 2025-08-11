@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Your Interests - Let's Talk</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 500px;
+      width: 100%;
+    }
+
+    .interest-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .interests-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .interest-btn {
+      background: #f5f5f5;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 12px 8px;
+      font-size: 14px;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+
+    .interest-btn:hover {
+      background: #e8e8e8;
+      transform: translateY(-2px);
+    }
+
+    .interest-btn.selected {
+      background: #d81b60;
+      color: white;
+      border-color: #d81b60;
+      box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3);
+    }
+
+    .continue-btn {
+      background: #d81b60;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 15px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .continue-btn:hover {
+      background: #c2185b;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(216, 27, 96, 0.4);
+    }
+
+    .continue-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .continue-btn .loader {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    .continue-btn.loading .loader {
+      display: inline-block;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .modal-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+
+    .modal-icon.success {
+      color: #4CAF50;
+    }
+
+    .modal-icon.error {
+      color: #f44336;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .modal-message {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .modal-btn {
+      background: #d81b60;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .modal-btn:hover {
+      background: #c2185b;
+    }
+
+    /* Page Loader */
+    .page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+
+    .page-loader.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #d81b60;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 600px) {
+      .interests-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+      
+      .interest-btn {
+        padding: 10px 6px;
+        font-size: 13px;
+      }
+      
+      .interest-card {
+        padding: 30px 20px;
+      }
+      
+      .title {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .interests-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Modal for messages -->
+<div id="messageModal" class="modal">
+  <div class="modal-content">
+    <div id="modalIcon" class="modal-icon"></div>
+    <div id="modalTitle" class="modal-title"></div>
+    <div id="modalMessage" class="modalMessage"></div>
+    <button id="modalBtn" class="modal-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<!-- Page Loader -->
+<div id="pageLoader" class="page-loader">
+  <div class="spinner"></div>
+</div>
+
+<div class="container">
+  <div class="interest-card">
+    <h1 class="title">Your interests</h1>
+    <p class="subtitle">Tell us what piques your curiosity and passions</p>
+    
+    <div class="interests-grid" id="interestsGrid">
+      <!-- Interests will be populated by JavaScript -->
+    </div>
+    
+    <button class="continue-btn" id="continueBtn" onclick="saveInterests()">
+      Continue
+      <div class="loader"></div>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Check authentication
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    showModal('error', 'Authentication Required', 'Please login first.');
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 2000);
+  }
+
+  // Check if token is expired
+  function isTokenExpired(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    } catch (error) {
+      return true;
+    }
+  }
+
+  if (token && isTokenExpired(token)) {
+    handleSessionExpiration();
+  }
+
+  // Available interests
+  const availableInterests = [
+    'Gaming', 'Music', 'Reading', 'Sports',
+    'Travel', 'Cooking', 'Photography', 'Art',
+    'Dancing', 'Writing', 'Technology',
+    'Fashion', 'Fitness', 'Pets'
+  ];
+
+  // Selected interests
+  let selectedInterests = [];
+
+  // Modal functions
+  function showModal(type, title, message) {
+    const modal = document.getElementById('messageModal');
+    const icon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    
+    icon.className = `modal-icon ${type}`;
+    icon.innerHTML = type === 'success' ? '✓' : '✗';
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    
+    modal.classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('messageModal').classList.remove('show');
+  }
+
+  // Loader functions
+  function showPageLoader() {
+    document.getElementById('pageLoader').classList.add('show');
+  }
+
+  function hidePageLoader() {
+    document.getElementById('pageLoader').classList.remove('show');
+  }
+
+  function setButtonLoading(loading) {
+    const button = document.getElementById('continueBtn');
+    if (loading) {
+      button.classList.add('loading');
+      button.disabled = true;
+    } else {
+      button.classList.remove('loading');
+      button.disabled = false;
+    }
+  }
+
+  // Create interest buttons
+  function createInterestButtons() {
+    const grid = document.getElementById('interestsGrid');
+    grid.innerHTML = '';
+    
+    availableInterests.forEach(interest => {
+      const button = document.createElement('button');
+      button.className = 'interest-btn';
+      button.textContent = interest;
+      button.onclick = () => toggleInterest(interest, button);
+      grid.appendChild(button);
+    });
+  }
+
+  // Toggle interest selection
+  function toggleInterest(interest, button) {
+    if (selectedInterests.includes(interest)) {
+      selectedInterests = selectedInterests.filter(i => i !== interest);
+      button.classList.remove('selected');
+    } else {
+      if (selectedInterests.length < 5) { // Limit to 5 interests
+        selectedInterests.push(interest);
+        button.classList.add('selected');
+      } else {
+        showModal('error', 'Maximum Interests', 'You can select up to 5 interests.');
+      }
+    }
+    
+    updateContinueButton();
+  }
+
+  // Update continue button state
+  function updateContinueButton() {
+    const button = document.getElementById('continueBtn');
+    if (selectedInterests.length > 0) {
+      button.style.opacity = '1';
+      button.style.cursor = 'pointer';
+    } else {
+      button.style.opacity = '0.6';
+      button.style.cursor = 'not-allowed';
+    }
+  }
+
+  // Save interests to API
+  async function saveInterests() {
+    if (selectedInterests.length === 0) {
+      showModal('error', 'No Interests Selected', 'Please select at least one interest to continue.');
+      return;
+    }
+
+    try {
+      setButtonLoading(true);
+      
+      const response = await fetch(API_CONFIG.getApiUrl('/interests'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          interests: selectedInterests
+        })
+      });
+
+      if (response.status === 401) {
+        handleSessionExpiration();
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        showModal('success', 'Interests Saved!', 'Your interests have been saved successfully.');
+        
+        // Store interests in localStorage for future use
+        localStorage.setItem('userInterests', JSON.stringify(selectedInterests));
+        
+        // Redirect after successful save
+        setTimeout(() => {
+          window.location.href = 'profile1.html'; // or wherever you want to redirect
+        }, 2000);
+      } else {
+        showModal('error', 'Save Failed', data.message || 'Failed to save interests. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error saving interests:', error);
+      showModal('error', 'Save Error', 'Failed to save interests. Please check your connection and try again.');
+    } finally {
+      setButtonLoading(false);
+    }
+  }
+
+  // Load existing interests if available
+  async function loadExistingInterests() {
+    try {
+      showPageLoader();
+      
+      const response = await fetch(API_CONFIG.getApiUrl('/interests'), {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data && data.data.interests) {
+          selectedInterests = data.data.interests;
+          
+          // Update UI to show selected interests
+          selectedInterests.forEach(interest => {
+            const button = document.querySelector(`[onclick*="${interest}"]`);
+            if (button) {
+              button.classList.add('selected');
+            }
+          });
+          
+          updateContinueButton();
+        }
+      }
+    } catch (error) {
+      console.error('Error loading interests:', error);
+      // Don't show error modal for loading, just continue with empty state
+    } finally {
+      hidePageLoader();
+    }
+  }
+
+  // Initialize page
+  document.addEventListener('DOMContentLoaded', () => {
+    createInterestButtons();
+    loadExistingInterests();
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && selectedInterests.length > 0) {
+      saveInterests();
+    }
+  });
+</script>
+
+  <!-- Logout Utilities -->
+  <script src="js/logout-utils.js"></script>
+</body>
+</html>

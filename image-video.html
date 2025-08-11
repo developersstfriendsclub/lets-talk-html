@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Gallery Upload</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      margin: 0;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #fff;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      font-weight: bold;
+      background: #f4436c;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active { background: #c2185b; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .photo-section {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+
+    .photo-box {
+      text-align: center;
+    }
+
+    .photo-preview {
+      width: 100%;
+      max-height: 250px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background: #d81b60;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .gallery-box {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .gallery-box img,
+    .gallery-box video {
+      width: 100%;
+      max-height: 350px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f84d91;
+      width: 100%;
+      max-width: 400px;
+      height: 60px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: 0 -2px 10px #00000030;
+      z-index: 1000;
+    }
+
+    .footer-item {
+      width: 40px;
+      height: 40px;
+      background: #ffffffaa;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px #00000020;
+      cursor: pointer;
+    }
+
+    .footer-item img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-center {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 8px #00000030;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .footer-center img {
+      width: 30px;
+      height: 30px;
+    }
+
+    @media(max-width: 500px) {
+      .gallery-box img,
+      .gallery-box video {
+        max-height: 200px;
+      }
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 15% auto;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .modal-icon {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
+
+    .modal-icon.success {
+      color: #4CAF50;
+    }
+
+    .modal-icon.error {
+      color: #f44336;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .modal-message {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 25px;
+      line-height: 1.5;
+    }
+
+    .modal-btn {
+      background: #d81b60;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .modal-btn:hover {
+      background: #c2185b;
+    }
+
+    /* Loader Styles */
+    .loader {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    .loader.show {
+      display: inline-block;
+    }
+
+    .page-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 3000;
+    }
+
+    .page-loader.show {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #d81b60;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Loading states */
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .btn-loading .loader {
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Modal for messages -->
+<div id="messageModal" class="modal">
+  <div class="modal-content">
+    <div id="modalIcon" class="modal-icon"></div>
+    <div id="modalTitle" class="modal-title"></div>
+    <div id="modalMessage" class="modal-message"></div>
+    <button id="modalBtn" class="modal-btn" onclick="closeModal()">OK</button>
+  </div>
+</div>
+
+<!-- Page Loader -->
+<div id="pageLoader" class="page-loader">
+  <div class="spinner"></div>
+</div>
+
+<div class="container">
+  <h2> My Gallery</h2>
+  
+   <div id="google_translate_element"></div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('images')">IMAGES</button>
+    <button class="tab-btn" onclick="showTab('videos')">VIDEOS</button>
+  </div>
+
+  <!-- IMAGE TAB -->
+  <div class="tab-content active" id="images">
+    <div class="photo-section">
+      <div class="photo-box">
+        <img src="imgs/music-14.jpg" class="photo-preview" id="profilePhoto1" />
+        <input type="file" id="imageInput1" accept="image/*" style="display:none" onchange="uploadPhoto(1)">
+        <button class="btn" id="imageBtn1" onclick="document.getElementById('imageInput1').click()">
+          Add PHOTO 1
+          <div class="loader" id="imageLoader1"></div>
+        </button>
+      </div>
+    </div>
+    <div class="gallery" id="imageGallery"><p>Loading...</p></div>
+  </div>
+
+  <!-- VIDEO TAB -->
+  <div class="tab-content" id="videos">
+    <div class="photo-section">
+      <div class="photo-box">
+        <video class="photo-preview" id="videoPreview1" controls></video>
+        <input type="file" id="videoInput1" accept="video/*" style="display:none" onchange="uploadVideo(1)">
+        <button class="btn" id="videoBtn1" onclick="document.getElementById('videoInput1').click()">
+          Add VIDEO 1
+          <div class="loader" id="videoLoader1"></div>
+        </button>
+      </div>
+      <div class="photo-box">
+        <video class="photo-preview" id="videoPreview2" controls></video>
+        <input type="file" id="videoInput2" accept="video/*" style="display:none" onchange="uploadVideo(2)">
+        <button class="btn" id="videoBtn2" onclick="document.getElementById('videoInput2').click()">
+          Add VIDEO 2
+          <div class="loader" id="videoLoader2"></div>
+        </button>
+      </div>
+      <div class="photo-box">
+        <video class="photo-preview" id="videoPreview3" controls></video>
+        <input type="file" id="videoInput3" accept="video/*" style="display:none" onchange="uploadVideo(3)">
+        <button class="btn" id="videoBtn3" onclick="document.getElementById('videoInput3').click()">
+          Add VIDEO 3
+          <div class="loader" id="videoLoader3"></div>
+        </button>
+      </div>
+    </div>
+    <div class="gallery" id="videoGallery"><p>Loading...</p></div>
+  </div>
+    <div class="footer-nav">
+    <div class="footer-item"><a href="call-list.html"><img src="icons/video.png" alt="Video"></a></div>
+    <div class="footer-item"><a href="my-chats.html"><img src="icons/chat.png" alt="Chat"></a></div>
+
+    <div class="footer-center">
+      <img src="imgs/logo11.png" alt="Main" />
+    </div>
+
+    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+    <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    showModal('error', 'Authentication Required', 'Please login first.');
+    setTimeout(() => {
+      window.location.href = "login.html";
+    }, 2000);
+  }
+
+  // Check if token is expired
+  function isTokenExpired(token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp < currentTime;
+    } catch (error) {
+      return true; // If we can't parse the token, consider it expired
+    }
+  }
+
+  // Check token expiration on page load
+  if (token && isTokenExpired(token)) {
+    handleSessionExpiration();
+  }
+
+  // Modal functions
+  function showModal(type, title, message) {
+    const modal = document.getElementById('messageModal');
+    const icon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    
+    icon.className = `modal-icon ${type}`;
+    icon.innerHTML = type === 'success' ? '✓' : '✗';
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    
+    modal.classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('messageModal').classList.remove('show');
+  }
+
+  // Loader functions
+  function showLoader(loaderId) {
+    const loader = document.getElementById(loaderId);
+    if (loader) loader.classList.add('show');
+  }
+
+  function hideLoader(loaderId) {
+    const loader = document.getElementById(loaderId);
+    if (loader) loader.classList.remove('show');
+  }
+
+  function showPageLoader() {
+    document.getElementById('pageLoader').classList.add('show');
+  }
+
+  function hidePageLoader() {
+    document.getElementById('pageLoader').classList.remove('show');
+  }
+
+  function setButtonLoading(buttonId, loading) {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      if (loading) {
+        button.classList.add('btn-loading');
+        button.disabled = true;
+      } else {
+        button.classList.remove('btn-loading');
+        button.disabled = false;
+      }
+    }
+  }
+
+  function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.querySelector(`[onclick="showTab('${tabId}')"]`).classList.add('active');
+    
+    // Load content for the selected tab
+    if (tabId === 'images') {
+      loadImages();
+    } else if (tabId === 'videos') {
+      loadVideos();
+    }
+  }
+
+  async function loadImages() {
+    const container = document.getElementById('imageGallery');
+    container.innerHTML = '<p style="text-align: center; color: #666;">Loading images...</p>';
+    
+    try {
+      const res = await fetch(API_CONFIG.getImageUrl('?page=1&limit=20&isPublic=true'), {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
+      
+      if (res.status === 401) {
+        handleSessionExpiration();
+        return;
+      }
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log("Images API response:", data);
+      
+      container.innerHTML = '';
+      
+      if (data.success && data.data && data.data.images && Array.isArray(data.data.images)) {
+        if (data.data.images.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #666;">No images found. Upload your first image!</p>';
+          return;
+        }
+        
+        // Update the first preview image
+        if (data.data.images[0] && data.data.images[0].url) {
+          document.getElementById('profilePhoto1').src = data.data.images[0].url;
+        }
+        
+        // Display all images in gallery
+        data.data.images.forEach((img, index) => {
+          if (img.url) {
+            const div = document.createElement('div');
+            div.className = "gallery-box";
+            div.innerHTML = `
+              <img src="${img.url}" alt="Gallery Image ${index + 1}" 
+                   style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;"
+                   onerror="this.src='imgs/logo11.png'">
+              <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                ${img.title || `Image ${index + 1}`}
+              </p>
+            `;
+            container.appendChild(div);
+          }
+        });
+      } else {
+        container.innerHTML = '<p style="text-align: center; color: #ff4444;">No images found or invalid response format.</p>';
+      }
+    } catch (err) {
+      console.error("Error loading images:", err);
+      container.innerHTML = `<p style="text-align: center; color: #ff4444;">Error loading images: ${err.message}</p>`;
+    }
+  }
+
+  async function loadVideos() {
+    const container = document.getElementById('videoGallery');
+    container.innerHTML = '<p style="text-align: center; color: #666;">Loading videos...</p>';
+    
+    try {
+      const res = await fetch(API_CONFIG.getVideoUrl('?page=1&limit=20&isPublic=true&status=completed'), {
+        method: "GET",
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
+      
+      if (res.status === 401) {
+        handleSessionExpiration();
+        return;
+      }
+      
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log("Videos API response:", data);
+      
+      container.innerHTML = '';
+      
+      const videos = Array.isArray(data.data) ? data.data : (data.data?.videos || []);
+      
+      if (videos.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #666;">No videos found. Upload your first video!</p>';
+        return;
+      }
+      
+      videos.forEach((vid, index) => {
+        const videoUrl = vid.videoUrl || vid.url;
+        if (videoUrl) {
+          const div = document.createElement('div');
+          div.className = "gallery-box";
+          div.innerHTML = `
+            <video controls src="${videoUrl}" class="photo-preview" 
+                   style="width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px;">
+              Your browser does not support the video tag.
+            </video>
+            <p style="margin-top: 8px; font-size: 12px; color: #666;">
+              ${vid.title || `Video ${index + 1}`}
+            </p>
+          `;
+          container.appendChild(div);
+        }
+      });
+    } catch (err) {
+      console.error("Error loading videos:", err);
+      container.innerHTML = `<p style="text-align: center; color: #ff4444;">Error loading videos: ${err.message}</p>`;
+    }
+  }
+
+  async function uploadPhoto(index) {
+    const input = document.getElementById(`imageInput${index}`);
+    const preview = document.getElementById(`profilePhoto${index}`);
+    const button = document.getElementById(`imageBtn${index}`);
+    const file = input.files[0];
+    
+    if (!file) {
+      showModal('error', 'No File Selected', 'Please select a file first');
+      return;
+    }
+
+    // Validate file size (max 10MB for images)
+    if (file.size > 10 * 1024 * 1024) {
+      showModal('error', 'File Too Large', 'File size should be less than 10MB');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showModal('error', 'Invalid File Type', 'Please select an image file');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("title", `Photo ${index}`);
+    formData.append("description", `Uploaded from slot ${index}`);
+    formData.append("isPublic", "true");
+    formData.append("image_type", "gallery");
+
+    try {
+      // Show loading state
+      setButtonLoading(`imageBtn${index}`, true);
+      preview.style.opacity = '0.5';
+      const originalSrc = preview.src;
+      
+      const res = await fetch(API_CONFIG.getImageUrl('/single'), {
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      console.log("Upload response:", data);
+      
+      // Check for token expiration
+      if (res.status === 401) {
+        handleSessionExpiration();
+        return;
+      }
+      
+      if (res.ok && data.success && data.data?.url) {
+        preview.src = data.data.url;
+        preview.style.opacity = '1';
+        showModal('success', 'Upload Successful', 'Image uploaded successfully!');
+        
+        // Refresh gallery
+        loadImages();
+      } else {
+        preview.src = originalSrc;
+        preview.style.opacity = '1';
+        showModal('error', 'Upload Failed', data.message || "Upload failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      preview.style.opacity = '1';
+      showModal('error', 'Upload Error', 'Upload failed. Please check your connection and try again.');
+    } finally {
+      setButtonLoading(`imageBtn${index}`, false);
+    }
+  }
+
+  async function uploadVideo(index) {
+    const input = document.getElementById(`videoInput${index}`);
+    const preview = document.getElementById(`videoPreview${index}`);
+    const button = document.getElementById(`videoBtn${index}`);
+    const file = input.files[0];
+    
+    if (!file) {
+      showModal('error', 'No File Selected', 'Please select a file first');
+      return;
+    }
+
+    // Validate file size (max 100MB for videos)
+    if (file.size > 100 * 1024 * 1024) {
+      showModal('error', 'File Too Large', 'File size should be less than 100MB');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('video/')) {
+      showModal('error', 'Invalid File Type', 'Please select a video file');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("title", `Video ${index}`);
+    formData.append("description", `Uploaded from slot ${index}`);
+    formData.append("isPublic", "true");
+
+    try {
+      // Show loading state
+      setButtonLoading(`videoBtn${index}`, true);
+      preview.style.opacity = '0.5';
+      
+      const res = await fetch(API_CONFIG.getVideoUrl('/single'), {
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}` 
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+      console.log("Video upload response:", data);
+      
+      // Check for token expiration
+      if (res.status === 401) {
+        handleSessionExpiration();
+        return;
+      }
+      
+      if (res.ok || res.status === 202) {
+        // Update preview
+        preview.src = URL.createObjectURL(file);
+        preview.style.opacity = '1';
+        showModal('success', 'Upload Successful', 'Video uploaded successfully!');
+        
+        // Refresh gallery
+        loadVideos();
+      } else {
+        preview.style.opacity = '1';
+        showModal('error', 'Upload Failed', data.message || "Video upload failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Video upload error:", err);
+      preview.style.opacity = '1';
+      showModal('error', 'Upload Error', 'Video upload failed. Please check your connection and try again.');
+    } finally {
+      setButtonLoading(`videoBtn${index}`, false);
+    }
+  }
+
+  // Load content when page loads
+  document.addEventListener('DOMContentLoaded', () => {
+    // Clear galleries initially
+    document.getElementById('videoGallery').innerHTML = "";
+    document.getElementById('imageGallery').innerHTML = "";
+    
+    // Load images by default (first tab)
+    loadImages();
+  });
+</script>
+
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+   <script>
+    // 🚫 Disable right-click context menu
+    // document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // 🚫 Disable PrintScreen key (attempted workaround)
+    // document.addEventListener('keyup', function (e) {
+    //   if (e.key === 'PrintScreen') {
+    //     navigator.clipboard.writeText('');
+    //     showModal('error', 'Screenshot Disabled', 'Screenshot disabled on this page.');
+    //   }
+    // });
+
+    // 🚫 Disable Ctrl+U, Ctrl+Shift+I, Ctrl+S, F12, etc.
+    document.addEventListener('keydown', function(e) {
+      if (
+        (e.ctrlKey && e.key === 'u') || // View Source
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || // Dev Tools
+        (e.ctrlKey && e.key === 's') || // Save Page
+        (e.key === 'F12')
+      ) {
+        e.preventDefault();
+        showModal('error', 'Action Disabled', 'This action is disabled.');
+      }
+    });
+
+    // ✅ Safe clipboard write (no read, no popup)
+    // function copyText(text) {
+    //   navigator.clipboard.writeText(text)
+    //     .then(() => showModal('success', 'Copied', "Text copied safely."))
+    //     .catch(err => console.error("Copy failed", err));
+    // }
+
+    // Example copy button
+    // const copyBtn = document.createElement('button');
+    // copyBtn.textContent = "Copy Message";
+    // copyBtn.onclick = () => copyText("This is protected content.");
+    // document.body.appendChild(copyBtn);
+  </script>
+
+  <!-- Logout Utilities -->
+  <script src="js/logout-utils.js"></script>
+</body>
+</html>

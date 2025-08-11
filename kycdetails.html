@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>KYC Details</title>
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f0f0;
+    }
+
+    .kyc-container {
+      max-width: 500px;
+      margin: 30px auto;
+      background-color: #f9c7d7;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .kyc-header {
+      font-size: 1.8em;
+      font-weight: 700;
+      text-align: center;
+      color: #e83f8c;
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      margin: 20px 0 10px;
+      color: #333;
+      font-size: 1.1em;
+      text-align: center;
+    }
+
+    .photo-section,
+    .audition-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .photo-box {
+      background-color: #fff;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .photo-preview {
+      width: 100%;
+      max-width: 300px;
+      height: auto;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
+    }
+    
+    .back-button {
+      background-color: #ff5ca7;
+      color: white;
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    .btn {
+      padding: 10px 24px;
+      background-color: #e83f8c;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95em;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background-color: #c13575;
+    }
+
+    .video-box {
+      width: 100%;
+      max-width: 320px;
+      min-height: 180px;
+      background-color: #f3b2ca;
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      border: 2px dashed #e083a3;
+    }
+
+    .video-box video {
+      width: 100%;
+      border-radius: 8px;
+    }
+
+    .bottom-button {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .bottom-button .btn {
+      font-size: 1em;
+      padding: 12px 28px;
+    }
+
+    .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+    #google_translate_element {
+      color: transparent !important;
+    }
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media (max-width: 600px) {
+      .kyc-container {
+        margin: 15px;
+        padding: 20px;
+      }
+
+      .photo-preview {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="kyc-container">
+    <div style="text-align: left;">
+    <button onclick="window.location.href='host-users.html'" class="back-button">← Back</button></div>
+  <div class="kyc-header">KYC Details</div>
+  <div id="google_translate_element"></div>
+
+  <div class="section-title">Profile Photo</div>
+  <div class="photo-section">
+    <div class="photo-box">
+      <img src="imgs/music-14.jpg" class="photo-preview" id="profilePhoto" />
+     <input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none" onchange="uploadPhoto(event)">
+<input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="uploadPhoto(event)">
+      <!--<button class="btn" onclick="document.getElementById('photoUpload').click()">Take Selfie / Choose Photo</button>-->
+      <button class="btn" onclick="openCamera()">📸 Take Selfie</button>
+<button class="btn" onclick="openGallery()">🖼️ Choose from Gallery</button>
+
+    </div>
+  </div>
+
+  <div class="section-title">ID Card (Aadhaar/Voter)</div>
+  <div class="photo-section">
+    <div class="photo-box">
+      <img src="imgs/music-14.jpg" class="photo-preview" id="idCardPhoto" />
+      <input type="file" id="idCardUpload" accept="image/*" style="display:none" onchange="uploadIDCard(event)">
+      <button class="btn" onclick="document.getElementById('idCardUpload').click()">Choose ID</button>
+    </div>
+  </div>
+
+  <div class="section-title">Audition Video</div>
+  <div class="audition-section">
+    <div class="video-box" id="videoPreview">Video Placeholder</div>
+    <input type="file" id="videoUpload" accept="video/*" style="display:none" onchange="uploadVideo(event)">
+    <button class="btn" onclick="document.getElementById('videoUpload').click()">Upload Audition Video</button>
+  </div>
+
+  <div class="bottom-button">
+    <button class="btn" onclick="goToProfile()">Register KYC Details</button>
+    <button class="btn" onclick="window.location.href='host-users.html'">
+  Go to Host Details
+</button>
+  </div>
+</div>
+
+<script>
+  async function uploadImage(file, title, previewId) {
+    const authToken = localStorage.getItem("authToken");
+    if (!file || !authToken) return alert("Login first or file missing.");
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("title", title);
+    formData.append("description", title);
+    formData.append("image_type", title);
+    formData.append("isPublic", true);
+
+    try {
+      const res = await fetch(API_CONFIG.getImageUrl('/single'), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+      if (data.data) {
+        document.getElementById(previewId).src = data.data.url;
+        alert(`${title} uploaded!`);
+      } else {
+        alert(data.message || "Upload failed.");
+      }
+    } catch (err) {
+      alert("Error uploading image.");
+      console.error(err);
+    }
+  }
+
+  function uploadPhoto(event) {
+    const file = event.target.files[0];
+    uploadImage(file, "profile_photo", "profilePhoto");
+  }
+
+  function uploadIDCard(event) {
+    const file = event.target.files[0];
+    uploadImage(file, "id_card_photo", "idCardPhoto");
+  }
+
+  async function uploadVideo(event) {
+    const authToken = localStorage.getItem("authToken");
+    const file = event.target.files[0];
+    const videoPreview = document.getElementById('videoPreview');
+
+    if (!file || !authToken) return alert("Login first or video missing.");
+
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("title", "audition");
+    formData.append("isPublic", true);
+    
+    try {
+      const res = await fetch(API_CONFIG.getVideoUrl('/single'), {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+      if ( data.data?.url) {
+        videoPreview.innerHTML = "";
+        const video = document.createElement("video");
+        video.src = data.data.url;
+        video.controls = true;
+        video.style.width = "100%";
+        videoPreview.appendChild(video);
+        alert("Video uploaded!");
+      } else {
+        alert(data.message || "Video upload failed.");
+      }
+    } catch (err) {
+      alert("Error uploading video.");
+      console.error(err);
+    }
+  }
+
+  async function loadImages() {
+    const token = localStorage.getItem("authToken");
+    try {
+      const res = await fetch(API_CONFIG.getImageUrl('/single/types_wise'), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ image_type: "profile_photo" })
+      });
+
+      const data = await res.json();
+      if (Array.isArray(data.data) && data.data.length > 0) {
+        document.getElementById('profilePhoto').src = data.data[0].url;
+      }
+    } catch (err) {
+      console.error("Image loading error:", err);
+    }
+  }
+
+  async function loadIdCardImages() {
+    const token = localStorage.getItem("authToken");
+    try {
+      const res = await fetch(API_CONFIG.getImageUrl('/single/types_wise'), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ image_type: "id_card_photo" })
+      });
+
+      const data = await res.json();
+      if (Array.isArray(data.data) && data.data.length > 0) {
+        document.getElementById('idCardPhoto').src = data.data[0].url;
+      }
+    } catch (err) {
+      console.error("Image loading error:", err);
+    }
+  }
+
+  async function loadVideo() {
+    const token = localStorage.getItem("authToken");
+    const videoPreview = document.getElementById("videoPreview");
+
+    try {
+      const res = await fetch(API_CONFIG.getVideoUrl(''), {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      const data = await res.json();
+      const videos = data.data?.videos;
+      if (Array.isArray(videos) && videos.length > 0) {
+        const video = document.createElement("video");
+        video.src = videos[0].url;
+        video.controls = true;
+        video.style.width = "100%";
+        videoPreview.innerHTML = "";
+        videoPreview.appendChild(video);
+      } else {
+        videoPreview.innerHTML = "<p>No video found</p>";
+      }
+    } catch (err) {
+      console.error("Video loading error:", err);
+      videoPreview.innerHTML = "<p style='color:red;'>Error loading video</p>";
+    }
+  }
+
+  function goToProfile() {
+    window.location.href = "profile1.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    (async () => {
+      await loadImages();
+      await loadIdCardImages();
+      await loadVideo();
+    })();
+  });
+</script>
+
+<script>
+  function openCamera() {
+    document.getElementById('cameraInput').click();
+  }
+
+  function openGallery() {
+    document.getElementById('galleryInput').click();
+  }
+</script>
+
+<!-- Google Translate -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>

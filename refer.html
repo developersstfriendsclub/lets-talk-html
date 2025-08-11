@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Referral</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+     body, html {
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #f9b2c5, #f67db0);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    h2 {
+      color: white;
+      margin-top: 20px;
+      background: #e8a5b8;
+      padding: 10px;
+      border-radius: 10px;
+      font-size: 1.5rem;
+    }
+
+    .wallet-card {
+      background: #e64592;
+      padding: 20px;
+      border-radius: 20px;
+      margin: 20px 0;
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .wallet-card h3 {
+      margin: 0;
+    }
+
+    .wallet-card img {
+      vertical-align: middle;
+      width: 20px;
+      margin-right: 5px;
+    }
+
+    #withdrawBtn {
+      background: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    #formSection {
+      display: none;
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      color: white;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #methodInput {
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    button[type="submit"] {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .back-button {
+    background-color: #ff5ca7;
+    color: white;
+    padding: 6px 12px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+
+    #referralList {
+  padding-left: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+    .silhouette {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .footer img {
+      width: 100%;
+    }
+
+    .footer-text {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d6006d;
+      margin-top: 5px;
+    }
+
+    label img {
+     vertical-align: middle;
+    margin-left: 10%;
+    width: 18%;
+    }
+     .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media (max-width: 480px) {
+      .footer img {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 400px) {
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      .wallet-card {
+        padding: 15px;
+      }
+
+      input[type="text"], input[type="number"] {
+        padding: 8px;
+      }
+
+      #withdrawBtn, button[type="submit"] {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+       <div style="text-align: left;">
+    <button onclick="window.location.href='profile1.html'" class="back-button">← Back</button>
+     
+  </div>
+    <h2>Referred Host</h2>
+     <p>Refer + Host + Earn Rs.700 (Per Host)</p>
+  
+ 
+      <div id="google_translate_element"></div>
+
+    <!--<div class="wallet-card">-->
+    <!--  <h3>My Wallet</h3>-->
+    <!--  <p><img src="https://cdn-icons-png.flaticon.com/512/263/263100.png" alt="coin"> <span id="walletBalance">Loading...</span></p>-->
+      
+    <!--</div>-->
+  <form id="referralForm" onsubmit="saveReferral(event)">
+  <label for="refName">Referred Host Name</label>
+  <input type="text" id="refName" required>
+
+  <label for="profileId">Profile ID</label>
+  <input type="text" id="profileId" required>
+
+  <label for="refDate">Date</label>
+  <input type="date" id="refDate" required>
+
+  <button type="submit">Save</button>
+</form>
+
+<div style="margin-top:20px; text-align:left; color:white;">
+  <h3>Total Referrals: <span id="refCount">0</span></h3>
+  <ul id="referralList"></ul>
+  <!--<ul id="referralList" style="padding-left: 0;"></ul>-->
+   <!--<ul id="referralList" style="display: none;"></ul>-->
+</div>
+
+
+    <!--<button id="withdrawBtn">WITHDRAW</button>-->
+
+
+
+    <!-- Footer -->
+    <div class="footer" style="margin-top:2em;">
+      <div class="footer-text" style="margin-top:4em;">TM</div>
+      <img src="imgs/female1.jpg" alt="Silhouette" /><br>
+       CopyRight © 2025 Friends Club. All Rights Reserved.
+    </div>
+  </div>
+
+  <script>
+  const STORAGE_KEY = "referrals";
+
+  function loadReferrals() {
+    // const list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    const referralList = document.getElementById("referralList");
+    const refCount = document.getElementById("refCount");
+
+    referralList.innerHTML = "";
+    list.forEach((item, index) => {
+      const li = document.createElement("li");
+      li.style.listStyle = "none";
+      li.style.background = "#fff3f8";
+      li.style.margin = "5px 0";
+      li.style.padding = "10px";
+      li.style.borderRadius = "8px";
+      li.style.color = "#d6006d";
+      li.textContent = ` ${index + 1} | Name: ${item.name} | ID: ${item.id} | Date: ${item.date}`;
+      referralList.appendChild(li);
+    });
+
+    refCount.textContent = list.length;
+  }
+
+  function saveReferral(event) {
+    event.preventDefault();
+
+    const name = document.getElementById("refName").value.trim();
+    const id = document.getElementById("profileId").value.trim();
+    const date = document.getElementById("refDate").value;
+
+    if (!name || !id || !date) return alert("All fields are required.");
+
+    // const list = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    // list.push({ name, id, date });
+
+    // localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+
+    // Clear form
+    document.getElementById("referralForm").reset();
+
+    // Reload the list
+    loadReferrals();
+  }
+
+  document.addEventListener("DOMContentLoaded", loadReferrals);
+</script>
+
+    <!-- Google Translate (Optional) -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+   <script>
+    // ðŸš« Disable right-click context menu
+    // document.addEventListener('contextmenu', event => event.preventDefault());
+
+    // ðŸš« Disable PrintScreen key (attempted workaround)
+    // document.addEventListener('keyup', function (e) {
+    //   if (e.key === 'PrintScreen') {
+    //     navigator.clipboard.writeText('');
+    //     alert('Screenshot disabled on this page.');
+    //   }
+    // });
+
+    // ðŸš« Disable Ctrl+U, Ctrl+Shift+I, Ctrl+S, F12, etc.
+    document.addEventListener('keydown', function(e) {
+      if (
+        (e.ctrlKey && e.key === 'u') || // View Source
+        (e.ctrlKey && e.shiftKey && e.key === 'I') || // Dev Tools
+        (e.ctrlKey && e.key === 's') || // Save Page
+        (e.key === 'F12')
+      ) {
+        e.preventDefault();
+        alert('This action is disabled.');
+      }
+    });
+
+    // âœ… Safe clipboard write (no read, no popup)
+    // function copyText(text) {
+    //   navigator.clipboard.writeText(text)
+    //     .then(() => alert("Text copied safely."))
+    //     .catch(err => console.error("Copy failed", err));
+    // }
+
+    // Example copy button
+    // const copyBtn = document.createElement('button');
+    // copyBtn.textContent = "Copy Message";
+    // copyBtn.onclick = () => copyText("This is protected content.");
+    // document.body.appendChild(copyBtn);
+  </script>
+
+</body>
+</html>

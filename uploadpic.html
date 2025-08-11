@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Upload Photo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background-color: #fddae3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .upload-container {
+      background-color: #fddae3;
+      padding: 30px 20px 40px;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 10px #00000060;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #000;
+    }
+
+    p {
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 25px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      justify-items: center;
+      margin-bottom: 30px;
+    }
+
+    .photo-slot {
+      width: 90px;
+      height: 90px;
+      border: 2px dashed #d6006d;
+      border-radius: 10px;
+      background-color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: #d6006d;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .photo-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+
+    .continue-btn {
+      padding: 14px;
+      width: 100%;
+      background-color: #d6006d;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .continue-btn:hover {
+      background-color: #b8005a;
+    }
+
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      .photo-slot {
+        width: 80px;
+        height: 80px;
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="upload-container">
+    <h2>Upload your photo</h2>
+    <p>We'd love to see you. Upload a photo for your dating journey.</p>
+
+    <div class="grid">
+      <!-- First image preview -->
+      <div class="photo-slot">
+        <img src="imgs/music-14.jpg" alt="Uploaded">
+      </div>
+
+      <!-- Empty upload slots -->
+      <div class="photo-slot">+</div>
+      <div class="photo-slot">+</div>
+      <div class="photo-slot">+</div>
+      <div class="photo-slot">+</div>
+      <div class="photo-slot">+</div>
+    </div>
+
+   <!-- Continue Button -->
+<button class="continue-btn" onclick="window.location.href='interest.html'">Continue</button>
+
+  </div>
+
+</body>
+</html>
