@@ -187,6 +187,16 @@
     .goog-te-gadget {
       color: #66666600 !important;
     }
+    
+        /* Make bell blink */
+.blink-bell img {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 
     @media (max-width: 480px) {
       .call-card img {
@@ -248,7 +258,9 @@
      <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
     </div>
 
-    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+     <div class="footer-item"><a href="notifications.html" class="blink-bell">
+    <img src="icons/bell.png" alt="Notification">
+  </a></div>  
     <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
   </div>
     

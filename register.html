@@ -111,6 +111,11 @@
       color: #444;
       text-shadow: 1px 1px 1px #fff;
     }
+    
+    .host-dob {
+  color: #000; /* Dark grey for readability */
+  font-size: 14px;
+}
 
     .goog-logo-link,
     .goog-te-gadget span {
@@ -153,6 +158,11 @@
         font-size: 15px;
         padding: 12px;
       }
+      
+      .host-dob {
+    color: #000; /* Pure black for small screens */
+    font-size: 13px;
+  }
 
       .footer-text {
         font-size: 18px;
@@ -237,11 +247,24 @@
       <option value="female">Female</option>
       <option value="other">Other</option>
     </select>
+    
+    <select id="premium" required>
+      <option value="" disabled selected>Premium Host</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    
+    </select>
 
     <input type="tel" id="phone" placeholder="Phone Number" required /> <!-- ✅ SAME phone field -->
 
-    <input type="date" id="dob" required />
-    <input type="password" id="password" placeholder="Password" required />
+    <input type="date" id="dob" placeholder="DOB" required />
+   <div style="position:relative;">
+  <input type="password" id="password" placeholder="Password" required style="padding-right:40px;" />
+  <span class="toggle-password" onclick="togglePassword()" 
+        style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:18px;">
+    👁️
+  </span>
+</div>
     <button class="submit-btn" type="submit">Register</button>
   </form>
 
@@ -261,11 +284,12 @@
     const email = document.getElementById('email').value.trim();
     const phone = document.getElementById('phone').value.trim(); // ✅ uses same value
     const gender = document.getElementById('gender').value.toLowerCase();
+    const premium = document.getElementById('premium').value.trim();
     const dob = document.getElementById('dob').value;
     const password = document.getElementById('password').value;
     const msgDiv = document.getElementById('responseMsg');
 
-    const payload = { name, email, gender, phone, dob, password };
+    const payload = { name, email, gender, premium, phone, dob, password };
 
 try {
         const res = await fetch(API_CONFIG.getAuthUrl('/sign-up'), {
@@ -299,7 +323,23 @@ try {
   msgDiv.className = "error";
 }
   });
+  
+  function togglePassword() {
+    const pwd = document.getElementById("password");
+    const icon = document.querySelector(".toggle-password");
+    if (pwd.type === "password") {
+      pwd.type = "text";
+      icon.textContent = "🙈";
+    } else {
+      pwd.type = "password";
+      icon.textContent = "👁️";
+    }
+  }
+  
 </script>
+
+
+
 
 <!-- Google Translate -->
 <script type="text/javascript">
@@ -310,12 +350,12 @@ try {
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 <script>
-  document.addEventListener('keyup', function (e) {
-    if (e.key === 'PrintScreen') {
-      navigator.clipboard.writeText('');
-      alert('Screenshot disabled on this page.');
-    }
-  });
+//   document.addEventListener('keyup', function (e) {
+//     if (e.key === 'PrintScreen') {
+//       navigator.clipboard.writeText('');
+//       alert('Screenshot disabled on this page.');
+//     }
+//   });
 
   document.addEventListener('keydown', function(e) {
     if (

@@ -184,6 +184,17 @@
       width: 30px;
       height: 30px;
     }
+    
+    /* Make bell blink */
+.blink-bell img {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 
     @media(max-width: 500px) {
       .gallery-box img,
@@ -369,8 +380,10 @@
         <input type="file" id="imageInput1" accept="image/*" style="display:none" onchange="uploadPhoto(1)">
         <button class="btn" id="imageBtn1" onclick="document.getElementById('imageInput1').click()">
           Add PHOTO 1
+         
           <div class="loader" id="imageLoader1"></div>
-        </button>
+        </button><br>
+         Add multiple images to click on Add Photo1 button
       </div>
     </div>
     <div class="gallery" id="imageGallery"><p>Loading...</p></div>
@@ -414,7 +427,9 @@
       <img src="imgs/logo11.png" alt="Main" />
     </div>
 
-    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+  <div class="footer-item"><a href="notifications.html" class="blink-bell">
+    <img src="icons/bell.png" alt="Notification">
+  </a></div> 
     <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
   </div>
 </div>

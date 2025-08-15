@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="fast2sms" content="CDvDuBmuaXzCy99Ehd5iZcfnwvSoCM0Y"/>
+  <title>Profile Page</title>
+  
+  <!-- API Configuration -->
+  <script src="js/config.js"></script>
+  
+  <!-- Environment Switcher (for development) -->
+  <script src="js/env-switcher.js"></script>
+  
+  <style>
+    .glow-star {
+      margin-left: 6px;
+      animation: glow 1.2s ease-in-out infinite alternate;
+      color: #ff5ca7;
+      font-size: 20px;
+    }
+
+    @keyframes glow {
+      from {
+        text-shadow: 0 0 10px #fff, 0 0 20px #ff8ac9, 0 0 30px #ff8ac9, 0 0 40px #ff8ac9;
+      }
+      to {
+        text-shadow: 0 0 15px #fff, 0 0 30px #ff5ca7, 0 0 45px #ff5ca7, 0 0 60px #ff5ca7;
+      }
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 400px;
+      background-color: #f9c7d7;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .header {
+      background-color: #f9c7d7;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .profile-pic {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #fff;
+    }
+
+    .name {
+      font-weight: bold;
+      font-size: 1.2em;
+      margin-top: 10px;
+    }
+
+    .interest {
+      font-size: 0.9em;
+      color: #555;
+    }
+
+    .switch-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .switch-label {
+      margin-left: 8px;
+      font-size: 0.9em;
+    }
+
+    .list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .list-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-top: 1px solid #ddd;
+      background-color: #fff;
+      color: #000;
+      text-decoration: none;
+    }
+
+    .list-item:hover {
+      background-color: #f0f0f0;
+    }
+
+    .list-item:last-child {
+      border-bottom: 1px solid #ddd;
+    }
+
+    .icon {
+      margin-right: 10px;
+      font-size: 1.2em;
+    }
+
+    .footer {
+      background-color: #f9c7d7;
+      padding: 20px;
+      text-align: center;
+      color: #555;
+      font-size: 0.9em;
+    }
+
+    .link-wrapper {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logout-btn {
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 20px;
+      width: calc(100% - 40px);
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background-color: #cc0000;
+    }
+
+    .auth-error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin: 20px;
+    }
+
+    .beauty-toggle {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .beauty-toggle label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 1em;
+    }
+
+    .beauty-toggle button {
+      margin-top: 10px;
+      padding: 5px 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background: #fff;
+      color: #000;
+      font-size: 0.85em;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    .error-message {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      margin: 20px;
+    }
+
+    .profile-info {
+      margin-top: 10px;
+    }
+
+    .profile-info p {
+      margin: 5px 0;
+      font-size: 0.9em;
+      color: #555;
+    }
+    
+      .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div id="google_translate_element" style="justify-items: center; margin-top:1em;"></div>
+
+    <!-- Header section -->
+    <div class="header">
+      <img src="imgs/music-14.jpg" alt="Profile Picture" class="profile-pic" id="profilePic" />
+      <div class="name" id="userName">Loading...</div>
+      <div class="interest" id="userInterest">Loading...</div>
+      <div class="profile-info" id="profileInfo">
+        <!-- Additional profile information will be loaded here -->
+      </div>
+      <div class="switch-container">
+        <input type="checkbox" id="interestSwitch" />
+        <label for="interestSwitch" class="switch-label">On/Off</label>
+      </div>
+    </div>
+
+    <!-- Profile options list -->
+    <ul class="list">
+    
+    
+
+      <!-- ✅ New Beauty Filters Toggle Section -->
+      <li class="list-item">
+        <div class="beauty-toggle">
+          <label for="beautyFilterToggle">
+            <span>Beauty filters:</span>
+            <input type="checkbox" id="beautyFilterToggle" checked />
+          </label>
+          <button onclick="alert('Beauty Filter Demo')">Try and see</button>
+        </div>
+      </li>
+
+    </ul>
+
+    <!-- Logout Button -->
+    <button class="logout-btn" onclick="logout()">🚪 LOGOUT</button>
+
+    <!-- Footer -->
+    <div class="footer">
+    
+      CopyRight © 2025 Friends Club. All Rights Reserved.
+    </div>
+  </div>
+
+  <!-- Authentication Check and Logout Script -->
+  <script>
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (checkAuth()) {
+        loadUserDetails();
+      }
+    });
+
+    function checkAuth() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        showAuthError();
+        return false;
+      }
+      return true;
+    }
+
+    function showAuthError() {
+      const container = document.querySelector('.container');
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'auth-error';
+      errorDiv.innerHTML = `
+        <h3>⚠️ Authentication Required</h3>
+        <p>Please login to access this page.</p>
+        <button onclick="window.location.href='login.html'" style="background: #d6006d; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">Go to Login</button>
+      `;
+      container.insertBefore(errorDiv, container.firstChild);
+    }
+
+    async function loadUserDetails() {
+      try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
+
+        // Show loading state
+        document.getElementById('userName').textContent = 'Loading...';
+        document.getElementById('userInterest').textContent = 'Loading...';
+
+        // Call the /single/types_wise API endpoint
+       const imageResponse = await fetch(API_CONFIG.getImageUrl('/single/types_wise'), {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ image_type: 'profile_photo' })
+      });
+
+        const jsonData = await imageResponse.json();
+        // let response = data2.data[0];
+        
+        let data = jsonData.data[0]
+        if (!data.success == 200) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+
+        // const data = await response.json();
+        console.log('User details loaded:', data[0]);
+
+        // Update the UI with user details
+        updateUserInterface(data);
+
+      } catch (error) {
+        console.error('Error loading user details:', error);
+        showErrorMessage('Failed to load user details. Please try again.');
+        
+        // Set default values if API fails
+        document.getElementById('userName').textContent = 'User';
+        document.getElementById('userInterest').textContent = 'Interest not available';
+      }
+    }
+
+    function updateUserInterface(data) {
+      try {
+        // Update user name
+        if (data.User.name) {
+          const name = data.User.name;
+          document.getElementById('userName').textContent = name;
+        }
+
+        // Update user interest
+        if (data.User.gender) {
+          const interest = data.User.gender == "male" ? "Female" : "Male";
+          document.getElementById('userInterest').textContent = `Interest in ${interest}`;
+        }
+
+        // Update profile picture if available
+        if (data.url) {
+          const profilePic = document.getElementById('profilePic');
+          profilePic.src = data.url;
+          profilePic.alt = 'Profile Picture';
+        }
+
+        // Update additional profile information
+        const profileInfo = document.getElementById('profileInfo');
+        let infoHTML = '';
+
+        if (data.User.email) {
+          infoHTML += `<p>📧 ${data.User.email}</p>`;
+        }
+
+        if (data.User.phone) {
+          infoHTML += `<p>📱 ${data.User.phone}</p>`;
+        }
+
+        if (data.User.location || data.User.city) {
+          const location = data.User.location || data.User.city;
+          infoHTML += `<p>📍 ${location}</p>`;
+        }
+
+        if (data.User.bio || data.User.description) {
+          const bio = data.User.bio || data.User.description;
+          infoHTML += `<p>💬 ${bio}</p>`;
+        }
+
+        if (infoHTML) {
+          profileInfo.innerHTML = infoHTML;
+        }
+
+        // Update interest switch if available
+        if (data.isActive !== undefined) {
+          document.getElementById('interestSwitch').checked = data.isActive;
+        }
+
+      } catch (error) {
+        console.error('Error updating user interface:', error);
+      }
+    }
+
+    function showErrorMessage(message) {
+      const container = document.querySelector('.container');
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message';
+      errorDiv.innerHTML = `
+        <h3>⚠️ Error</h3>
+        <p>${message}</p>
+      `;
+      container.insertBefore(errorDiv, container.firstChild);
+    }
+
+    async function logout() {
+      try {
+        // Show loading state
+        const logoutBtn = document.querySelector('.logout-btn');
+        const originalText = logoutBtn.textContent;
+        logoutBtn.textContent = '🔄 Logging out...';
+        logoutBtn.disabled = true;
+
+        // Call the logout API
+        const token = localStorage.getItem('authToken');
+        if (token) {
+          try {
+            const response = await fetch(API_CONFIG.getAuthUrl('/logout'), {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (response.ok) {
+              console.log('Logout API call successful');
+            } else {
+              console.log('Logout API call failed, but continuing with local cleanup');
+            }
+          } catch (error) {
+            console.log('Logout API call error, but continuing with local cleanup:', error);
+          }
+        }
+
+        // Clear all user data
+        clearAllUserData();
+
+        // Show success message and redirect
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            title: "Logged Out",
+            text: "You have been logged out successfully!",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false
+          }).then(() => {
+            window.location.href = "login.html";
+          });
+        } else {
+          alert('Logged out successfully!');
+          window.location.href = "login.html";
+        }
+
+      } catch (error) {
+        console.error('Error during logout:', error);
+        
+        // Reset button state
+        logoutBtn.textContent = originalText;
+        logoutBtn.disabled = false;
+        
+        // Show error message
+        alert('Error during logout. Please try again.');
+      }
+    }
+
+    function redirectToLogin() {
+      window.location.href = 'login.html';
+    }
+
+    // Function to clear all user data (from logout-utils.js)
+    function clearAllUserData() {
+      try {
+        // Clear all localStorage items
+        localStorage.clear();
+        console.log('All localStorage data cleared');
+      } catch (error) {
+        console.error('Error clearing localStorage:', error);
+        // Fallback: manually remove known items
+        const knownItems = [
+          "authToken",
+          "userInfo", 
+          "updatedProfileImage",
+          "userInterests",
+          "ENV_SWITCHER_DEV_MODE",
+          "bankId",
+          "STORAGE_KEY"
+        ];
+        
+        knownItems.forEach(item => {
+          try {
+            localStorage.removeItem(item);
+          } catch (e) {
+            console.error(`Error removing ${item}:`, e);
+          }
+        });
+      }
+
+      try {
+        // Clear session storage
+        sessionStorage.clear();
+        console.log('All sessionStorage data cleared');
+      } catch (error) {
+        console.error('Error clearing sessionStorage:', error);
+      }
+
+      try {
+        // Clear cookies
+        const cookies = document.cookie.split(";");
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i];
+          const eqPos = cookie.indexOf("=");
+          const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+          
+          const paths = ['/', '/well-known', '/lets-talk'];
+          paths.forEach(path => {
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=" + path;
+            document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=" + path + ";domain=" + window.location.hostname;
+          });
+        }
+        console.log('All cookies cleared');
+      } catch (error) {
+        console.error('Error clearing cookies:', error);
+      }
+    }
+  </script>
+
+  <!-- Google Translate -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
+  <!-- Logout Utilities -->
+  <script src="js/logout-utils.js"></script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
