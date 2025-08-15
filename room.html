@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Room</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="js/config.js"></script>
+  <style>
+    body { margin:0; font-family: system-ui, sans-serif; background:#0e0f12; color:#fff; }
+    .wrap { max-width: 1000px; margin: 0 auto; padding: 12px; }
+    .row { position:relative; }
+    .stage { position:relative; width:100%; aspect-ratio: 16 / 9; background:#000; border-radius:12px; overflow:hidden; }
+    video { width: 100%; height: 100%; object-fit: cover; display:block; background:#000; }
+    #localVideo { position:absolute; width: 220px; height: 124px; right:12px; bottom:12px; border-radius:10px; box-shadow:0 2px 12px rgba(0,0,0,0.5); object-fit: cover; }
+    .pill { position:absolute; left:10px; top:10px; background:rgba(0,0,0,0.6); padding:4px 8px; border-radius:12px; font-size:12px; }
+    .toolbar { display:flex; gap:10px; justify-content:center; align-items:center; margin:16px 0; }
+    .btn { background:#1f2937; border:none; color:#fff; padding:10px 14px; border-radius:22px; cursor:pointer; }
+    .btn.red { background:#ef4444; }
+    .btn.green { background:#10b981; }
+    .btn.yellow { background:#f59e0b; }
+    .chat { margin-top:12px; display:flex; gap:8px; }
+    .chat input { flex:1; padding:10px; border-radius:12px; border:1px solid #333; background:#111827; color:#fff; }
+    .chat button { padding:10px 14px; border-radius:12px; }
+    .log { background:#0b1220; border:1px solid #1f2a44; border-radius:12px; padding:10px; height:160px; overflow:auto; margin-top:8px; }
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); display:none; align-items:center; justify-content:center; z-index:1000; }
+    .overlay.show { display:flex; }
+    .card { background:#0b1220; border:1px solid #1f2a44; padding:18px; border-radius:12px; min-width:280px; max-width:90%; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h3 id="roomTitle">Room</h3>
+    <div class="row">
+      <div class="stage">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo" autoplay playsinline muted></video>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="btn green" id="btnAccept" style="display:none;">Accept</button>
+      <button class="btn red" id="btnReject" style="display:none;">Reject</button>
+      <button class="btn" id="btnMute">Mute</button>
+      <button class="btn" id="btnVideo">Video Off</button>
+      <button class="btn red" id="btnHangup">Hang Up</button>
+    </div>
+  <div id="incomingOverlay" class="overlay">
+    <div class="card">
+      <div style="font-weight:700; margin-bottom:8px;">Incoming Call</div>
+      <div id="incomingFrom" style="font-size:14px; color:#cbd5e1; margin-bottom:12px;"></div>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn green" id="ovlAccept">Accept</button>
+        <button class="btn red" id="ovlReject">Reject</button>
+      </div>
+    </div>
+  </div>
+    <div class="chat">
+      <input id="msg" placeholder="Type message..."/>
+      <button onclick="sendMsg()">Send</button>
+    </div>
+    <div id="log" class="log"></div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const roomName = params.get('room');
+    const displayName = params.get('name') || 'Guest';
+    document.getElementById('roomTitle').textContent = `Room: ${roomName}`;
+
+    const SOCKET_URL = (window.API_CONFIG && typeof API_CONFIG.getBaseUrl==='function') ? API_CONFIG.getBaseUrl() : window.location.origin;
+    const socket = io(SOCKET_URL, { path: '/socket.io', transports: ['websocket','polling'] });
+    let pc;
+    let localStream;
+    let isMuted=false, isVideoOff=false;
+    let pendingOffer = null;
+
+    function log(msg){ const el=document.getElementById('log'); el.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${msg}</div>`; el.scrollTop = el.scrollHeight; }
+
+    async function init(){
+      socket.emit('join-room', { roomName, userName: displayName });
+      localStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 } }, audio: true });
+      document.getElementById('localVideo').srcObject = localStream;
+      pc = new RTCPeerConnection({ iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ] });
+      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+      const remoteEl = document.getElementById('remoteVideo');
+      remoteEl.muted = true;
+      pc.ontrack = (e) => { remoteEl.srcObject = e.streams[0]; try { remoteEl.play(); } catch(_){} };
+      pc.onconnectionstatechange = () => {
+        if (pc.connectionState === 'connected') {
+          setTimeout(()=>{ try { remoteEl.muted = false; } catch(_){} }, 300);
+        }
+      };
+      pc.onnegotiationneeded = async () => {
+        try {
+          if (!pc.currentLocalDescription) {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            socket.emit('room-offer', { roomName, offer });
+          }
+        } catch(e) { console.warn('negotiationneeded failed', e); }
+      };
+      pc.onicecandidate = (e) => { if (e.candidate) socket.emit('room-ice-candidate', { roomName, candidate: e.candidate }); };
+
+      // If others are present, create offer
+      // Trigger offer when either we join a populated room or server notifies ready
+      socket.on('room-participants', async ({ roomName: rn, participants }) => {
+        if (rn !== roomName) return;
+        // Deterministic offerer: smallest socket id in room
+        try {
+          const smallest = participants.slice().sort()[0];
+          const weAreOfferer = smallest === socket.id;
+          if (participants.length >= 2 && weAreOfferer && !pc.currentLocalDescription) {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            socket.emit('room-offer', { roomName, offer });
+          }
+        } catch(e) { console.warn('participants negotiation error', e); }
+      });
+      socket.on('room-ready', async () => {
+        if (!pc.currentLocalDescription){
+          const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+          await pc.setLocalDescription(offer);
+          socket.emit('room-offer', { roomName, offer });
+        }
+      });
+      socket.on('room-offer', async ({ from, offer }) => {
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          socket.emit('room-answer', { roomName, answer });
+          showInCallUI();
+        } catch(e) {
+          pendingOffer = offer;
+          showOverlay(true, `From: ${from || 'Peer'}`);
+        }
+      });
+      socket.on('room-answer', async ({ from, answer }) => {
+        try {
+          if (!pc.currentRemoteDescription) {
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
+            showInCallUI();
+          }
+        } catch(e) { console.warn('apply answer failed', e); }
+      });
+      socket.on('room-ice-candidate', async ({ from, candidate }) => {
+        try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e) { console.warn('ICE add error', e); }
+      });
+
+      // Chat
+      socket.on('room-message', ({ from, message, timestamp }) => {
+        log(`${from||'Peer'}: ${message}`);
+      });
+
+      socket.on('room-reject', ({ from, reason }) => {
+        showOverlay(false);
+        log(`Call rejected: ${reason||''}`);
+      });
+    }
+
+    // Overlay buttons
+    document.getElementById('ovlAccept').onclick = async () => {
+      try {
+        if (!pendingOffer) return showOverlay(false);
+        await pc.setRemoteDescription(new RTCSessionDescription(pendingOffer));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        socket.emit('room-answer', { roomName, answer });
+        pendingOffer = null;
+        showOverlay(false);
+        showInCallUI();
+      } catch (e) { console.warn('Accept error', e); }
+    };
+    document.getElementById('ovlReject').onclick = () => {
+      socket.emit('room-reject', { roomName, reason: 'User rejected' });
+      pendingOffer = null;
+      showOverlay(false);
+    };
+
+    function showOverlay(show, fromTxt=''){
+      const ovl = document.getElementById('incomingOverlay');
+      if (show){ ovl.classList.add('show'); document.getElementById('incomingFrom').textContent = fromTxt; }
+      else { ovl.classList.remove('show'); }
+    }
+
+    function showInCallUI(){
+      document.getElementById('btnAccept').style.display='none';
+      document.getElementById('btnReject').style.display='none';
+    }
+
+    // Controls
+    document.getElementById('btnMute').onclick = ()=>{
+      isMuted = !isMuted;
+      localStream.getAudioTracks().forEach(t=> t.enabled = !isMuted);
+      document.getElementById('btnMute').textContent = isMuted ? 'Unmute' : 'Mute';
+    };
+    document.getElementById('btnVideo').onclick = ()=>{
+      isVideoOff = !isVideoOff;
+      localStream.getVideoTracks().forEach(t=> t.enabled = !isVideoOff);
+      document.getElementById('btnVideo').textContent = isVideoOff ? 'Video On' : 'Video Off';
+    };
+    document.getElementById('btnHangup').onclick = ()=>{
+      try { pc.close(); } catch(e){}
+      socket.emit('leave-room', { roomName, userName: displayName });
+      window.history.back();
+    }
+
+    function sendMsg(){
+      const m = document.getElementById('msg').value.trim();
+      if (!m) return;
+      socket.emit('room-message', { roomName, from: displayName, message: m });
+      log(`Me: ${m}`);
+      document.getElementById('msg').value = '';
+    }
+
+    window.addEventListener('beforeunload', ()=> socket.emit('leave-room', { roomName, userName: displayName }));
+    init();
+  </script>
+</body>
+</html>
+
+

@@ -356,9 +356,12 @@
           <div class="host-card">
             <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
-              <h4>${host.name || ''} ${isPremium ? '<span class="premium-badge">👑 Premium</span>' : ''}</h4>
+              <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
               <p>${host.phone || ''}</p>
-              <button class="call-btn" onclick="showModal('success', 'Coming Soon', 'Call feature will be available soon.')">Call</button>
+              <div>
+                <button class="call-btn" onclick="window.location.href='../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}'">Call</button>
+                <button class="call-btn" style="margin-left:8px;background:#8b5cf6" onclick="window.location.href='../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}'">Chat</button>
+              </div>
             </div>
           </div>
         `;

@@ -385,7 +385,7 @@
                 <p>Gender: ${user.gender || "N/A"}</p>
                 <p>Phone: ${user.phone || "N/A"}</p>
                 <p>Email: ${user.email || "N/A"}</p>
-                <button class="call-btn" onclick="initiateCall('${user.user_profile_id || user.id}')">CALL NOW</button>
+                <button class="call-btn" onclick="window.location.href='room.html?room=${encodeURIComponent('room_'+(user.user_profile_id||user.id))}&name=${encodeURIComponent(user.name||'User')}'">Call / Chat</button>
               </div>
             `;
             usersList.appendChild(userCard);
