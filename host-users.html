@@ -107,6 +107,19 @@
   position: relative; /* Needed for proper containment */
 }
 
+.premium-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #ffd700;
+  color: #7a5b00;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
 .user-card img {
   height: 90px;
   width:28%;
@@ -356,15 +369,16 @@
             // Safely handle image URL with fallback
             let imageUrl = "imgs/logo11.png"; // Default fallback
             if (user.Images && Array.isArray(user.Images) && user.Images.length > 0) {
+              const profileImg = user.Images.find(img => img && img.image_type === 'profile_photo');
               const lastImage = user.Images[user.Images.length - 1];
-              if (lastImage && lastImage.url) {
-                imageUrl = lastImage.url;
-              }
+              imageUrl = (profileImg && profileImg.url) || (lastImage && lastImage.url) || imageUrl;
             }
+            const isPremium = Boolean(user.is_premium);
             
             const userCard = document.createElement("div");
             userCard.className = "user-card";
             userCard.innerHTML = `
+              ${isPremium ? '<span class="premium-badge">👑 Premium</span>' : ''}
               <img src="${imageUrl}" alt="${user.name || 'Host'}" onerror="this.src='imgs/logo11.png'">
               <div class="user-info">
                 <h3>${user.name || "Unknown Host"}</h3>
