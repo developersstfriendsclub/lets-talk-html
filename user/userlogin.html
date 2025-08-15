@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <script src="../js/config.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #fef9f9;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 350px;
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+      margin: auto;
+    }
+
+    .logo {
+      width: 100px;
+      margin: 0 auto 20px;
+    }
+
+    h2, h3 {
+      color: #b03b6a;
+      margin: 10px 0;
+    }
+
+    h3 {
+      font-weight: normal;
+      margin-bottom: 20px;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border: 1.5px solid #b03b6a;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    .forgot {
+      text-align: right;
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #b03b6a;
+    }
+
+    .login-btn {
+      width: 100%;
+      background-color: #b03b6a;
+      color: #fff;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
+    .signup {
+      font-size: 14px;
+      color: #b03b6a;
+    }
+
+    .signup a {
+      color: #b03b6a;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-top: auto;
+      padding: 10px 0;
+      background-color: #f6f6f6;
+    }
+
+    @media (max-width: 400px) {
+      .container {
+        padding: 15px;
+      }
+    }
+
+    /* Modal & Loader (reused pattern) */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .modal.show { display: flex; align-items: center; justify-content: center; }
+    .modal-content {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease-out;
+    }
+    .modal-icon { font-size: 60px; margin-bottom: 20px; }
+    .modal-icon.success { color: #4CAF50; }
+    .modal-icon.error { color: #f44336; }
+    .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; color: #333; }
+    .modal-message { font-size: 15px; color: #666; margin-bottom: 22px; }
+    .modal-btn { background: #b03b6a; color: white; border: none; padding: 10px 24px; border-radius: 25px; cursor: pointer; }
+
+    .page-loader {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(255,255,255,0.9);
+      display: none; justify-content: center; align-items: center; z-index: 3000;
+    }
+    .page-loader.show { display: flex; }
+    .spinner {
+      width: 48px; height: 48px; border: 5px solid #f3f3f3; border-top: 5px solid #b03b6a; border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideIn { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  </style>
+</head>
+<body>
+  <!-- Modal for messages -->
+  <div id="messageModal" class="modal">
+    <div class="modal-content">
+      <div id="modalIcon" class="modal-icon"></div>
+      <div id="modalTitle" class="modal-title"></div>
+      <div id="modalMessage" class="modal-message"></div>
+      <button id="modalBtn" class="modal-btn" onclick="closeModal()">OK</button>
+    </div>
+  </div>
+
+  <!-- Page Loader -->
+  <div id="pageLoader" class="page-loader">
+    <div class="spinner"></div>
+  </div>
+  <div class="container">
+    <img src="../imgs/logo1.png" class="logo" alt="Logo" />
+    <h2>Welcome Back!</h2>
+    <h3>FOR USERS</h3>
+
+    <input id="email" type="email" placeholder="Email" required />
+    <input id="password" type="password" placeholder="Password" required />
+
+    <!--<div class="forgot">-->
+    <!--  <a href="#">Forgot Password?</a>-->
+    <!--</div>-->
+
+    <button class="login-btn" onclick="loginUser()">Login</button>
+
+    <div class="signup">
+      Don't have an account? <a href="#">Sign Up</a>
+    </div>
+  </div>
+
+  <footer>
+    CopyRight © 2025 Pick N Pin. All Rights Reserved
+  </footer>
+
+  <script>
+  function showModal(type, title, message) {
+    const modal = document.getElementById('messageModal');
+    const icon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    icon.className = `modal-icon ${type}`;
+    icon.innerHTML = type === 'success' ? '✓' : '✗';
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.classList.add('show');
+  }
+  function closeModal() { document.getElementById('messageModal').classList.remove('show'); }
+  function showPageLoader() { document.getElementById('pageLoader').classList.add('show'); }
+  function hidePageLoader() { document.getElementById('pageLoader').classList.remove('show'); }
+
+  async function loginUser() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      showModal('error', 'Missing Fields', 'Please enter both email and password.');
+      return;
+    }
+
+    try {
+      showPageLoader();
+      const response = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.USER_AUH.LOGIN), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.data?.token) {
+        localStorage.setItem("userToken", data.data.token);
+        hidePageLoader();
+        showModal('success', 'Login Successful', 'Redirecting to hosts...');
+        setTimeout(() => { window.location.href = "user-host-list.html"; }, 900);
+      } else {
+        hidePageLoader();
+        showModal('error', 'Login Failed', data.message || "Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      hidePageLoader();
+      showModal('error', 'Network Error', 'Something went wrong. Please try again later.');
+    }
+  }
+
+  // window.onload = function () {
+  //   // const userInfo = localStorage.getItem("userInfo");
+  //   if (userInfo) {
+  //     try {
+  //       const user = JSON.parse(userInfo);
+  //       if (user.email) {
+  //         document.getElementById("email").value = user.email;
+  //       }
+  //     } catch (e) {
+  //       console.warn("Corrupted user info in storage.");
+  //     }
+  //   }
+  // };
+</script>
+
+</body>
+</html>

@@ -6,6 +6,7 @@
   <title>Host Page</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+  <script src="../js/config.js"></script>
 
   <style>
     body, html { user-select: none; }
@@ -204,13 +205,41 @@
       }
       .header-left { margin: 0; }
     }
+
+    /* Modal & Loader */
+    .modal { display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); }
+    .modal.show { display:flex; align-items:center; justify-content:center; }
+    .modal-content { background:#fff; padding:24px 28px; border-radius:14px; width:90%; max-width:380px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
+    .modal-icon { font-size:56px; margin-bottom:14px; }
+    .modal-icon.success { color:#4CAF50; } .modal-icon.error { color:#f44336; }
+    .modal-title { font-size:20px; font-weight:700; margin-bottom:8px; }
+    .modal-message { font-size:14px; color:#666; margin-bottom:18px; }
+    .modal-btn { background:#b03b6a; color:#fff; border:none; padding:9px 22px; border-radius:24px; cursor:pointer; }
+    .page-loader { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:none; align-items:center; justify-content:center; z-index:3000; }
+    .page-loader.show { display:flex; }
+    .spinner { width:48px; height:48px; border:5px solid #f3f3f3; border-top:5px solid #b03b6a; border-radius:50%; animation:spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
   </style>
 </head>
 <body>
+  <!-- Modal for messages -->
+  <div id="messageModal" class="modal">
+    <div class="modal-content">
+      <div id="modalIcon" class="modal-icon"></div>
+      <div id="modalTitle" class="modal-title"></div>
+      <div id="modalMessage" class="modal-message"></div>
+      <button id="modalBtn" class="modal-btn" onclick="closeModal()">OK</button>
+    </div>
+  </div>
+
+  <!-- Page Loader -->
+  <div id="pageLoader" class="page-loader">
+    <div class="spinner"></div>
+  </div>
 
   <header>
     <div class="header-left">
-      Host <img src="imgs/India-Waved-Flag-icon.png" class="flag" alt="Indian Flag"/>
+      Host <img src="../imgs/India-Waved-Flag-icon.png" class="flag" alt="Indian Flag"/>
     </div>
     <div class="header-right">
       <a href="#"><div class="recharge"><i class="fas fa-phone"></i> ₹1000</div></a>
@@ -223,7 +252,7 @@
 
   <div class="banner">
     <div class="footer-text">TM</div>
-    <img src="imgs/female11.png" alt="Banner"/>
+    <img src="../imgs/female11.png" alt="Banner"/>
   </div>
 
   <div class="section-title">Popular</div>
@@ -246,49 +275,79 @@
   </div>
 
 <script>
-    const API_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZV9pZCI6OTQsImRvbWFpbl9uYW1lIjoibXlyb29weWEiLCJjb250YWN0IjpudWxsLCJlbXBsb3llZSI6eyJpZCI6OTQsInBob25lIjoiOTRYWFhYWFgxNiJ9LCJ1bmlxdWVUb2tlbiI6ImVmODFjNThkLTk4NDEtNGVmZi1iYjAzLTQzOGUyMzFmYWU0MSIsImlhdCI6MTc1NDg5NDAxNCwiZXhwIjoxNzU0OTgwNDE0fQ.JARg2AJW6mYUShqQWYLOfiFR81YbcGQ8oNcjfbMs_O8";
+    const API_TOKEN = localStorage.getItem("userToken");
 
-async function loadHosts() {
-  try {
-    const res = await fetch("https://clientfriendclub.com/api/v1/get-host-details", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_TOKEN}`
+    function showModal(type, title, message) {
+      const modal = document.getElementById('messageModal');
+      const icon = document.getElementById('modalIcon');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalMessage = document.getElementById('modalMessage');
+      icon.className = `modal-icon ${type}`;
+      icon.innerHTML = type === 'success' ? '✓' : '✗';
+      modalTitle.textContent = title;
+      modalMessage.textContent = message;
+      modal.classList.add('show');
+    }
+    function closeModal() { document.getElementById('messageModal').classList.remove('show'); }
+    function showPageLoader() { document.getElementById('pageLoader').classList.add('show'); }
+    function hidePageLoader() { document.getElementById('pageLoader').classList.remove('show'); }
+
+    async function loadHosts() {
+      const container = document.getElementById("host-container");
+      try {
+        if (!API_TOKEN) {
+          showModal('error', 'Authentication Required', 'Please login to view hosts.');
+          setTimeout(() => { window.location.href = 'userlogin.html'; }, 1200);
+          return;
+        }
+        showPageLoader();
+        const res = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.USER_AUH.GET_HOST_ALL), {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_TOKEN}`
+          }
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || `HTTP ${res.status}`);
+        }
+
+        renderHosts(data.data || []);
+        hidePageLoader();
+        // showModal('success', 'Loaded', 'Hosts loaded successfully.');
+      } catch (err) {
+        console.error("Error loading hosts:", err);
+        hidePageLoader();
+        container.innerHTML = "<p>Could not load hosts.</p>";
+        showModal('error', 'Load Failed', err.message || 'Please try again.');
       }
-    });
+    }
 
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    function renderHosts(hosts) {
+      const container = document.getElementById("host-container");
+      container.innerHTML = "";
+      if (!hosts.length) {
+        container.innerHTML = "<p>No hosts found.</p>";
+        return;
+      }
+      hosts.forEach(host => {
+        container.innerHTML += `
+          <div class="host-card">
+            <img src="${(host.Images && host.Images.length > 0 && host.Images[0].url) ? host.Images[0].url : '../imgs/logo.jpg'}" alt="${host.name}">
+            <div class="host-details">
+              <h4>${host.name || ''}</h4>
+              <p>${host.phone || ''}</p>
+              <button class="call-btn" onclick="showModal('success', 'Coming Soon', 'Call feature will be available soon.')">Call</button>
+            </div>
+          </div>
+        `;
+      });
+    }
 
-    const data = await res.json();
-    renderHosts(data.data || []);
-  } catch (err) {
-    console.error("Error loading hosts:", err);
-    document.getElementById("host-container").innerHTML = "<p>Could not load hosts.</p>";
-  }
-}
-
-function renderHosts(hosts) {
-  const container = document.getElementById("host-container");
-  container.innerHTML = "";
-  if (!hosts.length) {
-    container.innerHTML = "<p>No hosts found.</p>";
-    return;
-  }
-  hosts.forEach(host => {
-    container.innerHTML += `
-      <div class="host-card">
-        <img src="${host.image || 'imgs/default.png'}" alt="${host.name}">
-        <div class="host-details">
-          <h4>${host.name}</h4>
-          <p>${host.phone || 'N/A'}</p>
-        </div>
-      </div>
-    `;
-  });
-}
-
-window.onload = loadHosts;
+    window.onload = loadHosts;
   </script>
 
 
