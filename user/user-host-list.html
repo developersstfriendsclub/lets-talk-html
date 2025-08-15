@@ -118,6 +118,16 @@
       margin-top: 1em;
       z-index: 1;
     }
+    .premium-badge {
+      display:inline-block;
+      margin-left:8px;
+      background:#ffd700;
+      color:#7a5b00;
+      padding:2px 8px;
+      border-radius:12px;
+      font-size:11px;
+      font-weight:700;
+    }
     .host-details { flex: 1; }
     .host-details h4 { margin: 0 0 5px; }
     img.flag {
@@ -276,6 +286,7 @@
 
 <script>
     const API_TOKEN = localStorage.getItem("userToken");
+    let allHosts = [];
 
     function showModal(type, title, message) {
       const modal = document.getElementById('messageModal');
@@ -315,7 +326,8 @@
           throw new Error(data.message || `HTTP ${res.status}`);
         }
 
-        renderHosts(data.data || []);
+        allHosts = data.data || [];
+        renderHosts(allHosts);
         hidePageLoader();
         // showModal('success', 'Loaded', 'Hosts loaded successfully.');
       } catch (err) {
@@ -334,16 +346,49 @@
         return;
       }
       hosts.forEach(host => {
+        const images = Array.isArray(host.Images) ? host.Images : [];
+        const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+        const displayUrl = (profileImg && profileImg.url)
+          || (images.length > 0 && images[0] && images[0].url)
+          || '../imgs/logo.jpg';
+        const isPremium = Boolean(host.is_premium);
         container.innerHTML += `
           <div class="host-card">
-            <img src="${(host.Images && host.Images.length > 0 && host.Images[0].url) ? host.Images[0].url : '../imgs/logo.jpg'}" alt="${host.name}">
+            <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
-              <h4>${host.name || ''}</h4>
+              <h4>${host.name || ''} ${isPremium ? '<span class="premium-badge">👑 Premium</span>' : ''}</h4>
               <p>${host.phone || ''}</p>
               <button class="call-btn" onclick="showModal('success', 'Coming Soon', 'Call feature will be available soon.')">Call</button>
             </div>
           </div>
         `;
+      });
+    }
+
+    function filterAndRender(query) {
+      const normalized = (query || '').toString().toLowerCase().trim();
+      if (!normalized) {
+        renderHosts(allHosts);
+        return;
+      }
+      const filtered = allHosts.filter(h => {
+        const name = (h.name || '').toString().toLowerCase();
+        const phone = (h.phone || '').toString().toLowerCase();
+        return name.includes(normalized) || phone.includes(normalized);
+      });
+      const container = document.getElementById("host-container");
+      if (!filtered.length) {
+        container.innerHTML = "<p>No matching hosts.</p>";
+        return;
+      }
+      renderHosts(filtered);
+    }
+
+    // Wire up search input
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        filterAndRender(e.target.value);
       });
     }
 

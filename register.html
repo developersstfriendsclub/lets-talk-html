@@ -289,7 +289,8 @@
     const password = document.getElementById('password').value;
     const msgDiv = document.getElementById('responseMsg');
 
-    const payload = { name, email, gender, premium, phone, dob, password };
+    const is_premium = premium === 'yes';
+    const payload = { name, email, gender, is_premium, phone, dob, password };
 
 try {
         const res = await fetch(API_CONFIG.getAuthUrl('/sign-up'), {

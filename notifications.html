@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Notification</title>
+  <script src="js/config.js"></script>
   <style>
     * {
       margin: 0;
@@ -51,6 +52,10 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       margin-bottom: 20px;
     }
+    .status-badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:700; }
+    .status-approved { background:#e6f4ea; color:#137333; }
+    .status-rejected { background:#fdecea; color:#a50e0e; }
+    .status-pending { background:#fff4e5; color:#b26a00; }
 
     .notification-card img {
       width: 40px;
@@ -209,20 +214,10 @@
     <div class="header">Notification</div>
     
 
-    <!-- Notification Entry -->
-    <!--<div class="notification-card">-->
-    <!--  <img src="https://i.imgur.com/tBJ9AsU.png" alt="Notif Icon" />-->
-    <!--  <div class="notification-info">-->
-    <!--    <h4>id: 123345_Anjali</h4>-->
-    <!--    <p><span class="icon">🔔</span> June 5, 2025 - 3:15 PM</p>-->
-    <!--    <p>Welcome to Pick N Pin......</p>-->
-    <!--  </div>-->
-    <!--</div>-->
+    <div id="notificationList"></div>
     
-     <!-- Waiting for Approval Box -->
-    <div class="waiting-box">
+    <div id="approvalBox" class="waiting-box" style="display:none;">
       ⏳ Waiting for Approval by Admin.  <br>You will be notified soon.
-     
     </div>
     <br> 
      <span style="color:red; font-weight:600;">** Welcome Bonus ₹400 each upon approval.**</span>
@@ -245,6 +240,38 @@
     <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
     <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('userToken');
+        if (!token) {
+          document.getElementById('approvalBox').style.display = 'block';
+          return;
+        }
+        const res = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const isApproved = Boolean(data?.data?.is_verified);
+        const status = (data?.data?.approval_status) || (isApproved ? 'approved' : 'pending');
+        document.getElementById('approvalBox').style.display = status === 'pending' ? 'block' : 'none';
+
+        const list = document.getElementById('notificationList');
+        list.innerHTML = '';
+        const now = new Date().toLocaleString();
+        if (status === 'approved') {
+          list.innerHTML += `<div class="notification-card"><img src="icons/bell.png" alt="Icon"/><div class="notification-info"><h4>Account Status <span class="status-badge status-approved">Approved</span></h4><p>${now}</p><p>Your host account has been approved. Enjoy premium access.</p></div></div>`;
+        } else if (status === 'rejected') {
+          list.innerHTML += `<div class="notification-card"><img src="icons/bell.png" alt="Icon"/><div class="notification-info"><h4>Account Status <span class="status-badge status-rejected">Rejected</span></h4><p>${now}</p><p>Your host account was rejected. Please update your details and try again.</p></div></div>`;
+        } else {
+          list.innerHTML += `<div class="notification-card"><img src="icons/bell.png" alt="Icon"/><div class="notification-info"><h4>Account Status <span class="status-badge status-pending">Pending</span></h4><p>${now}</p><p>Waiting for Approval by Admin. You will be notified soon.</p></div></div>`;
+        }
+      } catch (e) {
+        document.getElementById('approvalBox').style.display = 'block';
+      }
+    });
+  </script>
   </div>
    <!-- Google Translate (Optional) -->
 <script type="text/javascript">
