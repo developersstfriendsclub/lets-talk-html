@@ -25,7 +25,7 @@
     .guide-container {
       background-color: #fddae3;
       width: 100%;
-      max-width: 420px;
+      max-width: 600px;
       padding: 30px 20px 60px;
       border-radius: 10px;
       box-shadow: 0 0 10px #00000070;
@@ -66,6 +66,18 @@
     .enter-btn:hover {
       background-color: #b9005c;
     }
+    
+     .back-button {
+      background-color: #ff5ca7;
+      color: white;
+      padding: 6px 12px;
+      font-size: 14px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
 
     @media screen and (max-width: 480px) {
       .guide-container {
@@ -88,9 +100,10 @@
   </style>
 </head>
 <body>
-
+ 
   <div class="guide-container">
     <!-- Replace the logo URL with your actual image if needed -->
+    <div style="text-align: left;"><button onclick="window.location.href='profile1.html'" class="back-button">← Back</button></div><br>
     <img src="imgs/logo11.png" alt="App Logo" />
 
     <h2>App Guide for Host</h2>
@@ -102,9 +115,16 @@
       <li>প্রোফাইল ঠিক করার পরে হোমপেজে গিয়ে ভিডিও কল রিসিভ করার জন্য অপশন দেখতে পারবেন, এবং ইনকাম সম্পর্কিত তথ্য দেখতে পারবেন।</li>
       <li>প্রোফাইল ফটো যুক্ত করার জন্য My Photos and Videos এ গিয়ে আপনার ইচ্ছেমতো ছবি এবং ভিডিও আপলোড করতে পারবেন এবং যদি ভিডিও কল করতে চান তাহলে Add Video অপশনে যেতে হবে।</li>
     </ol>
+    <span style="color:red; font-weight:600;">** The first 20 hosts are eligible for ₹400 each upon approval.**</span><br>
+    <h4 style="margin-top:2em;">Read the instructions carefully for integrate your profile details </h4>
+    <p>First, register with your details in Registration.html. Then, open the App Guide page, read all instructions, click Enter, select one or more interests, and press Continue.
+
+Go to the Profile section → My Profile to edit your details and profile picture, then click Save to store them permanently. Next, visit the KYC Details page to check your details and upload a selfie.
+
+After completing this, go to the Host Details page to verify that your picture is visible. You can log out anytime from the Profile section by clicking Logout.</p>
 
     <!--<button class="enter-btn"><a href="uploadpic.html" onclick="window.location.href='uploadpic.html'">ENTER</a></button>-->
-     <button class="enter-btn"><a href="interest.html" onclick="window.location.href='interest.html'">ENTER</a></button>
+     <button class="enter-btn" style="margin-top:6px;"><a href="interest.html" onclick="window.location.href='interest.html'">ENTER</a></button>
    
   </div>
 

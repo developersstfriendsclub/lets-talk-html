@@ -55,6 +55,18 @@
       padding: 10px;
       border-radius: 10px;
     }
+    
+   
+/* Make bell blink */
+.blink-bell img {
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 
 /*    .user-card {*/
 /*      display: flex;*/
@@ -209,6 +221,8 @@
       width: 30px;
       height: 30px;
     }
+    
+
 
     @media (max-width: 480px) {
       .user-card {
@@ -251,7 +265,9 @@
      <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
     </div>
 
-    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+    <div class="footer-item"><a href="notifications.html" class="blink-bell">
+    <img src="icons/bell.png" alt="Notification">
+  </a></div>  
     <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
   </div>
 
@@ -329,10 +345,10 @@
           console.log("Filtered hosts count:", hosts.length);
           
           // Show only first 5 hosts if there are too many (for debugging)
-          if (hosts.length > 5) {
-            console.log("Too many users returned, showing only first 5 for debugging");
-            hosts = hosts.slice(0, 5);
-          }
+        //   if (hosts.length > 5) {
+        //     console.log("Too many users returned, showing only first 5 for debugging");
+        //     hosts = hosts.slice(0, 5);
+        //   }
 
           hosts.forEach((user, index) => {
             console.log(`User ${index + 1}:`, user); // Log each user for debugging
