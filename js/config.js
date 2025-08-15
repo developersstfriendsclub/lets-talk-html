@@ -26,6 +26,7 @@ const API_CONFIG = {
     AUTH: {
       SIGNUP: '/sign-up',
       SIGNIN: '/sign-in',
+      GOOGLE_SIGNIN: '/google-sign-in',
       LOGOUT: '/logout',
       FORGOT_PASSWORD: '/forgot-password',
       UPDATE_PROFILE: '/update-profile',
@@ -72,6 +73,18 @@ const API_CONFIG = {
       LOGIN: '/user-login',
       GET_HOST_ALL: '/host-list-for-user',
     }
+  },
+
+  // Google OAuth Client IDs per environment (fill these in)
+  GOOGLE_CLIENT_IDS: {
+    LOCAL: '947452896893-jcs0sd83ckmb239uh7epome5ebo0rhc5.apps.googleusercontent.com',
+    STAGING: '947452896893-jcs0sd83ckmb239uh7epome5ebo0rhc5.apps.googleusercontent.com',
+    PRODUCTION: '947452896893-jcs0sd83ckmb239uh7epome5ebo0rhc5.apps.googleusercontent.com'
+  },
+
+  // Get Google Client ID for current env
+  getGoogleClientId: function() {
+    return this.GOOGLE_CLIENT_IDS[this.CURRENT_ENV.toUpperCase()] || '';
   },
   
   // Helper function to get full API URL
