@@ -8,8 +8,6 @@
   
   <!-- API Configuration -->
   <script src="js/config.js"></script>
-  
-  <!-- Environment Switcher (for development) -->
   <script src="js/env-switcher.js"></script>
   
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
@@ -51,16 +49,13 @@
     button:hover {
       background-color: #c2185b;
     }
-     .footer {
+    .footer {
       margin-top: 40px;
       opacity: 0.2;
     }
-
     .footer img {
       width: 100%;
-      /* filter: drop-shadow(0 0 8px #ff5e92); */
     }
-
     .footer-text {
       font-size: 20px;
       font-weight: bold;
@@ -72,50 +67,39 @@
       font-weight: bold;
       text-align: center;
     }
-    
-      .goog-logo-link,
+    .goog-logo-link,
     .goog-te-gadget span {
       display: none !important;
     }
-
     #google_translate_element {
       color: transparent !important;
     }
-
     .goog-te-gadget {
       color: #66666600 !important;
-    }
-    @media (max-width: 480px) {
-     
-
-      .footer img {
-        width: 100%;
-      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-       <div id="google_translate_element"></div>
+    <div id="google_translate_element"></div>
     <h2>My Wallet</h2>
 
-    <input type="text" id="holderName" placeholder="Account Holder Name" required />
-    <input type="text" id="accountNumber" placeholder="Account Number" required />
-    <input type="text" id="ifsc" placeholder="IFSC Code" required />
-    <input type="text" id="bankName" placeholder="Bank Name" required />
-    <input type="text" id="branchName" placeholder="Branch Name" required />
-     <input type="hidden" id="bankaccountid"  />
-    
+    <input type="text" id="holderName" placeholder="Account Holder Name" />
+    <input type="text" id="accountNumber" placeholder="Account Number" />
+    <input type="text" id="ifsc" placeholder="IFSC Code" />
+    <input type="text" id="bankName" placeholder="Bank Name" />
+    <input type="text" id="branchName" placeholder="Branch Name" />
+    <input type="hidden" id="bankaccountid" />
+
     <button onclick="submitBank()">Save / Update</button>
     <div id="responseMsg"></div>
-       <!-- Footer Graphic -->
-  
   </div>
 
   <script>
     const token = localStorage.getItem("authToken");
     const apiUrl = API_CONFIG.getBankAccountUrl('');
-    let data = null;
+    let loadedBank = {}; // store initial bank data
+
     if (!token) {
       alert("Login required. Redirecting to login...");
       window.location.href = "login.html";
@@ -123,49 +107,78 @@
 
     const responseMsg = document.getElementById("responseMsg");
 
-    // Get current bank details on load
+    // Load bank details on page load
     window.onload = async () => {
       try {
         const res = await fetch(apiUrl + "?page=1&limit=10", {
           headers: { Authorization: `Bearer ${token}` }
         });
-         console.log("res",res)
-        data = await res.json();
-         console.log("data",data);
-        //  console.log(data.data.bankAccounts[0].accountNumber)
+        const data = await res.json();
+
         if (data?.data?.bankAccounts.length > 0) {
           const bank = data.data.bankAccounts[0];
-          console.log(bank)
           document.getElementById("holderName").value = bank.accountHolderName || "";
           document.getElementById("accountNumber").value = bank.accountNumber || "";
           document.getElementById("ifsc").value = bank.ifscCode || "";
           document.getElementById("bankName").value = bank.bankName || "";
-          document.getElementById("branchName").value = bank.branchCode || "";//
-        // localStorage.setItem("bankId", bank.id); // Save for update
-        document.getElementById("bankaccountid").value = bank.id;
+          document.getElementById("branchName").value = bank.branchCode || "";
+          document.getElementById("bankaccountid").value = bank.id;
+
+          loadedBank = {
+            accountHolderName: bank.accountHolderName || "",
+            accountNumber: bank.accountNumber || "",
+            ifscCode: bank.ifscCode || "",
+            bankName: bank.bankName || "",
+            branchCode: bank.branchCode || ""
+          };
         }
       } catch (err) {
         console.error("Error fetching bank details:", err);
       }
     };
-        // const bankId = localStorage.getItem("bankId");
-     
-      console.log("data22",document.getElementById("bankaccountid").value);
-    // Submit bank info (POST or PUT)
+
+    // Save or update bank details
     async function submitBank() {
+      const holderName = document.getElementById("holderName").value.trim();
+      const accountNumber = document.getElementById("accountNumber").value.trim();
+      const ifsc = document.getElementById("ifsc").value.trim();
+      const bankName = document.getElementById("bankName").value.trim();
+      const branchName = document.getElementById("branchName").value.trim();
+
+      // Validation: fields must not be empty
+      if (!holderName || !accountNumber || !ifsc || !bankName || !branchName) {
+        responseMsg.style.color = "red";
+        responseMsg.innerText = "Please fill all the fields before saving.";
+        return;
+      }
+
+      // Check if something changed
+      const isChanged =
+        holderName !== loadedBank.accountHolderName ||
+        accountNumber !== loadedBank.accountNumber ||
+        ifsc !== loadedBank.ifscCode ||
+        bankName !== loadedBank.bankName ||
+        branchName !== loadedBank.branchCode;
+
+      if (!isChanged && document.getElementById("bankaccountid").value) {
+        responseMsg.style.color = "orange";
+        responseMsg.innerText = "No changes detected.";
+        return;
+      }
+
       const payload = {
-        accountHolderName: document.getElementById("holderName").value,
-        accountNumber: document.getElementById("accountNumber").value,
-        ifscCode: document.getElementById("ifsc").value,
-        bankName: document.getElementById("bankName").value,
-        branchCode: document.getElementById("branchName").value,
+        accountHolderName: holderName,
+        accountNumber: accountNumber,
+        ifscCode: ifsc,
+        bankName: bankName,
+        branchCode: branchName,
         isActive: true
       };
 
-      // const bankId = localStorage.getItem("bankId");
-      
       const method = document.getElementById("bankaccountid").value ? "PUT" : "POST";
-      const endpoint = document.getElementById("bankaccountid").value ? `${apiUrl}/${document.getElementById("bankaccountid").value}` : apiUrl;
+      const endpoint = document.getElementById("bankaccountid").value
+        ? `${apiUrl}/${document.getElementById("bankaccountid").value}`
+        : apiUrl;
 
       try {
         const res = await fetch(endpoint, {
@@ -182,7 +195,20 @@
         if (res.ok) {
           responseMsg.style.color = "green";
           responseMsg.innerText = data.message || "Bank details saved!";
-       
+
+          // If first-time creation, save new ID
+          if (data.data && data.data.id) {
+            document.getElementById("bankaccountid").value = data.data.id;
+          }
+
+          // Update local loadedBank so "no changes" works after save
+          loadedBank = {
+            accountHolderName: holderName,
+            accountNumber: accountNumber,
+            ifscCode: ifsc,
+            bankName: bankName,
+            branchCode: branchName
+          };
         } else {
           responseMsg.style.color = "red";
           responseMsg.innerText = data.message || "Failed to save!";
@@ -194,17 +220,18 @@
       }
     }
   </script>
-    <!-- Google Translate (Optional) -->
-<script type="text/javascript">
-  function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
-  }
-</script>
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <div class="footer">
-        <div class="footer-text"></div>
-      <img src="imgs/female1.jpg" alt="Silhouette" />
-      
-    </div>
+
+  <!-- Google Translate -->
+  <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+    }
+  </script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+  <div class="footer">
+    <div class="footer-text"></div>
+    <img src="imgs/female1.jpg" alt="Silhouette" />
+  </div>
 </body>
 </html>
