@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
   <script src="../js/config.js"></script>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
   <style>
     body, html { user-select: none; }
@@ -284,9 +285,23 @@
     <a href="userprofile.html"><div class="nav-item"><i class="fas fa-user"></i></div></a>
   </div>
 
+  <!-- Incoming Call Overlay -->
+  <div id="incomingOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:3000;">
+    <div style="background:#fff;padding:18px;border-radius:12px;min-width:280px;max-width:90%;text-align:center;">
+      <div style="font-weight:700;color:#b03b6a;margin-bottom:8px;">Incoming Call</div>
+      <div id="incomingFrom" style="font-size:14px;color:#444;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button id="ovlAccept" class="modal-btn">Accept</button>
+        <button id="ovlReject" class="modal-btn" style="background:#f44336;">Reject</button>
+      </div>
+    </div>
+  </div>
+
 <script>
     const API_TOKEN = localStorage.getItem("userToken");
     let allHosts = [];
+    let me = { id: null, name: null, profileId: null };
+    let socket;
 
     function showModal(type, title, message) {
       const modal = document.getElementById('messageModal');
@@ -312,6 +327,16 @@
           return;
         }
         showPageLoader();
+        // get my profile for socket register
+        const myRes = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE), {
+          method: 'GET', headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${API_TOKEN}` }
+        });
+        const myData = await myRes.json();
+        if (myRes.ok && myData?.data) {
+          me.id = myData.data.id; me.name = myData.data.name; me.profileId = myData.data.user_profile_id;
+          localStorage.setItem('userId', me.id);
+        }
+
         const res = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.USER_AUH.GET_HOST_ALL), {
           method: "GET",
           headers: {
@@ -329,6 +354,7 @@
         allHosts = data.data || [];
         renderHosts(allHosts);
         hidePageLoader();
+        initSocket();
         // showModal('success', 'Loaded', 'Hosts loaded successfully.');
       } catch (err) {
         console.error("Error loading hosts:", err);
@@ -336,6 +362,42 @@
         container.innerHTML = "<p>Could not load hosts.</p>";
         showModal('error', 'Load Failed', err.message || 'Please try again.');
       }
+    }
+
+    // Initiate a call: create a call log and navigate to room
+    async function startCall(host){
+      try {
+        const callerId = me.id || localStorage.getItem('userId');
+        const calleeId = host.id;
+        // Create/get dynamic room via API
+        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), {
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId })
+        });
+        const roomData = await roomResp.json();
+        const roomName = roomData?.data?.name || `room_${host.user_profile_id||host.id}`;
+        const resp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.CALL_CREATE), {
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId, roomName, startedAt: Date.now() })
+        });
+        try { const out = await resp.json(); if (out?.data?.id) { localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); } } catch(_){ }
+        // notify callee via socket
+        try { if (socket && me.profileId && host.user_profile_id) socket.emit('call-user', { from: me.profileId, to: host.user_profile_id }); } catch(_){}
+        window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(host.name||'Host')}`;
+      } catch(e){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}`; }
+    }
+
+    function initSocket(){
+      try {
+        const SOCKET_URL = API_CONFIG.getBaseUrl();
+        socket = io(SOCKET_URL, { path: '/socket.io' });
+        if (me.profileId) socket.emit('register', me.profileId, String(me.id||''));
+        socket.on('incoming-call', ({ from, fromUserId, suggestedRoom }) => {
+          const ovl = document.getElementById('incomingOverlay');
+          document.getElementById('incomingFrom').textContent = `From: ${from}`;
+          ovl.style.display='flex';
+          document.getElementById('ovlAccept').onclick = ()=> { ovl.style.display='none'; window.location.href = `../room.html?room=${encodeURIComponent(suggestedRoom||('room_'+from))}&name=${encodeURIComponent(me.name||'Me')}`; };
+          document.getElementById('ovlReject').onclick = ()=> { ovl.style.display='none'; try { socket.emit('reject-call', { from: from, to: me.profileId }); } catch(_){} };
+        });
+      } catch(_){ }
     }
 
     function renderHosts(hosts) {
@@ -352,13 +414,26 @@
           || (images.length > 0 && images[0] && images[0].url)
           || '../imgs/logo.jpg';
         const isPremium = Boolean(host.is_premium);
+        // container.innerHTML += `
+        //   <div class="host-card">
+        //     <img src="${displayUrl}" alt="${host.name}">
+        //     <div class="host-details">
+        //       <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
+        //       <p>${host.phone || ''}</p>
+        //       <div>
+        //         <button class="call-btn" onclick='startCall(${JSON.stringify({ id: '${host.id}'.replace(/'/g,"\'"), name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
+        //         <button class="call-btn" style="margin-left:8px;background:#8b5cf6" onclick="(function(){ var h={ id: ${host.id}, name: '${(host.name||'').replace(/'/g, "\'")}', user_profile_id: '${(host.user_profile_id||'').replace(/'/g, "\'")}' }; var room = 'room_'+(h.user_profile_id||h.id); window.location.href='../room-chat.html?room='+encodeURIComponent(room)+'&name='+encodeURIComponent(me.name||'Me')+'&peer='+encodeURIComponent(h.name||'Host'); })()">Chat</button>
+        //       </div>
+        //     </div>
+        //   </div>
+        // `;
+
         container.innerHTML += `
           <div class="host-card">
             <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
-              <h4>${host.name || ''} ${isPremium ? '<span class="premium-badge">👑 Premium</span>' : ''}</h4>
+              <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
               <p>${host.phone || ''}</p>
-              <button class="call-btn" onclick="showModal('success', 'Coming Soon', 'Call feature will be available soon.')">Call</button>
             </div>
           </div>
         `;
