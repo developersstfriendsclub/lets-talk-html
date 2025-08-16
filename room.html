@@ -203,6 +203,15 @@
     };
     document.getElementById('btnHangup').onclick = ()=>{
       try { pc.close(); } catch(e){}
+      // Persist end time and duration if available
+      try {
+        const callId = localStorage.getItem('activeCallId');
+        const started = Number(localStorage.getItem('activeCallStart')||Date.now());
+        const duration = Math.max(0, Math.floor((Date.now()-started)/1000));
+        if (callId) {
+          fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.CALL_UPDATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ id: Number(callId), status:'ended', endedAt: Date.now(), durationSeconds: duration }) });
+        }
+      } catch(_){}
       socket.emit('leave-room', { roomName, userName: displayName });
       window.history.back();
     }

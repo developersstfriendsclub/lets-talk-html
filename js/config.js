@@ -40,7 +40,9 @@ const API_CONFIG = {
       HOST_LIST_FOR_USER: '/host-list-for-user',
       HOST_LIST_FOR_ADMIN: '/host-list-for-admin',
       HOST_DETAILS_BY_ID_FOR_ADMIN: '/host-details-by-id-for-admin',
-      DELETE_HOST_THROUGH_ADMIN: '/delete-host-through-admin'
+      DELETE_HOST_THROUGH_ADMIN: '/delete-host-through-admin',
+      CALL_CREATE: '/call/create',
+      CALL_UPDATE: '/call/update'
     },
     
     IMAGES: {
