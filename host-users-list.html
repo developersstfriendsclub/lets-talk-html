@@ -17,13 +17,19 @@
     .info { flex:1; }
     .name { font-weight:700; color:#0f172a; }
     .meta { font-size:12px; color:#475569; }
+    .status { font-size:12px; color:#475569; margin-top:4px; }
+    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:#9ca3af; }
+    .dot.online { background:#22c55e; }
     .actions { display:flex; gap:8px; }
     .btn { background:#d6006d; color:#fff; border:none; padding:8px 12px; border-radius:18px; cursor:pointer; font-size:12px; }
   </style>
   <script>
     let allUsers = [];
+    let me = { id: null, profileId: null, name: null };
+    let online = new Set();
     function roomIdFor(userId) { return `room_${userId}`; }
-    function toCallPage(user) { window.location.href = `room.html?room=${encodeURIComponent(roomIdFor(user.id))}&name=${encodeURIComponent(user.name||'User')}`; }
+    function toCallPage(user) { window.location.href = `room-video.html?room=${encodeURIComponent(roomIdFor(user.id))}&name=${encodeURIComponent((me.name||'Me'))}&peer=${encodeURIComponent(user.name||'User')}`; }
+    function toChatPage(user) { window.location.href = `room-chat.html?room=${encodeURIComponent(roomIdFor(user.id))}&name=${encodeURIComponent((me.name||'Me'))}&peer=${encodeURIComponent(user.name||'User')}`; }
     function render(list) {
       const root = document.getElementById('list');
       root.innerHTML = '';
@@ -32,15 +38,17 @@
         const img = (u.Images && u.Images.length>0 && u.Images[0].url) ? u.Images[0].url : 'imgs/logo11.png';
         const el = document.createElement('div');
         el.className = 'card';
+        const onlineDot = online.has(String(u.user_profile_id||'')) ? 'online' : '';
         el.innerHTML = `
           <img src="${img}" alt="${u.name||'User'}"/>
           <div class="info">
             <div class="name">${u.name||'User'}</div>
             <div class="meta">${u.email||''}</div>
+            <div class="status"><span class="dot ${onlineDot}"></span>${onlineDot?'Online':'Offline'}</div>
           </div>
           <div class="actions">
             <button class="btn" onclick='toCallPage(${JSON.stringify(u)})'>Call</button>
-            <button class="btn" onclick='toCallPage(${JSON.stringify(u)})'>Chat</button>
+            <button class="btn" onclick='toChatPage(${JSON.stringify(u)})'>Chat</button>
           </div>`;
         root.appendChild(el);
       });
@@ -48,10 +56,17 @@
     async function loadUsers() {
       const token = localStorage.getItem('authToken') || localStorage.getItem('userToken');
       if (!token) { window.location.href='User/userlogin.html'; return; }
+      try {
+        const myRes = await fetch(API_CONFIG.getAuthUrl('/show-profile'), { headers: { 'Authorization': `Bearer ${token}` } });
+        const myData = await myRes.json();
+        if (myRes.ok && myData?.data) { me.id = myData.data.id; me.profileId = myData.data.user_profile_id; me.name = myData.data.name; }
+      } catch(_){ }
       const res = await fetch(API_CONFIG.getAuthUrl('/user-list-for-host'), { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       allUsers = data?.data || [];
       render(allUsers);
+      // Initialize presence via socket if available
+      try { const socket = io(API_CONFIG.getBaseUrl(), { path:'/socket.io' }); if (me.profileId) socket.emit('register', me.profileId, String(me.id||'')); socket.on('user-list', (l)=>{ online = new Set((l||[]).map(String)); render(allUsers); }); } catch(_){ }
     }
     function onSearch(v){ const q=(v||'').toLowerCase(); if(!q) return render(allUsers); render(allUsers.filter(u=> (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q))); }
     document.addEventListener('DOMContentLoaded', loadUsers);

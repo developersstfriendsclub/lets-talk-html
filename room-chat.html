@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="js/config.js"></script>
+  <link rel="stylesheet" href="css/room.css"/>
+</head>
+<body>
+  <div class="chat-wrap">
+    <div class="chat-container">
+      <div id="roomTitle" class="header"><div class="avatar" id="avatar">U</div><div><div id="peerName">Chat</div><div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#94a3b8;"><div class="statusDot" id="statusDot"></div><span id="presenceText">Online</span></div></div></div>
+      <div id="chatList" class="chatbox"></div>
+    </div>
+    <div id="typingBar" class="typing"></div>
+    <div class="inputbar" style="padding:12px;">
+      <input id="msg" placeholder="Type a message"/>
+      <button id="sendBtn">Send</button>
+    </div>
+    <div id="log" style="display:none"></div>
+  </div>
+  <script src="js/room.js"></script>
+  <script>/* ensure mode */ if (!location.search.includes('mode=')) { const u=new URL(location.href); u.searchParams.set('mode','chat'); location.replace(u.toString()); }</script>
+</body>
+</html>
+
+

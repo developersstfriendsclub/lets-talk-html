@@ -8,8 +8,8 @@ const API_CONFIG = {
   },
   
   // Current environment (can be set via environment variable or manually)
-  // CURRENT_ENV: 'production', // Change this to 'local' for development
-  CURRENT_ENV: 'local', // Change this to 'local' for development
+  CURRENT_ENV: 'production', // Change this to 'local' for development
+  // CURRENT_ENV: 'local', // Change this to 'local' for development
   
   // Get current base URL
   getBaseUrl: function() {
@@ -42,7 +42,10 @@ const API_CONFIG = {
       HOST_DETAILS_BY_ID_FOR_ADMIN: '/host-details-by-id-for-admin',
       DELETE_HOST_THROUGH_ADMIN: '/delete-host-through-admin',
       CALL_CREATE: '/call/create',
-      CALL_UPDATE: '/call/update'
+      CALL_UPDATE: '/call/update',
+      CHAT_LIST: '/chat/list',
+      CHAT_CREATE: '/chat/create',
+      ROOM_CREATE: '/room/create'
     },
     
     IMAGES: {

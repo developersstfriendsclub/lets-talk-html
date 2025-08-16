@@ -31,13 +31,13 @@
 <body>
   <div class="wrap">
     <h3 id="roomTitle">Room</h3>
-    <div class="row">
+    <div class="row" id="videoStage">
       <div class="stage">
         <video id="remoteVideo" autoplay playsinline></video>
         <video id="localVideo" autoplay playsinline muted></video>
       </div>
     </div>
-    <div class="toolbar">
+    <div class="toolbar" id="videoToolbar">
       <button class="btn green" id="btnAccept" style="display:none;">Accept</button>
       <button class="btn red" id="btnReject" style="display:none;">Reject</button>
       <button class="btn" id="btnMute">Mute</button>
@@ -64,6 +64,7 @@
     const params = new URLSearchParams(window.location.search);
     const roomName = params.get('room');
     const displayName = params.get('name') || 'Guest';
+    const mode = (params.get('mode') || 'both').toLowerCase();
     document.getElementById('roomTitle').textContent = `Room: ${roomName}`;
 
     const SOCKET_URL = (window.API_CONFIG && typeof API_CONFIG.getBaseUrl==='function') ? API_CONFIG.getBaseUrl() : window.location.origin;
@@ -77,22 +78,33 @@
 
     async function init(){
       socket.emit('join-room', { roomName, userName: displayName });
-      localStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 } }, audio: true });
-      document.getElementById('localVideo').srcObject = localStream;
-      pc = new RTCPeerConnection({ iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ] });
-      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+      const isVideoMode = mode !== 'chat';
+      if (isVideoMode) {
+        const chatBox = document.querySelector('.chat'); if (chatBox) chatBox.style.display = 'none';
+        const logBox = document.getElementById('log'); if (logBox) logBox.style.display = 'none';
+      }
+      if (!isVideoMode) {
+        // Hide video UI for chat-only
+        document.getElementById('videoStage').style.display = 'none';
+        document.getElementById('videoToolbar').style.display = 'none';
+      } else {
+        localStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 } }, audio: true });
+        document.getElementById('localVideo').srcObject = localStream;
+        pc = new RTCPeerConnection({ iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ] });
+        localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+      }
       const remoteEl = document.getElementById('remoteVideo');
       remoteEl.muted = true;
-      pc.ontrack = (e) => { remoteEl.srcObject = e.streams[0]; try { remoteEl.play(); } catch(_){} };
-      pc.onconnectionstatechange = () => {
+      if (pc) { pc.ontrack = (e) => { remoteEl.srcObject = e.streams[0]; try { remoteEl.play(); } catch(_){} }; }
+      pc && (pc.onconnectionstatechange = () => {
         if (pc.connectionState === 'connected') {
           setTimeout(()=>{ try { remoteEl.muted = false; } catch(_){} }, 300);
         }
-      };
-      pc.onnegotiationneeded = async () => {
+      });
+      pc && (pc.onnegotiationneeded = async () => {
         try {
           if (!pc.currentLocalDescription) {
             const offer = await pc.createOffer();
@@ -100,14 +112,13 @@
             socket.emit('room-offer', { roomName, offer });
           }
         } catch(e) { console.warn('negotiationneeded failed', e); }
-      };
-      pc.onicecandidate = (e) => { if (e.candidate) socket.emit('room-ice-candidate', { roomName, candidate: e.candidate }); };
+      });
+      if (pc) { pc.onicecandidate = (e) => { if (e.candidate) socket.emit('room-ice-candidate', { roomName, candidate: e.candidate }); }; }
 
-      // If others are present, create offer
-      // Trigger offer when either we join a populated room or server notifies ready
+      // If others are present, create offer (video-mode only)
       socket.on('room-participants', async ({ roomName: rn, participants }) => {
         if (rn !== roomName) return;
-        // Deterministic offerer: smallest socket id in room
+        if (!pc) return;
         try {
           const smallest = participants.slice().sort()[0];
           const weAreOfferer = smallest === socket.id;
@@ -119,6 +130,7 @@
         } catch(e) { console.warn('participants negotiation error', e); }
       });
       socket.on('room-ready', async () => {
+        if (!pc) return;
         if (!pc.currentLocalDescription){
           const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
           await pc.setLocalDescription(offer);
@@ -126,6 +138,7 @@
         }
       });
       socket.on('room-offer', async ({ from, offer }) => {
+        if (!isVideoMode) return; // chat-only
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(offer));
           const answer = await pc.createAnswer();
@@ -138,6 +151,7 @@
         }
       });
       socket.on('room-answer', async ({ from, answer }) => {
+        if (!isVideoMode) return; // chat-only
         try {
           if (!pc.currentRemoteDescription) {
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
@@ -146,6 +160,7 @@
         } catch(e) { console.warn('apply answer failed', e); }
       });
       socket.on('room-ice-candidate', async ({ from, candidate }) => {
+        if (!isVideoMode) return; // chat-only
         try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e) { console.warn('ICE add error', e); }
       });
 

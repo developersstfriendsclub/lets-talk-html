@@ -369,14 +369,19 @@
       try {
         const callerId = me.id || localStorage.getItem('userId');
         const calleeId = host.id;
-        const roomName = `room_${host.user_profile_id||host.id}`;
+        // Create/get dynamic room via API
+        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), {
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId })
+        });
+        const roomData = await roomResp.json();
+        const roomName = roomData?.data?.name || `room_${host.user_profile_id||host.id}`;
         const resp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.CALL_CREATE), {
           method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId, roomName, startedAt: Date.now() })
         });
         try { const out = await resp.json(); if (out?.data?.id) { localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); } } catch(_){ }
         // notify callee via socket
         try { if (socket && me.profileId && host.user_profile_id) socket.emit('call-user', { from: me.profileId, to: host.user_profile_id }); } catch(_){}
-        window.location.href = `../room.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(host.name||'Host')}`;
+        window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(host.name||'Host')}`;
       } catch(e){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}`; }
     }
 
@@ -409,16 +414,26 @@
           || (images.length > 0 && images[0] && images[0].url)
           || '../imgs/logo.jpg';
         const isPremium = Boolean(host.is_premium);
+        // container.innerHTML += `
+        //   <div class="host-card">
+        //     <img src="${displayUrl}" alt="${host.name}">
+        //     <div class="host-details">
+        //       <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
+        //       <p>${host.phone || ''}</p>
+        //       <div>
+        //         <button class="call-btn" onclick='startCall(${JSON.stringify({ id: '${host.id}'.replace(/'/g,"\'"), name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
+        //         <button class="call-btn" style="margin-left:8px;background:#8b5cf6" onclick="(function(){ var h={ id: ${host.id}, name: '${(host.name||'').replace(/'/g, "\'")}', user_profile_id: '${(host.user_profile_id||'').replace(/'/g, "\'")}' }; var room = 'room_'+(h.user_profile_id||h.id); window.location.href='../room-chat.html?room='+encodeURIComponent(room)+'&name='+encodeURIComponent(me.name||'Me')+'&peer='+encodeURIComponent(h.name||'Host'); })()">Chat</button>
+        //       </div>
+        //     </div>
+        //   </div>
+        // `;
+
         container.innerHTML += `
           <div class="host-card">
             <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
               <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
               <p>${host.phone || ''}</p>
-              <div>
-                <button class="call-btn" onclick='startCall(${JSON.stringify({ id: '${host.id}'.replace(/'/g,"\'"), name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
-                <button class="call-btn" style="margin-left:8px;background:#8b5cf6" onclick='startCall(${JSON.stringify({ id: '${host.id}'.replace(/'/g,"\'"), name: host.name, user_profile_id: host.user_profile_id })})'>Chat</button>
-              </div>
             </div>
           </div>
         `;
