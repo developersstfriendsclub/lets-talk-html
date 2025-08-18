@@ -209,9 +209,9 @@
     <div class="divider">or continue with</div>
     <div id="googleSignInBtn"></div>
 
-    <div class="signup">
-      Don't have an account? <a href="#">Sign Up</a>
-    </div>
+    <!--<div class="signup">-->
+    <!--  Don't have an account? <a href="#">Sign Up</a>-->
+    <!--</div>-->
   </div>
 
   <footer>
@@ -342,6 +342,26 @@
   //     }
   //   }
   // };
+ 
+  document.addEventListener('keyup', function (e) {
+    if (e.key === 'PrintScreen') {
+      navigator.clipboard.writeText('');
+      alert('Screenshot disabled on this page.');
+    }
+  });
+
+  document.addEventListener('keydown', function(e) {
+    if (
+      (e.ctrlKey && e.key === 'u') ||
+      (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+      (e.ctrlKey && e.key === 's') ||
+      (e.key === 'F12')
+    ) {
+      e.preventDefault();
+      alert('This action is disabled.');
+    }
+  });
+
 </script>
 
 </body>
