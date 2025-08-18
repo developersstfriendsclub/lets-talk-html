@@ -267,13 +267,7 @@
   </div>
 
   <div class="section-title">Popular Hosts</div>
-  <div class="popular-users">
-    <img src="https://randomuser.me/api/portraits/men/1.jpg" alt="User1">
-    <img src="https://randomuser.me/api/portraits/women/2.jpg" alt="User2">
-    <img src="https://randomuser.me/api/portraits/men/3.jpg" alt="User3">
-    <img src="https://randomuser.me/api/portraits/women/4.jpg" alt="User4">
-    <img src="https://randomuser.me/api/portraits/men/5.jpg" alt="User5">
-  </div>
+  <div id="popular-container" class="popular-users"></div>
 
  <div id="host-container">Loading hosts...</div>
  
@@ -353,6 +347,13 @@
 
         allHosts = data.data || [];
         renderHosts(allHosts);
+
+        // load popular for top strip
+        try {
+          const popResp = await fetch(API_CONFIG.getAuthUrl('/host-list-popular'), { method:'GET', headers:{ 'Authorization': `Bearer ${API_TOKEN}` } });
+          const popData = await popResp.json();
+          if (popResp.ok && Array.isArray(popData?.data)) renderPopular(popData.data);
+        } catch(_){ renderPopular(allHosts.filter(h=>h.is_popular)); }
         hidePageLoader();
         initSocket();
         // showModal('success', 'Loaded', 'Hosts loaded successfully.');
@@ -456,10 +457,27 @@
               <div>
                 <button class="call-btn" onclick='startCall(${JSON.stringify({ id: host.id, name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
                 <button class="call-btn" style="margin-left:8px;background:#8b5cf6" onclick='startChat(${JSON.stringify({ id: host.id, name: host.name, user_profile_id: host.user_profile_id })})'>Chat</button>
+                <a class="call-btn" style="margin-left:8px;background:#0ea5e9; text-decoration:none; display:inline-block;" href="host-details.html?user_id=${encodeURIComponent(host.id)}">View</a>
               </div>
             </div>
           </div>
         `;
+      });
+    }
+
+    function renderPopular(hosts){
+      const root = document.getElementById('popular-container');
+      root.innerHTML = '';
+      if (!hosts || hosts.length===0) return;
+      hosts.forEach(h => {
+        const images = Array.isArray(h.Images) ? h.Images : [];
+        const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+        const displayUrl = (profileImg && profileImg.url)
+          || (images.length > 0 && images[0] && images[0].url)
+          || '../imgs/logo.jpg';
+        const img = document.createElement('img');
+        img.src = displayUrl; img.alt = h.name || 'Host';
+        root.appendChild(img);
       });
     }
 

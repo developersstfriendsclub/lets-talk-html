@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Host Details</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
+  <script src="../js/config.js"></script>
+  <style>
+    body { margin:0; font-family:'Roboto', sans-serif; background:#f8fafc; color:#0f172a; }
+    header { padding:14px 16px; border-bottom:1px solid #e5e7eb; font-weight:800; color:#b03b6a; background:#ffffff; position:sticky; top:0; z-index:10; }
+    .container { max-width:980px; margin:0 auto; padding:16px; }
+
+    .profile-card { position:relative; border-radius:16px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.08); background:linear-gradient(135deg,#fde1ec,#f8c6d8); }
+    .profile-cover { height:110px; background:linear-gradient(135deg,#ec4899,#b03b6a); opacity:0.85; }
+    .profile-content { display:flex; gap:16px; align-items:center; padding:12px 16px 18px; background:#ffffff; }
+    .avatar { width:96px; height:96px; border-radius:12px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,0.18); margin-top:-48px; border:3px solid #fff; }
+    .name { font-size:22px; font-weight:900; color:#0f172a; }
+    .badge { display:inline-block; margin-left:8px; background:#ffd700; color:#7a5b00; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:800; vertical-align:middle; }
+    .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+    .chip { font-size:12px; color:#334155; background:#f1f5f9; padding:6px 10px; border-radius:999px; }
+    .actions { margin-top:10px; display:flex; gap:10px; flex-wrap:wrap; }
+    .btn { background:#b03b6a; color:#fff; border:none; padding:10px 16px; border-radius:24px; cursor:pointer; font-size:14px; text-decoration:none; display:inline-block; box-shadow:0 4px 10px rgba(176,59,106,0.25); }
+    .btn.secondary { background:#0ea5e9; box-shadow:0 4px 10px rgba(14,165,233,0.25); }
+    .metrics { display:flex; gap:18px; margin-top:10px; color:#475569; font-size:13px; }
+    .metric b { color:#0f172a; }
+
+    .section-card { background:#ffffff; border-radius:14px; padding:14px; box-shadow:0 6px 18px rgba(0,0,0,0.06); margin-top:16px; }
+    .section-title { margin:0 0 10px; color:#b03b6a; font-size:16px; font-weight:800; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:12px; }
+    .grid img { width:100%; height:150px; object-fit:cover; border-radius:10px; cursor:pointer; transition:transform .2s ease; }
+    .grid img:hover { transform:scale(1.03); }
+    .grid video { width:100%; height:200px; border-radius:10px; background:#000; }
+
+    .lightbox { position:fixed; inset:0; background:rgba(0,0,0,.8); display:none; align-items:center; justify-content:center; z-index:1000; }
+    .lightbox.show { display:flex; }
+    .lightbox img { max-width:92%; max-height:92%; border-radius:12px; box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+
+    .page-loader { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:none; align-items:center; justify-content:center; z-index:1200; }
+    .page-loader.show { display:flex; }
+    .spinner { width:48px; height:48px; border:5px solid #f3f3f3; border-top:5px solid #b03b6a; border-radius:50%; animation:spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+
+    @media (max-width: 520px) {
+      .profile-content { flex-direction:column; align-items:flex-start; }
+      .avatar { margin-top:-56px; }
+      .actions { width:100%; }
+      .btn { flex:1; text-align:center; }
+    }
+  </style>
+  <script>
+    const API_TOKEN = localStorage.getItem('userToken');
+    let me = { id: null, name: null, profileId: null };
+    let host = null;
+
+    function showPageLoader() { document.getElementById('pageLoader').classList.add('show'); }
+    function hidePageLoader() { document.getElementById('pageLoader').classList.remove('show'); }
+
+    function getQueryParam(name){ const url = new URL(window.location.href); return url.searchParams.get(name); }
+    function getHostIdFromQuery(){
+      const url = new URL(window.location.href);
+      return url.searchParams.get('user_id')
+    }
+
+    async function loadMe(){
+      try {
+        const myRes = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE), { headers: { 'Authorization': `Bearer ${API_TOKEN}` }});
+        const myData = await myRes.json();
+        if (myRes.ok && myData?.data) { me.id = myData.data.id; me.name = myData.data.name; me.profileId = myData.data.user_profile_id; }
+      } catch(_){}
+    }
+
+    async function loadDetails(){
+      const userId = getHostIdFromQuery();
+      if (!userId) { document.getElementById('root').innerHTML = '<p>Missing user_id</p>'; return; }
+      showPageLoader();
+      await loadMe();
+      try{
+        const url = API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.HOST_DETAILS_BY_ID_FOR_USER)+`?user_id=${encodeURIComponent(userId)}`;
+        const res = await fetch(url);
+
+        const out = await res.json();
+
+        console.log(out)
+        if (!res.ok || !out?.data) throw new Error(out.message||('HTTP '+res.status));
+        host = out.data;
+        render();
+      }catch(e){ document.getElementById('root').innerHTML = `<p style="color:#ef4444">Failed to load: ${e.message||'error'}</p>`; }
+      finally{ hidePageLoader(); }
+    }
+
+    function render(){
+      const root = document.getElementById('root');
+      const images = Array.isArray(host?.Images)?host.Images:[];
+      const videos = Array.isArray(host?.Videos)?host.Videos:[];
+      const profileImg = images.find(img => (img && img.image_type)==='profile_photo');
+      const avatar = (profileImg && profileImg.url) || (images[0] && images[0].url) || '../imgs/logo.jpg';
+      const premium = !!host.is_premium;
+      window.currentHost = { id: host.id, name: host.name, user_profile_id: host.user_profile_id };
+      root.innerHTML = `
+        <div class="profile-card">
+          <div class="profile-cover"></div>
+          <div class="profile-content">
+            <img class="avatar" src="${avatar}" alt="${host.name||'Host'}"/>
+            <div>
+              <div class="name">${host.name||'Host'} ${premium?'<span class="badge">👑 Premium</span>':''}</div>
+              <div class="chips">
+                <span class="chip">Host ID: ${host.user_profile_id||host.id}</span>
+                <span class="chip">Phone: ${host.phone||''}</span>
+              </div>
+              <div class="actions">
+                <a class="btn" href="#" onclick="startCall(window.currentHost); return false;">Call</a>
+                <a class="btn secondary" href="#" onclick="startChat(window.currentHost); return false;">Chat</a>
+              </div>
+              <div class="metrics">
+                <div class="metric"><b>${images.length}</b>&nbsp;Images</div>
+                <div class="metric"><b>${videos.length}</b>&nbsp;Videos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">Images</div>
+          <div class="grid" id="imgGrid"></div>
+        </div>
+        <div class="section-card">
+          <div class="section-title">Videos</div>
+          <div class="grid" id="vidGrid"></div>
+        </div>
+      `
+      .replaceAll('__ID__', String(host.id))
+      .replaceAll('__NAME__', String(host.name||''))
+      .replaceAll('__PID__', String(host.user_profile_id||''));
+
+      const imgGrid = document.getElementById('imgGrid');
+      images.forEach(im => { const el = document.createElement('img'); el.src = im.url; el.alt = im.title||''; el.onclick = function(){ openLightbox(im.url); }; imgGrid.appendChild(el); });
+      const vidGrid = document.getElementById('vidGrid');
+      videos.forEach(v => { const el = document.createElement('video'); el.controls=true; el.src = v.url; vidGrid.appendChild(el); });
+    }
+
+    function openLightbox(url){
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImg');
+      img.src = url; lb.classList.add('show');
+    }
+    function closeLightbox(){
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lightboxImg');
+      img.src = ''; lb.classList.remove('show');
+    }
+
+    async function startCall(hostMin){
+      try {
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(hostMin.id);
+        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId }) });
+        const roomData = await roomResp.json();
+        const roomName = roomData?.data?.name || `room_${hostMin.user_profile_id||hostMin.id}`;
+        window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(hostMin.name||'Host')}`;
+      } catch(_){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(hostMin.user_profile_id||hostMin.id))}&name=${encodeURIComponent(hostMin.name||'Host')}`; }
+    }
+
+    async function startChat(hostMin){
+      try {
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(hostMin.id);
+        let roomName = '';
+        try { const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId }) }); const roomData = await roomResp.json(); roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : ''; } catch(_){}
+        if (!roomName) roomName = `room_${hostMin.user_profile_id||hostMin.id}`;
+        window.location.href = `../room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(hostMin.name||'Host')}&mode=chat`;
+      } catch(_){}
+    }
+
+    document.addEventListener('DOMContentLoaded', loadDetails);
+  </script>
+</head>
+<body>
+  <div id="pageLoader" class="page-loader"><div class="spinner"></div></div>
+  <header>Host Details</header>
+  <div class="container" id="root">Loading...</div>
+  <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" alt="preview" />
+  </div>
+</body>
+</html>
+
+

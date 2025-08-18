@@ -38,6 +38,7 @@ const API_CONFIG = {
       USER_LOGIN: '/user-login',
       USER_DETAILS: '/user-details',
       HOST_LIST_FOR_USER: '/host-list-for-user',
+      HOST_DETAILS_BY_ID_FOR_USER: '/host-details-by-id-for-user',
       HOST_LIST_FOR_ADMIN: '/host-list-for-admin',
       HOST_DETAILS_BY_ID_FOR_ADMIN: '/host-details-by-id-for-admin',
       DELETE_HOST_THROUGH_ADMIN: '/delete-host-through-admin',
