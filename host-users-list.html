@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Users (Host View)</title>
   <script src="js/config.js"></script>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <style>
     body { margin:0; font-family: 'Segoe UI', sans-serif; background:linear-gradient(to bottom, #f8c6d8, #fddae3); }
     .container { max-width:440px; margin:0 auto; padding:16px; }
@@ -27,9 +28,56 @@
     let allUsers = [];
     let me = { id: null, profileId: null, name: null };
     let online = new Set();
-    function roomIdFor(userId) { return `room_${userId}`; }
-    function toCallPage(user) { window.location.href = `room-video.html?room=${encodeURIComponent(roomIdFor(user.id))}&name=${encodeURIComponent((me.name||'Me'))}&peer=${encodeURIComponent(user.name||'User')}`; }
-    function toChatPage(user) { window.location.href = `room-chat.html?room=${encodeURIComponent(roomIdFor(user.id))}&name=${encodeURIComponent((me.name||'Me'))}&peer=${encodeURIComponent(user.name||'User')}`; }
+    let socket;
+
+    async function startCall(user){
+      try {
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(user.id);
+        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId }) });
+        const roomData = await roomResp.json();
+        const roomName = roomData?.data?.name || `room_${Math.min(callerId,calleeId)}_${Math.max(callerId,calleeId)}`;
+        window.location.href = `room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}`;
+      } catch(_){
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(user.id);
+        const a = Math.min(callerId, calleeId), b = Math.max(callerId, calleeId);
+        const fallback = (Number.isFinite(a)&&Number.isFinite(b))?`room_${a}_${b}`:`room_${user.user_profile_id||user.id}`;
+        window.location.href = `room-video.html?room=${encodeURIComponent(fallback)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}`;
+      }
+    }
+
+    async function startChat(user){
+      try {
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(user.id);
+        let roomName = '';
+        try {
+          const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
+            method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId })
+          });
+          const roomData = await roomResp.json();
+          roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : '';
+        } catch(_) {}
+        if (!roomName) {
+          const a = Math.min(callerId, calleeId), b = Math.max(callerId, calleeId);
+          roomName = (Number.isFinite(a) && Number.isFinite(b)) ? `room_${a}_${b}` : `room_${user.user_profile_id||user.id}`;
+        }
+        try {
+          if (socket && me.profileId && user.user_profile_id) {
+            socket.emit('chat-invite', { from: String(me.profileId), fromName: me.name, to: String(user.user_profile_id), roomName });
+          }
+        } catch(_){}
+        window.location.href = `room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}&mode=chat`;
+      } catch(_){
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(user.id);
+        const a = Math.min(callerId, calleeId), b = Math.max(callerId, calleeId);
+        const fallback = (Number.isFinite(a)&&Number.isFinite(b))?`room_${a}_${b}`:`room_${user.user_profile_id||user.id}`;
+        window.location.href = `room-chat.html?room=${encodeURIComponent(fallback)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}&mode=chat`;
+      }
+    }
+
     function render(list) {
       const root = document.getElementById('list');
       root.innerHTML = '';
@@ -47,12 +95,13 @@
             <div class="status"><span class="dot ${onlineDot}"></span>${onlineDot?'Online':'Offline'}</div>
           </div>
           <div class="actions">
-            <button class="btn" onclick='toCallPage(${JSON.stringify(u)})'>Call</button>
-            <button class="btn" onclick='toChatPage(${JSON.stringify(u)})'>Chat</button>
+            <button class="btn" onclick='startCall(${JSON.stringify(u)})'>Call</button>
+            <button class="btn" onclick='startChat(${JSON.stringify(u)})'>Chat</button>
           </div>`;
         root.appendChild(el);
       });
     }
+
     async function loadUsers() {
       const token = localStorage.getItem('authToken') || localStorage.getItem('userToken');
       if (!token) { window.location.href='User/userlogin.html'; return; }
@@ -66,8 +115,28 @@
       allUsers = data?.data || [];
       render(allUsers);
       // Initialize presence via socket if available
-      try { const socket = io(API_CONFIG.getBaseUrl(), { path:'/socket.io' }); if (me.profileId) socket.emit('register', me.profileId, String(me.id||'')); socket.on('user-list', (l)=>{ online = new Set((l||[]).map(String)); render(allUsers); }); } catch(_){ }
+      try {
+        socket = io(API_CONFIG.getBaseUrl(), { path:'/socket.io' });
+        if (me.profileId) {
+          socket.emit('register', me.profileId, String(me.id||''));
+        }
+        // Online presence list
+        socket.on('user-list', (names) => {
+          try {
+            online = new Set((names||[]).map(x => String(x)));
+            render(allUsers);
+          } catch(_){}
+        });
+        // Incoming chat invites
+        socket.on('incoming-chat', ({ from, fromName, roomName }) => {
+          const accept = confirm(`${fromName || from} invited you to chat. Join?`);
+          if (accept) {
+            window.location.href = `room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(fromName||'User')}&mode=chat`;
+          }
+        });
+      } catch(_){ }
     }
+    
     function onSearch(v){ const q=(v||'').toLowerCase(); if(!q) return render(allUsers); render(allUsers.filter(u=> (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q))); }
     document.addEventListener('DOMContentLoaded', loadUsers);
   </script>
