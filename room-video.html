@@ -7,9 +7,47 @@
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <script src="js/config.js"></script>
   <link rel="stylesheet" href="css/room.css"/>
+  <style>
+    #lobby {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #0b1220;
+      color: #fff;
+      text-align: center;
+    }
+    #joinBtn {
+      background: #28a745;
+      border: none;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    #joinBtn:hover {
+      background: #218838;
+    }
+    #videoArea {
+      display: none; /* hidden by default */
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
+  <audio id="ringingSound" src="./assets/audio/ring.mp3" loop preload="auto"></audio>
+
+  <!-- Lobby -->
+  <div id="lobby">
+    <h2>Welcome to the Video Call</h2>
+    <p>Click below to join the room</p>
+    <button id="joinBtn">Join</button>
+  </div>
+
+  <!-- Video call -->
+  <div class="wrap" id="videoArea">
     <div class="stage">
       <video id="remoteVideo" autoplay playsinline></video>
       <video id="localVideo" autoplay playsinline muted></video>
@@ -19,11 +57,24 @@
       <button class="btn" id="btnVideo">Video Off</button>
       <button class="btn red" id="btnHangup">Hang Up</button>
     </div>
-    <div id="log" style="background:#0b1220;border:1px solid #1f2a44;border-radius:12px;padding:10px;height:140px;overflow:auto;"></div>
   </div>
+
   <script src="js/room.js"></script>
-  <script>/* ensure mode */ if (!location.search.includes('mode=')) { const u=new URL(location.href); u.searchParams.set('mode','video'); location.replace(u.toString()); }</script>
+  <script>
+    if (!location.search.includes('mode=')) {
+      const u = new URL(location.href);
+      u.searchParams.set('mode','video');
+      location.replace(u.toString());
+    }
+
+    // Join button click
+    document.getElementById('joinBtn').addEventListener('click', () => {
+      document.getElementById('lobby').style.display = 'none';
+      document.getElementById('videoArea').style.display = 'block';
+      if (typeof window.startRoom === 'function') {
+        window.startRoom(); // call init from room.js
+      }
+    });
+  </script>
 </body>
 </html>
-
-

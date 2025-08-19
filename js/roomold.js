@@ -25,13 +25,6 @@
     if ($('peerName')) $('peerName').textContent = peerName || 'Chat';
     if ($('avatar')) $('avatar').textContent = (peerName||'U').trim().charAt(0).toUpperCase();
     socket.emit('join-room', { roomName, userName: displayName });
-    
-    const ringtone = $('ringingSound');
-    if(ringtone){
-        ringtone.play().catch(err =>{
-            console.log(`Ringing autoplay is blocked by the user`, err);
-        })
-    }
 
     // Load history for chat page
     if ($('chatList')) {
@@ -87,12 +80,6 @@
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'connected' && remoteEl){ setTimeout(()=>{ try { remoteEl.muted = false; } catch(_){} }, 300); }
     };
-    
-    const ringtone = $('ringingSound');
-    if (ringtone && pc.connectionState === 'connected') {
-      ringtone.pause();
-      ringtone.currentTime = 0;
-    }
 
     socket.on('room-participants', async ({ roomName: rn, participants }) => {
       if (rn !== roomName) return; if (!pc) return;
@@ -123,7 +110,7 @@
         socket.emit('room-answer', { roomName, answer });
       } catch(e) { pendingOffer = offer; showOverlay(true, `From: ${from||'Peer'}`); }
     });
-    socket.on('room-answer', async ({ from, answer }) => { 
+    socket.on('room-answer', async ({ from, answer }) => {
       if (!pc) return;
       try { if (!pc.currentRemoteDescription) { await pc.setRemoteDescription(new RTCSessionDescription(answer)); } } catch(e) { console.warn('apply answer failed', e); }
     });
@@ -132,13 +119,7 @@
     // Toolbar controls (if present)
     if ($('btnMute')) $('btnMute').onclick = ()=>{ localStream.getAudioTracks().forEach(t=> t.enabled = !t.enabled); $('btnMute').textContent = localStream.getAudioTracks()[0]?.enabled ? 'Mute' : 'Unmute'; };
     if ($('btnVideo')) $('btnVideo').onclick = ()=>{ localStream.getVideoTracks().forEach(t=> t.enabled = !t.enabled); $('btnVideo').textContent = localStream.getVideoTracks()[0]?.enabled ? 'Video Off' : 'Video On'; };
-    if ($('btnHangup')) $('btnHangup').onclick = ()=>{ 
-      const ringtone = $('ringingSound');
-      if (ringtone) {
-        ringtone.pause();
-        ringtone.currentTime = 0;
-      }
-      try { pc && pc.close(); } catch(_){}; socket.emit('leave-room', { roomName, userName: displayName }); window.history.back(); };
+    if ($('btnHangup')) $('btnHangup').onclick = ()=>{ try { pc && pc.close(); } catch(_){}; socket.emit('leave-room', { roomName, userName: displayName }); window.history.back(); };
   }
 
   function showOverlay(show, text){ const ovl=$('incomingOverlay'); if (!ovl) return; if (show){ ovl.classList.add('show'); $('incomingFrom').textContent = text||''; } else { ovl.classList.remove('show'); } }
@@ -168,9 +149,7 @@
   }
 
   window.addEventListener('beforeunload', ()=> socket.emit('leave-room', { roomName, userName: displayName }));
-//   init();
-// expose init so HTML button can call it later
-window.startRoom = init;
+  init();
 })();
 
 
