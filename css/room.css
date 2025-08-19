@@ -5,9 +5,25 @@ body { margin:0; font-family: Inter, system-ui, sans-serif; background:#0e0f12; 
 
 /* Video layout */
 .wrap { max-width: 1000px; margin: 0 auto; padding: 8px; }
-.stage {   position: relative; max-width: 100%; aspect-ratio: 16 / 9; /* background: #9d1a1a; */ border-radius: 16px; overflow: hidden; height: 600px; }
+ .stage {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 20px !important;
+    height: 600px !important;
+  }
+
+  #remoteVideo,
+  #localVideo {
+    position: static !important; /* override absolute */
+    width: 48% !important;       /* equal width */
+    height: 100% !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.5) !important;
+  }
 video { width: 100%; height: 100%; object-fit: cover; display:block; background: #bb8b8b; }
-#localVideo { position:absolute; width: 100%; height: 100%; right:1px; bottom:16px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.5); }
+/* #localVideo { position:absolute; width: 100%; height: 100%; right:1px; bottom:16px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.5); } */
 #localVideo {
   transform: rotate(0deg); /* try 90deg, 180deg, 270deg if rotated */
 }

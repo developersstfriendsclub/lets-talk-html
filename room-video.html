@@ -31,9 +31,32 @@
     #joinBtn:hover {
       background: #218838;
     }
-    #videoArea {
+      #videoArea {
       display: none; /* hidden by default */
+      height: 100vh;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
     }
+    /* .stage {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px; /* space between videos 
+      width: 100%;
+      height: 80%;
+    } */
+    video {
+      background: #222;
+      border-radius: 10px;
+      width: 45%;  /* two equal videos side by side */
+      height: auto;
+      object-fit: cover;
+    }
+
+   
   </style>
 </head>
 <body>
