@@ -132,11 +132,11 @@
     .host-details { flex: 1; }
     .host-details h4 { margin: 0 0 5px; }
     img.flag {
-      width: 2em;
+      width: 1em;
       position: absolute;
-      top: 0.4em;
+      top: 0.8em;
       margin-left: 0.2em;
-      animation: wave-flag 1.5s infinite ease-in-out;
+      /*animation: wave-flag 1.5s infinite ease-in-out;*/
       transform-origin: left center;
     }
     @keyframes wave-flag {
@@ -181,11 +181,36 @@
       opacity: 0.8;
     }
     .nav-item {
-      color: white;
-      text-align: center;
-      font-size: 20px;
-      position: relative;
-    }
+    background: #ff89b0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+    padding-bottom: 0px;
+    margin-top: -13px;
+}
+
+.nav-item:hover {
+  background: #ff6fa0;
+  transform: scale(1.1);
+}
+
+    
+    .nav-item.active {
+  background: white;        
+  color: #f74e8f;          
+  width: 65px;              
+  height: 65px;
+  margin-top: -25px;        
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
+}
+
     .nav-item.active::after {
       content: "";
       width: 6px;
@@ -197,6 +222,19 @@
       left: 50%;
       transform: translateX(-50%);
     }
+    
+            .footer-item a {
+  text-decoration: none!important; /* removes underline */
+  color: inherit;        /* keeps original icon/text color */
+}
+    
+    .footer-item a img {
+  text-decoration: none!important; /* no underline on icons */
+  border: none;          /* prevents blue border on some browsers */
+}
+a:-webkit-any-link{ text-decoration: none!important;}
+    
+    
     @media (max-width: 500px) {
       .banner { width: 90%; height: 0%; }
       .host-card {
@@ -250,7 +288,7 @@
 
   <header>
     <div class="header-left">
-      Host <img src="../imgs/India-Waved-Flag-icon.png" class="flag" alt="Indian Flag"/>
+      Host <img src="../imgs1/India-Waved-Flag-icon.png" class="flag" alt="Indian Flag"/>
     </div>
     <div class="header-right">
       <a href="#"><div class="recharge"><i class="fas fa-phone"></i> ₹1000</div></a>
@@ -263,7 +301,7 @@
 
   <div class="banner">
     <div class="footer-text">TM</div>
-    <img src="../imgs/female11.png" alt="Banner"/>
+    <img src="../imgs1/female11.png" alt="Banner"/>
   </div>
 
   <div class="section-title">Popular Hosts</div>
@@ -274,7 +312,7 @@
   <div class="bottom-nav">
     <div class="nav-item"><i class="fas fa-video"></i></div>
     <a href="mychats.html"><div class="nav-item"><i class="fas fa-comment-alt"></i></div></a>
-    <a href="host-list.html"><div class="nav-item active"><i class="fas fa-home"></i></div></a>
+    <a href="user-host-list.html"><div class="nav-item active"><i class="fas fa-home"></i></div></a>
     <a href="notifications.html"><div class="nav-item"><i class="fas fa-bell"></i></div></a>
     <a href="userprofile.html"><div class="nav-item"><i class="fas fa-user"></i></div></a>
   </div>
