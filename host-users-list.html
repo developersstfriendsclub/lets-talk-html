@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Users (Host View)</title>
+  <link rel="icon" href="/assets/imgs/favicon.png">
   <script src="js/config.js"></script>
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <style>
@@ -137,7 +138,7 @@
       render(allUsers);
       // Initialize presence via socket if available
       try {
-        socket = io(API_CONFIG.getBaseUrl(), { path:'/socket.io' });
+        socket = io(API_CONFIG.getBaseUrl(), { path:'/socket.io', upgrade:false, transports:['polling'] });
         if (me.profileId) {
           socket.emit('register', me.profileId, String(me.id||''));
         }

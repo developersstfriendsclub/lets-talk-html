@@ -482,10 +482,12 @@
       setTimeout(() => fetchUsers(), 1000);
     }
     
-    // Add event listeners
+    // Add event listeners (guard in case buttons are not present on this page)
     document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('testAlternativeAPI').addEventListener('click', testAlternativeAPI);
-      document.getElementById('clearDebug').addEventListener('click', clearDebug);
+      var testBtn = document.getElementById('testAlternativeAPI');
+      if (testBtn) { testBtn.addEventListener('click', testAlternativeAPI); }
+      var clearBtn = document.getElementById('clearDebug');
+      if (clearBtn) { clearBtn.addEventListener('click', clearDebug); }
     });
     
     // Fetch users is now called after auth check in DOMContentLoaded

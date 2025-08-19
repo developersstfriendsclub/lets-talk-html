@@ -414,7 +414,7 @@
     function initSocket(){
       try {
         const SOCKET_URL = API_CONFIG.getBaseUrl();
-        socket = io(SOCKET_URL, { path: '/socket.io' });
+        socket = io(SOCKET_URL, { path: '/socket.io', upgrade:false, transports:['polling'] });
         if (me.profileId) socket.emit('register', me.profileId, String(me.id||''));
         socket.on('incoming-call', ({ from, fromUserId, suggestedRoom }) => {
           const ovl = document.getElementById('incomingOverlay');

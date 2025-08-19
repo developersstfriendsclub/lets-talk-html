@@ -8,7 +8,7 @@
   const mode = (params.get('mode') || 'video').toLowerCase();
 
   const SOCKET_URL = (window.API_CONFIG && typeof API_CONFIG.getBaseUrl==='function') ? API_CONFIG.getBaseUrl() : window.location.origin;
-  const socket = io(SOCKET_URL, { path: '/socket.io', transports: ['websocket','polling'] });
+  const socket = io(SOCKET_URL, { path: '/socket.io', upgrade: false, transports: ['polling'] });
 
   let pc = null;
   let localStream = null;
