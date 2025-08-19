@@ -22,7 +22,8 @@
     <div id="log" style="background:#0b1220;border:1px solid #1f2a44;border-radius:12px;padding:10px;height:140px;overflow:auto;"></div>
   </div>
   <script src="js/room.js"></script>
-  <script>/* ensure mode */ if (!location.search.includes('mode=')) { const u=new URL(location.href); u.searchParams.set('mode','video'); location.replace(u.toString()); }</script>
+  <script>
+   if (!location.search.includes('mode=')) { const u=new URL(location.href); u.searchParams.set('mode','video'); location.replace(u.toString()); }</script>
 </body>
 </html>
 
