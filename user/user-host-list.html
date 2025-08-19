@@ -368,20 +368,20 @@
     // Initiate a call: create a call log and navigate to room
     async function startCall(host){
       try {
-        const callerId = Number(me.id || localStorage.getItem('userId'));
-        const calleeId = Number(host.id);
+        const sender_id = Number(me.id || localStorage.getItem('userId'));
+        const receiver_id = Number(host.id);
         // Create/get dynamic room via API
         const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), {
-          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId })
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id })
         });
         const roomData = await roomResp.json();
-        const roomName = roomData?.data?.name || `room_${host.user_profile_id||host.id}`;
+        const roomName = roomData?.data?.name || `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
         const resp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.CALL_CREATE), {
-          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId, roomName, startedAt: Date.now() })
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id, roomName, startedAt: Date.now() })
         });
         try { const out = await resp.json(); if (out?.data?.id) { localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); } } catch(_){ }
-        // notify callee via socket
-        try { if (socket && me.profileId && host.user_profile_id) socket.emit('call-user', { from: me.profileId, to: host.user_profile_id }); } catch(_){}
+        // notify callee via socket with canonical room name
+        try { if (socket && me.profileId && host.user_profile_id) socket.emit('call-user', { from: me.profileId, to: host.user_profile_id, roomName }); } catch(_){}
         window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(host.name||'Host')}`;
       } catch(e){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}`; }
     }
@@ -389,15 +389,15 @@
     // Initiate a chat: obtain canonical room then navigate to chat page
     async function startChat(host){
       try {
-        const callerId = me.id;
-        const calleeId = Number(host.id);
+        const sender_id = me.id;
+        const receiver_id = Number(host.id);
         const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), {
-          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId })
+          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id })
         });
         const roomData = await roomResp.json();
         let roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : '';
         if (!roomName) {
-          alert("connection is not avalable");
+          roomName = `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
         }
 
         // Notify the host to join this chat room

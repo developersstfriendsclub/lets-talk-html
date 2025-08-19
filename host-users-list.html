@@ -16,32 +16,45 @@
     .card { display:flex; gap:12px; padding:12px; background:#fff; border-radius:12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); align-items:center; }
     .card img { width:64px; height:64px; border-radius:10px; object-fit:cover; }
     .info { flex:1; }
-    .name { font-weight:700; color:#0f172a; }
+    .name { font-weight:700; color:#0f172a; display:flex; align-items:center; gap:8px; }
     .meta { font-size:12px; color:#475569; }
     .status { font-size:12px; color:#475569; margin-top:4px; }
     .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:#9ca3af; }
     .dot.online { background:#22c55e; }
     .actions { display:flex; gap:8px; }
     .btn { background:#d6006d; color:#fff; border:none; padding:8px 12px; border-radius:18px; cursor:pointer; font-size:12px; }
+    .badge { background:#ef4444; color:#fff; border-radius:12px; padding:2px 6px; font-size:11px; font-weight:700; line-height:1; }
   </style>
   <script>
     let allUsers = [];
     let me = { id: null, profileId: null, name: null };
     let online = new Set();
     let socket;
+    let unreadCounts = {}; // key: user_profile_id (string) -> number
+
+    function storageKey(){ return `unreadCounts_${String(me.profileId||'')}`; }
+    function loadUnread(){
+      try {
+        const raw = localStorage.getItem(storageKey());
+        unreadCounts = raw ? JSON.parse(raw) : {};
+      } catch(_) { unreadCounts = {}; }
+    }
+    function saveUnread(){
+      try { localStorage.setItem(storageKey(), JSON.stringify(unreadCounts)); } catch(_){}
+    }
 
     async function startCall(user){
       try {
-        const callerId = Number(me.id || localStorage.getItem('userId'));
-        const calleeId = Number(user.id);
-        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId }) });
+        const sender_id = Number(me.id || localStorage.getItem('userId'));
+        const receiver_id = Number(user.id);
+        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id }) });
         const roomData = await roomResp.json();
-        const roomName = roomData?.data?.name || `room_${Math.min(callerId,calleeId)}_${Math.max(callerId,calleeId)}`;
+        const roomName = roomData?.data?.name || `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
         window.location.href = `room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}`;
       } catch(_){
-        const callerId = Number(me.id || localStorage.getItem('userId'));
-        const calleeId = Number(user.id);
-        const a = Math.min(callerId, calleeId), b = Math.max(callerId, calleeId);
+        const sender_id = Number(me.id || localStorage.getItem('userId'));
+        const receiver_id = Number(user.id);
+        const a = Math.min(sender_id, receiver_id), b = Math.max(sender_id, receiver_id);
         const fallback = (Number.isFinite(a)&&Number.isFinite(b))?`room_${a}_${b}`:`room_${user.user_profile_id||user.id}`;
         window.location.href = `room-video.html?room=${encodeURIComponent(fallback)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}`;
       }
@@ -49,18 +62,18 @@
 
     async function startChat(user){
       try {
-        const callerId = Number(me.id || localStorage.getItem('userId'));
-        const calleeId = Number(user.id);
+        const sender_id = Number(me.id || localStorage.getItem('userId'));
+        const receiver_id = Number(user.id);
         let roomName = '';
         try {
           const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
-            method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId })
+            method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id })
           });
           const roomData = await roomResp.json();
           roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : '';
         } catch(_) {}
         if (!roomName) {
-          const a = Math.min(callerId, calleeId), b = Math.max(callerId, calleeId);
+          const a = Math.min(sender_id, receiver_id), b = Math.max(sender_id, receiver_id);
           roomName = (Number.isFinite(a) && Number.isFinite(b)) ? `room_${a}_${b}` : `room_${user.user_profile_id||user.id}`;
         }
         try {
@@ -68,11 +81,16 @@
             socket.emit('chat-invite', { from: String(me.profileId), fromName: me.name, to: String(user.user_profile_id), roomName });
           }
         } catch(_){}
+        // Clear unread count for this user since we are opening the chat
+        try {
+          const key = String(user.user_profile_id||'');
+          if (key) { unreadCounts[key] = 0; saveUnread(); }
+        } catch(_){ }
         window.location.href = `room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}&mode=chat`;
       } catch(_){
-        const callerId = Number(me.id || localStorage.getItem('userId'));
-        const calleeId = Number(user.id);
-        const a = Math.min(callerId, calleeId), b = Math.max(callerId, calleeId);
+        const sender_id = Number(me.id || localStorage.getItem('userId'));
+        const receiver_id = Number(user.id);
+        const a = Math.min(sender_id, receiver_id), b = Math.max(sender_id, receiver_id);
         const fallback = (Number.isFinite(a)&&Number.isFinite(b))?`room_${a}_${b}`:`room_${user.user_profile_id||user.id}`;
         window.location.href = `room-chat.html?room=${encodeURIComponent(fallback)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}&mode=chat`;
       }
@@ -87,10 +105,11 @@
         const el = document.createElement('div');
         el.className = 'card';
         const onlineDot = online.has(String(u.user_profile_id||'')) ? 'online' : '';
+        const unread = Number(unreadCounts[String(u.user_profile_id||'')] || 0);
         el.innerHTML = `
           <img src="${img}" alt="${u.name||'User'}"/>
           <div class="info">
-            <div class="name">${u.name||'User'}</div>
+            <div class="name">${u.name||'User'} ${unread>0?`<span class="badge">${unread}</span>`:''}</div>
             <div class="meta">${u.email||''}</div>
             <div class="status"><span class="dot ${onlineDot}"></span>${onlineDot?'Online':'Offline'}</div>
           </div>
@@ -110,6 +129,8 @@
         const myData = await myRes.json();
         if (myRes.ok && myData?.data) { me.id = myData.data.id; me.profileId = myData.data.user_profile_id; me.name = myData.data.name; }
       } catch(_){ }
+      // Load unread counts after we know our profile id
+      loadUnread();
       const res = await fetch(API_CONFIG.getAuthUrl('/user-list-for-host'), { headers: { 'Authorization': `Bearer ${token}` } });
       const data = await res.json();
       allUsers = data?.data || [];
@@ -129,10 +150,14 @@
         });
         // Incoming chat invites
         socket.on('incoming-chat', ({ from, fromName, roomName }) => {
-          const accept = confirm(`${fromName || from} invited you to chat. Join?`);
-          if (accept) {
-            window.location.href = `room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(fromName||'User')}&mode=chat`;
-          }
+          try {
+            const key = String(from||'');
+            if (key) {
+              unreadCounts[key] = Number(unreadCounts[key] || 0) + 1;
+              saveUnread();
+              render(allUsers);
+            }
+          } catch(_){ }
         });
       } catch(_){ }
     }
