@@ -1,7 +1,7 @@
 /* Shared styles for video and chat rooms */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
 
-body { margin:0; font-family: Inter, system-ui, sans-serif; background:#0e0f12; color:#fff; }
+body { margin:0; font-family: Inter, system-ui, sans-serif; background:#edc2de; color:#fff; }
 
 /* Video layout */
 .wrap { max-width: 1000px; margin: 0 auto; padding: 8px; }
