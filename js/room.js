@@ -8,6 +8,7 @@
   const mode = (params.get('mode') || 'video').toLowerCase();
 
   const SOCKET_URL = (window.API_CONFIG && typeof API_CONFIG.getBaseUrl==='function') ? API_CONFIG.getBaseUrl() : window.location.origin;
+  // Force polling transport for production to avoid WebSocket issues
   const socket = io(SOCKET_URL, { path: '/socket.io', upgrade: false, transports: ['polling'] });
 
   let pc = null;
@@ -19,19 +20,30 @@
   function log(str){ const el = $('log'); if (el){ el.innerHTML += `<div>${new Date().toLocaleTimeString()} - ${str}</div>`; el.scrollTop = el.scrollHeight; } }
 
   async function init(){
-    $('roomTitle') && ( $('roomTitle').textContent = `Room: ${roomName}` );
-    // Derive peer initial for avatar if present in query
-    const peerName = params.get('peer') || '';
-    if ($('peerName')) $('peerName').textContent = peerName || 'Chat';
-    if ($('avatar')) $('avatar').textContent = (peerName||'U').trim().charAt(0).toUpperCase();
-    socket.emit('join-room', { roomName, userName: displayName });
+    console.log('Initializing room with params:', { roomName, displayName, mode });
     
-    const ringtone = $('ringingSound');
-    if(ringtone){
-        ringtone.play().catch(err =>{
-            console.log(`Ringing autoplay is blocked by the user`, err);
-        })
+    // Debug: Check if video elements exist
+    const localEl = $('localVideo');
+    const remoteEl = $('remoteVideo');
+    console.log('Video elements found:', { 
+      localVideo: !!localEl, 
+      remoteVideo: !!remoteEl,
+      localVideoDisplay: localEl?.style?.display,
+      remoteVideoDisplay: remoteEl?.style?.display
+    });
+    
+    // Update UI elements based on mode
+    if (mode === 'video') {
+      if ($('roomTitle')) $('roomTitle').textContent = `Room: ${roomName}`;
+      if ($('connectionStatus')) {
+        $('connectionStatus').innerHTML = '<i class="fas fa-wifi"></i><span>Connecting...</span>';
+      }
+    } else {
+      if ($('peerName')) $('peerName').textContent = params.get('peer') || 'Chat';
+      if ($('avatar')) $('avatar').innerHTML = '<i class="fas fa-user"></i>';
     }
+    
+    socket.emit('join-room', { roomName, userName: displayName });
 
     // Load history for chat page
     if ($('chatList')) {
@@ -41,14 +53,17 @@
         if (Array.isArray(data?.data)) {
           data.data.forEach(m => {
             const who = (m.senderId && String(m.senderId) === myId) ? 'me' : 'peer';
-            appendBubble(who, m.message, who==='me'?'Me':(peerName||'Peer'), m.createdAt);
+            appendBubble(who, m.message, who==='me'?'Me':(params.get('peer')||'Peer'), m.createdAt);
           });
         }
       } catch(_) {}
     }
 
     if (mode === 'video') {
+      console.log('Video mode detected, setting up video...');
       await setupVideo();
+    } else {
+      console.log('Chat mode detected, skipping video setup');
     }
 
     // Chat realtime
@@ -58,95 +73,355 @@
       appendBubble('peer', message, from, timestamp);
     });
     socket.on('room-typing', ({ from, isTyping }) => {
-      const bar = $('typingBar'); if (!bar) return;
-      bar.style.display = isTyping ? 'block' : 'none';
-      bar.textContent = isTyping ? `${from||'Peer'} is typing...` : '';
+      const bar = $('typingBar'); 
+      if (!bar) return;
+      bar.style.display = isTyping ? 'flex' : 'none';
+      const textEl = bar.querySelector('.typing-text');
+      if (textEl) {
+        textEl.textContent = isTyping ? `${from||'Peer'} is typing...` : '';
+      }
     });
 
     // Presence UI if socket user-list provided
     socket.on('user-list', (list)=>{
-      const dot=$('statusDot'), txt=$('presenceText');
+      const dot = $('statusDot');
+      const txt = $('presenceText');
       if (!dot || !txt) return;
-      const online = Array.isArray(list) && list.length>0; // coarse indicator
-      dot.style.background = online? '#22c55e' : '#9ca3af';
-      txt.textContent = online? 'Online' : 'Offline';
+      const online = Array.isArray(list) && list.length > 0; // coarse indicator
+      dot.style.background = online ? '#22c55e' : '#9ca3af';
+      txt.textContent = online ? 'Online' : 'Offline';
     });
   }
 
   async function setupVideo(){
-    localStream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 360 } }, audio: true });
-    if ($('localVideo')) $('localVideo').srcObject = localStream;
-    pc = new RTCPeerConnection({ iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ] });
-    localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-    const remoteEl = $('remoteVideo'); if (remoteEl){ remoteEl.muted = true; }
-    pc.ontrack = (e) => {
-      if (!remoteEl) return;
-      const [stream] = e.streams;
-      if (stream) {
-        remoteEl.srcObject = stream;
-        const tryPlay = () => { try { remoteEl.play(); } catch(_){ setTimeout(tryPlay, 150); } };
-        tryPlay();
+    try {
+      console.log('Setting up video...');
+      
+      // Detect mobile device and adjust video quality
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const videoConstraints = isMobile ? {
+        width: { ideal: 480, max: 640 },
+        height: { ideal: 270, max: 360 },
+        frameRate: { ideal: 15, max: 24 }
+      } : {
+        width: { ideal: 640, max: 1280 },
+        height: { ideal: 360, max: 720 },
+        frameRate: { ideal: 24, max: 30 }
+      };
+      
+      localStream = await navigator.mediaDevices.getUserMedia({ 
+        video: videoConstraints,
+        audio: { 
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      
+      console.log('Got local stream:', localStream);
+      
+      // Set local video
+      const localEl = $('localVideo');
+      if (localEl) {
+        console.log('Setting local video element');
+        localEl.srcObject = localStream;
+        localEl.muted = true; // Mute local video to prevent echo
+        localEl.style.display = 'block'; // Ensure it's visible
+        try {
+          await localEl.play();
+          console.log('Local video playing');
+        } catch(e) {
+          console.log('Local video autoplay failed, will play on user interaction:', e);
+        }
+      } else {
+        console.error('Local video element not found!');
       }
-    };
-    pc.onicecandidate = (e) => { if (e.candidate) socket.emit('room-ice-candidate', { roomName, candidate: e.candidate }); };
-    pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'connected' && remoteEl){ setTimeout(()=>{ try { remoteEl.muted = false; } catch(_){} }, 300); }
-    };
-    
-    const ringtone = $('ringingSound');
-    if (ringtone && pc.connectionState === 'connected') {
-      ringtone.pause();
-      ringtone.currentTime = 0;
-    }
 
-    socket.on('room-participants', async ({ roomName: rn, participants }) => {
-      if (rn !== roomName) return; if (!pc) return;
-      try {
-        const smallest = participants.slice().sort()[0];
-        const weAreOfferer = smallest === socket.id;
-        if (participants.length >= 2 && weAreOfferer && !pc.currentLocalDescription) {
-          const offer = await pc.createOffer();
+      // Setup WebRTC with optimized settings
+      pc = new RTCPeerConnection({ 
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ],
+        iceCandidatePoolSize: 10,
+        bundlePolicy: 'max-bundle',
+        rtcpMuxPolicy: 'require',
+        iceTransportPolicy: 'all'
+      });
+      
+      console.log('WebRTC peer connection created');
+      
+      // Add local tracks to peer connection with optimized settings
+      localStream.getTracks().forEach(track => {
+        if (track.kind === 'video') {
+          // Optimize video track
+          const sender = pc.addTrack(track, localStream);
+          if (sender && sender.getParameters) {
+            const params = sender.getParameters();
+            if (params.encodings) {
+              params.encodings.forEach(encoding => {
+                encoding.maxBitrate = isMobile ? 500000 : 1000000; // 500kbps for mobile, 1Mbps for desktop
+                encoding.maxFramerate = isMobile ? 15 : 24;
+              });
+              sender.setParameters(params).catch(console.warn);
+            }
+          }
+        } else {
+          pc.addTrack(track, localStream);
+        }
+      });
+      
+      // Setup remote video
+      const remoteEl = $('remoteVideo');
+      if (remoteEl) {
+        console.log('Setting up remote video element');
+        remoteEl.muted = true; // Start muted to avoid autoplay issues
+        remoteEl.style.display = 'block'; // Ensure it's visible
+        remoteEl.style.background = '#000'; // Set background
+        remoteEl.playsInline = true; // Important for mobile
+        remoteEl.autoplay = true;
+      } else {
+        console.error('Remote video element not found!');
+      }
+      
+      // Handle incoming remote stream with optimization
+      pc.ontrack = (e) => {
+        console.log('Received remote track:', e);
+        if (remoteEl && e.streams && e.streams[0]) {
+          console.log('Setting remote video stream');
+          remoteEl.srcObject = e.streams[0];
+          remoteEl.style.background = 'transparent'; // Remove background when stream is set
+          
+          // Optimize remote video playback
+          remoteEl.onloadedmetadata = () => {
+            console.log('Remote video metadata loaded');
+            // Retry play to handle autoplay restrictions
+            const tryPlay = () => {
+              remoteEl.play().then(() => {
+                console.log('Remote video playing successfully');
+                // Optimize video element for performance
+                remoteEl.style.transform = 'scale(1)'; // Ensure no scaling issues
+              }).catch(err => {
+                console.warn('Remote video autoplay failed, retrying...', err);
+                setTimeout(tryPlay, 200); // Faster retry for better performance
+              });
+            };
+            tryPlay();
+          };
+        }
+      };
+      
+      pc.onicecandidate = (e) => { 
+        if (e.candidate) {
+          console.log('Sending ICE candidate');
+          socket.emit('room-ice-candidate', { roomName, candidate: e.candidate }); 
+        }
+      };
+      
+      pc.onconnectionstatechange = () => {
+        console.log('WebRTC connection state:', pc.connectionState);
+        
+        // Update connection status display
+        const statusEl = $('connectionStatus');
+        if (statusEl) {
+          switch(pc.connectionState) {
+            case 'connecting':
+              statusEl.innerHTML = '<i class="fas fa-wifi"></i><span>Connecting...</span>';
+              break;
+            case 'connected':
+              statusEl.innerHTML = '<i class="fas fa-check-circle"></i><span>Connected</span>';
+              statusEl.style.color = '#22c55e';
+              break;
+            case 'disconnected':
+              statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Disconnected</span>';
+              statusEl.style.color = '#f59e0b';
+              break;
+            case 'failed':
+              statusEl.innerHTML = '<i class="fas fa-times-circle"></i><span>Connection Failed</span>';
+              statusEl.style.color = '#ef4444';
+              break;
+            default:
+              statusEl.innerHTML = '<i class="fas fa-wifi"></i><span>Initializing...</span>';
+          }
+        }
+        
+        if (pc.connectionState === 'connected' && remoteEl) {
+          setTimeout(() => { 
+            try { 
+              remoteEl.muted = false; // Unmute remote video when connected
+              console.log('Remote video unmuted');
+            } catch(_) {} 
+          }, 300);
+        }
+      };
+
+      // Handle room participants and negotiation
+      socket.on('room-participants', async ({ roomName: rn, participants }) => {
+        if (rn !== roomName) return; 
+        if (!pc) return;
+        console.log('Room participants:', participants);
+        try {
+          const smallest = participants.slice().sort()[0];
+          const weAreOfferer = smallest === socket.id;
+          console.log('We are offerer:', weAreOfferer);
+          if (participants.length >= 2 && weAreOfferer && !pc.currentLocalDescription) {
+            console.log('Creating offer...');
+            const offer = await pc.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true,
+              voiceActivityDetection: true
+            });
+            await pc.setLocalDescription(offer);
+            socket.emit('room-offer', { roomName, offer });
+            console.log('Offer sent');
+          }
+        } catch(e) { console.warn('participants negotiation error', e); }
+      });
+      
+      socket.on('room-ready', async () => {
+        if (!pc) return;
+        console.log('Room ready, checking if we need to create offer');
+        if (!pc.currentLocalDescription){
+          console.log('Creating initial offer...');
+          const offer = await pc.createOffer({ 
+            offerToReceiveAudio: true, 
+            offerToReceiveVideo: true,
+            voiceActivityDetection: true
+          });
           await pc.setLocalDescription(offer);
           socket.emit('room-offer', { roomName, offer });
+          console.log('Initial offer sent');
         }
-      } catch(e) { console.warn('participants negotiation error', e); }
-    });
-    socket.on('room-ready', async () => {
-      if (!pc) return;
-      if (!pc.currentLocalDescription){
-        const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
-        await pc.setLocalDescription(offer);
-        socket.emit('room-offer', { roomName, offer });
-      }
-    });
-    socket.on('room-offer', async ({ from, offer }) => {
-      if (!pc) return;
-      try {
-        await pc.setRemoteDescription(new RTCSessionDescription(offer));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        socket.emit('room-answer', { roomName, answer });
-      } catch(e) { pendingOffer = offer; showOverlay(true, `From: ${from||'Peer'}`); }
-    });
-    socket.on('room-answer', async ({ from, answer }) => { 
-      if (!pc) return;
-      try { if (!pc.currentRemoteDescription) { await pc.setRemoteDescription(new RTCSessionDescription(answer)); } } catch(e) { console.warn('apply answer failed', e); }
-    });
-    socket.on('room-ice-candidate', async ({ from, candidate }) => { if (!pc) return; try { await pc.addIceCandidate(new RTCIceCandidate(candidate)); } catch(e) { console.warn('ICE add error', e); } });
+      });
+      
+      socket.on('room-offer', async ({ from, offer }) => {
+        if (!pc) return;
+        console.log('Received offer from:', from);
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          console.log('Remote description set, creating answer...');
+          const answer = await pc.createAnswer({
+            voiceActivityDetection: true
+          });
+          await pc.setLocalDescription(answer);
+          socket.emit('room-answer', { roomName, answer });
+          console.log('Answer sent');
+        } catch(e) { 
+          console.error('Error handling offer:', e);
+          pendingOffer = offer; 
+          showOverlay(true, `From: ${from||'Peer'}`); 
+        }
+      });
+      
+      socket.on('room-answer', async ({ from, answer }) => {
+        if (!pc) return;
+        console.log('Received answer from:', from);
+        try { 
+          if (!pc.currentRemoteDescription) { 
+            await pc.setRemoteDescription(new RTCSessionDescription(answer)); 
+            console.log('Remote description set from answer');
+          } 
+        } catch(e) { console.warn('apply answer failed', e); }
+      });
+      
+      socket.on('room-ice-candidate', async ({ from, candidate }) => { 
+        if (!pc) return; 
+        console.log('Received ICE candidate from:', from);
+        try { 
+          await pc.addIceCandidate(new RTCIceCandidate(candidate)); 
+          console.log('ICE candidate added');
+        } catch(e) { console.warn('ICE add error', e); } 
+      });
 
-    // Toolbar controls (if present)
-    if ($('btnMute')) $('btnMute').onclick = ()=>{ localStream.getAudioTracks().forEach(t=> t.enabled = !t.enabled); $('btnMute').textContent = localStream.getAudioTracks()[0]?.enabled ? 'Mute' : 'Unmute'; };
-    if ($('btnVideo')) $('btnVideo').onclick = ()=>{ localStream.getVideoTracks().forEach(t=> t.enabled = !t.enabled); $('btnVideo').textContent = localStream.getVideoTracks()[0]?.enabled ? 'Video Off' : 'Video On'; };
-    if ($('btnHangup')) $('btnHangup').onclick = ()=>{ 
-      const ringtone = $('ringingSound');
-      if (ringtone) {
-        ringtone.pause();
-        ringtone.currentTime = 0;
+      // Toolbar controls (if present)
+      if ($('btnMute')) $('btnMute').onclick = ()=>{
+        localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled); 
+        const isMuted = !localStream.getAudioTracks()[0]?.enabled;
+        $('btnMute').innerHTML = `<i class="fas fa-${isMuted ? 'microphone-slash' : 'microphone'}"></i><span>${isMuted ? 'Unmute' : 'Mute'}</span>`;
+        
+        // Update button styling
+        if (isMuted) {
+          $('btnMute').style.background = '#ef4444';
+        } else {
+          $('btnMute').style.background = 'rgba(255, 255, 255, 0.1)';
+        }
+      };
+      
+      if ($('btnVideo')) $('btnVideo').onclick = ()=>{
+        localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled); 
+        const isVideoOff = !localStream.getVideoTracks()[0]?.enabled;
+        $('btnVideo').innerHTML = `<i class="fas fa-${isVideoOff ? 'video-slash' : 'video'}"></i><span>${isVideoOff ? 'Video On' : 'Video Off'}</span>`;
+        
+        // Update button styling
+        if (isVideoOff) {
+          $('btnVideo').style.background = '#ef4444';
+        } else {
+          $('btnVideo').style.background = 'rgba(255, 255, 255, 0.1)';
+        }
+      };
+      
+      if ($('btnHangup')) $('btnHangup').onclick = ()=>{
+        try { 
+          pc && pc.close(); 
+          localStream.getTracks().forEach(t => t.stop()); // Stop all tracks
+        } catch(_) {}
+        socket.emit('leave-room', { roomName, userName: displayName }); 
+        window.history.back(); 
+      };
+      
+      // Add screen share functionality
+      if ($('btnScreenShare')) $('btnScreenShare').onclick = async ()=>{
+        try {
+          if (!localStream.getVideoTracks()[0].enabled) {
+            alert('Please enable video first to share screen');
+            return;
+          }
+          
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: { 
+              cursor: 'always',
+              displaySurface: 'monitor'
+            } 
+          });
+          
+          // Replace video track
+          const videoTrack = screenStream.getVideoTracks()[0];
+          const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+          if (sender) {
+            sender.replaceTrack(videoTrack);
+            $('btnScreenShare').innerHTML = '<i class="fas fa-stop"></i><span>Stop</span>';
+            $('btnScreenShare').style.background = '#ef4444';
+            
+            // Handle screen share stop
+            videoTrack.onended = () => {
+              const originalTrack = localStream.getVideoTracks()[0];
+              if (sender && originalTrack) {
+                sender.replaceTrack(originalTrack);
+                $('btnScreenShare').innerHTML = '<i class="fas fa-desktop"></i><span>Share</span>';
+                $('btnScreenShare').style.background = 'rgba(255, 255, 255, 0.1)';
+              }
+            };
+          }
+        } catch(e) {
+          console.error('Screen share failed:', e);
+          alert('Screen sharing not supported or permission denied');
+        }
+      };
+      
+    } catch(e) {
+      console.error('Failed to setup video:', e);
+      let errorMessage = 'Failed to access camera/microphone. ';
+      if (e.name === 'NotAllowedError') {
+        errorMessage += 'Please check permissions and refresh the page.';
+      } else if (e.name === 'NotFoundError') {
+        errorMessage += 'No camera/microphone found.';
+      } else if (e.name === 'NotSupportedError') {
+        errorMessage += 'Your browser does not support video calls.';
+      } else {
+        errorMessage += 'Please check your device and try again.';
       }
-      try { pc && pc.close(); } catch(_){}; socket.emit('leave-room', { roomName, userName: displayName }); window.history.back(); };
+      alert(errorMessage);
+    }
   }
 
   function showOverlay(show, text){ const ovl=$('incomingOverlay'); if (!ovl) return; if (show){ ovl.classList.add('show'); $('incomingFrom').textContent = text||''; } else { ovl.classList.remove('show'); } }
@@ -176,9 +451,6 @@
   }
 
   window.addEventListener('beforeunload', ()=> socket.emit('leave-room', { roomName, userName: displayName }));
-//   init();
-// expose init so HTML button can call it later
-window.startRoom = init;
+  init();
 })();
-
 
