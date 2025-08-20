@@ -8,8 +8,8 @@ const ENV_SWITCHER = {
   },
 
   // Current environment
-  // currentEnv: 'production', // Default, will be overridden by localStorage or init
-  currentEnv: 'local', // Default, will be overridden by localStorage or init
+  currentEnv: 'production', // Default, will be overridden by localStorage or init
+  // currentEnv: 'local', // Default, will be overridden by localStorage or init
 
   // Initialize the switcher
   init: function() {
