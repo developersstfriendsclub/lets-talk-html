@@ -34,6 +34,9 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 100;
 }
+#localVideo {
+  transform: rotate(0deg); /* try 90deg, 180deg, 270deg if rotated */
+}
 
 .call-info {
   display: flex;
