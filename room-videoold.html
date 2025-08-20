@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Video Call</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="js/config.js"></script>
+  <link rel="stylesheet" href="css/room.css"/>
+</head>
+<body>
+  <div class="wrap">
+    <div class="stage">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+    <div class="toolbar">
+      <button class="btn" id="btnMute">Mute</button>
+      <button class="btn" id="btnVideo">Video Off</button>
+      <button class="btn red" id="btnHangup">Hang Up</button>
+    </div>
+    <div id="log" style="background:#0b1220;border:1px solid #1f2a44;border-radius:12px;padding:10px;height:140px;overflow:auto;"></div>
+  </div>
+  <script src="js/room.js"></script>
+  <script>/* ensure mode */ if (!location.search.includes('mode=')) { const u=new URL(location.href); u.searchParams.set('mode','video'); location.replace(u.toString()); }</script>
+</body>
+</html>
+
+
