@@ -247,8 +247,16 @@
       left: 50%;
       transform: translateX(-50%);
     }
+
+    img.img-flag {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    margin-top: 0em;
+    left: 13em;
+}
     
-            .footer-item a {
+    .footer-item a {
   text-decoration: none!important; /* removes underline */
   color: inherit;        /* keeps original icon/text color */
 }
@@ -516,7 +524,7 @@ a:-webkit-any-link{ text-decoration: none!important;}
             <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
               <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
-              <img src
+              <img src="../imgs/IndiaWavedFlag.png" class="img-flag"/>
               <p>${host.phone || ''}</p>
               <div>
                 <button class="call-btn" onclick='startCall(${JSON.stringify({ id: host.id, name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
