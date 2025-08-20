@@ -7,22 +7,117 @@
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <script src="js/config.js"></script>
   <link rel="stylesheet" href="css/room.css"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="wrap">
-    <div class="stage">
-      <video id="remoteVideo" autoplay playsinline></video>
-      <video id="localVideo" autoplay playsinline muted></video>
+  <div class="video-container">
+    <!-- Header -->
+    <div class="video-header">
+      <div class="call-info">
+        <div class="call-status">
+          <div class="status-dot"></div>
+          <span id="roomTitle">Connecting...</span>
+        </div>
+        <div class="call-timer" id="callTimer">00:00</div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="btnSettings">
+          <i class="fas fa-cog"></i>
+        </button>
+        <button class="header-btn" id="btnMinimize">
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
     </div>
-    <div class="toolbar">
-      <button class="btn" id="btnMute">Mute</button>
-      <button class="btn" id="btnVideo">Video Off</button>
-      <button class="btn red" id="btnHangup">Hang Up</button>
+
+    <!-- Main Video Area -->
+    <div class="video-stage">
+      <video id="remoteVideo" autoplay playsinline muted></video>
+      <div class="video-overlay">
+        <div class="connection-status" id="connectionStatus">
+          <i class="fas fa-wifi"></i>
+          <span>Connecting...</span>
+        </div>
+      </div>
+      
+      <!-- Local Video PIP -->
+      <div class="local-video-container">
+        <video id="localVideo" autoplay playsinline muted></video>
+        <div class="local-video-controls">
+          <button class="pip-control" id="btnTogglePIP">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
     </div>
-    <div id="log" style="background:#0b1220;border:1px solid #1f2a44;border-radius:12px;padding:10px;height:140px;overflow:auto;"></div>
+
+    <!-- Control Bar -->
+    <div class="control-bar">
+      <div class="control-group">
+        <button class="control-btn" id="btnMute">
+          <i class="fas fa-microphone"></i>
+          <span>Mute</span>
+        </button>
+        <button class="control-btn" id="btnVideo">
+          <i class="fas fa-video"></i>
+          <span>Video</span>
+        </button>
+      </div>
+      
+      <div class="control-group center">
+        <button class="control-btn primary" id="btnHangup">
+          <i class="fas fa-phone-slash"></i>
+          <span>End Call</span>
+        </button>
+      </div>
+      
+      <div class="control-group">
+        <button class="control-btn" id="btnScreenShare">
+          <i class="fas fa-desktop"></i>
+          <span>Share</span>
+        </button>
+        <button class="control-btn" id="btnMore">
+          <i class="fas fa-ellipsis-h"></i>
+          <span>More</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Debug Log (hidden by default) -->
+    <div id="log" class="debug-log" style="display: none;"></div>
   </div>
+
   <script src="js/room.js"></script>
-  <script>/* ensure mode */ if (!location.search.includes('mode=')) { const u=new URL(location.href); u.searchParams.set('mode','video'); location.replace(u.toString()); }</script>
+  <script>
+    // Ensure mode parameter is set
+    if (!location.search.includes('mode=')) { 
+      const u = new URL(location.href); 
+      u.searchParams.set('mode','video'); 
+      location.replace(u.toString()); 
+    }
+    
+    // Call timer
+    let callStartTime = Date.now();
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      document.getElementById('callTimer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+    
+    // PIP toggle
+    document.getElementById('btnTogglePIP').onclick = () => {
+      const localVideo = document.getElementById('localVideo');
+      if (localVideo.requestPictureInPicture) {
+        if (document.pictureInPictureElement) {
+          document.exitPictureInPicture();
+        } else {
+          localVideo.requestPictureInPicture();
+        }
+      }
+    };
+  </script>
 </body>
 </html>
 

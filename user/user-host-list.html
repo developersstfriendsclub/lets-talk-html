@@ -420,7 +420,7 @@
           const ovl = document.getElementById('incomingOverlay');
           document.getElementById('incomingFrom').textContent = `From: ${from}`;
           ovl.style.display='flex';
-          document.getElementById('ovlAccept').onclick = ()=> { ovl.style.display='none'; window.location.href = `../room-video.html?room=${encodeURIComponent(suggestedRoom||('room_'+from))}&name=${encodeURIComponent(me.name||'Me')}`; };
+          document.getElementById('ovlAccept').onclick = ()=> { ovl.style.display='none'; window.location.href = `../room-video.html?room=${encodeURIComponent(suggestedRoom||('room_'+from))}&name=${encodeURIComponent(me.name||'Me')}&mode=video`; };
           document.getElementById('ovlReject').onclick = ()=> { ovl.style.display='none'; try { socket.emit('reject-call', { from: from, to: me.profileId }); } catch(_){} };
         });
 
