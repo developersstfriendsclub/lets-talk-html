@@ -7,163 +7,117 @@
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <script src="js/config.js"></script>
   <link rel="stylesheet" href="css/room.css"/>
-  <style>
-    #lobby {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      background: #0b1220;
-      color: #fff;
-      text-align: center;
-    }
-    #joinBtn {
-      background: #28a745;
-      border: none;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-size: 18px;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    #joinBtn:hover {
-      background: #218838;
-    }
-      #videoArea {
-      display: none; /* hidden by default */
-      height: 100vh;
-      background:#edc2de;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    /* .stage {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px; /* space between videos 
-      width: 100%;
-      height: 80%;
-    } */
-    video {
-      background: #222;
-      border-radius: 10px;
-      width: 45%;  /* two equal videos side by side */
-      height: auto;
-      object-fit: cover;
-    }
-
-        .footer-item {
-      width: 40px;
-      height: 40px;
-      background: #ffffffaa;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 2px 5px #00000020;
-      cursor: pointer;
-    }
-
-    .footer-item img {
-      width: 20px;
-      height: 20px;
-    }
-
-    .footer-center {
-      width: 60px;
-      height: 60px;
-      background: #fff;
-      border-radius: 50%;
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 4px 8px #00000030;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
-    }
-
-    .footer-center img {
-      width: 30px;
-      height: 30px;
-    }
-
-    .footer {
-      margin-top: 30px;
-      opacity: 0.2;
-    }
-
-    .footer img {
-      width: 80%;
-      filter: drop-shadow(0 0 8px #ff5e92);
-      margin:0 12%;
-    }
-
-    .footer-text {
-    font-size: 30px;
-    font-weight: bold;
-    color: #d6006d;
-    margin-top: 5px;
-    text-align: center;
-    /* position: absolute; */
-    z-index: 9999;
-   
-}
-
-   
-  </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <audio id="ringingSound" src="./assets/audio/ring.mp3" loop preload="auto"></audio>
+  <div class="video-container">
+    <!-- Header -->
+    <div class="video-header">
+      <div class="call-info">
+        <div class="call-status">
+          <div class="status-dot"></div>
+          <span id="roomTitle">Connecting...</span>
+        </div>
+        <div class="call-timer" id="callTimer">00:00</div>
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="btnSettings">
+          <i class="fas fa-cog"></i>
+        </button>
+        <button class="header-btn" id="btnMinimize">
+          <i class="fas fa-minus"></i>
+        </button>
+      </div>
+    </div>
 
-  <!-- Lobby -->
-  <div id="lobby">
-    <h2>Welcome to the Video Call</h2>
-    <p>Click below to join the room</p>
-    <button id="joinBtn">Join</button>
-  </div>
+    <!-- Main Video Area -->
+    <div class="video-stage">
+      <video id="remoteVideo" autoplay playsinline muted></video>
+      <div class="video-overlay">
+        <div class="connection-status" id="connectionStatus">
+          <i class="fas fa-wifi"></i>
+          <span>Connecting...</span>
+        </div>
+      </div>
+      
+      <!-- Local Video PIP -->
+      <div class="local-video-container">
+        <video id="localVideo" autoplay playsinline muted></video>
+        <div class="local-video-controls">
+          <button class="pip-control" id="btnTogglePIP">
+            <i class="fas fa-expand"></i>
+          </button>
+        </div>
+      </div>
+    </div>
 
-  <!-- Video call -->
-  <div class="wrap" id="videoArea">
-    <div class="stage">
-      <video id="remoteVideo" autoplay playsinline></video>
-      <video id="localVideo" autoplay playsinline muted></video>
+    <!-- Control Bar -->
+    <div class="control-bar">
+      <div class="control-group">
+        <button class="control-btn" id="btnMute">
+          <i class="fas fa-microphone"></i>
+          <span>Mute</span>
+        </button>
+        <button class="control-btn" id="btnVideo">
+          <i class="fas fa-video"></i>
+          <span>Video</span>
+        </button>
+      </div>
+      
+      <div class="control-group center">
+        <button class="control-btn primary" id="btnHangup">
+          <i class="fas fa-phone-slash"></i>
+          <span>End Call</span>
+        </button>
+      </div>
+      
+      <div class="control-group">
+        <button class="control-btn" id="btnScreenShare">
+          <i class="fas fa-desktop"></i>
+          <span>Share</span>
+        </button>
+        <button class="control-btn" id="btnMore">
+          <i class="fas fa-ellipsis-h"></i>
+          <span>More</span>
+        </button>
+      </div>
     </div>
-        <!-- Footer -->
-    <div class="footer">
-         <div class="footer-text">TM</div>
-     <img src="imgs/female1.jpg" alt="Silhouette" />
-     
-    </div>
-    <div class="toolbar">
-      <button class="btn" id="btnMute">Mute</button>
-      <button class="btn" id="btnVideo">Video Off</button>
-      <button class="btn red" id="btnHangup">Hang Up</button>
-    </div>
+
+    <!-- Debug Log (hidden by default) -->
+    <div id="log" class="debug-log" style="display: none;"></div>
   </div>
 
   <script src="js/room.js"></script>
   <script>
-    if (!location.search.includes('mode=')) {
-      const u = new URL(location.href);
-      u.searchParams.set('mode','video');
-      location.replace(u.toString());
+    // Ensure mode parameter is set
+    if (!location.search.includes('mode=')) { 
+      const u = new URL(location.href); 
+      u.searchParams.set('mode','video'); 
+      location.replace(u.toString()); 
     }
-
-    // Join button click
-    document.getElementById('joinBtn').addEventListener('click', () => {
-      document.getElementById('lobby').style.display = 'none';
-      document.getElementById('videoArea').style.display = 'block';
-      if (typeof window.startRoom === 'function') {
-        window.startRoom(); // call init from room.js
+    
+    // Call timer
+    let callStartTime = Date.now();
+    setInterval(() => {
+      const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = elapsed % 60;
+      document.getElementById('callTimer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }, 1000);
+    
+    // PIP toggle
+    document.getElementById('btnTogglePIP').onclick = () => {
+      const localVideo = document.getElementById('localVideo');
+      if (localVideo.requestPictureInPicture) {
+        if (document.pictureInPictureElement) {
+          document.exitPictureInPicture();
+        } else {
+          localVideo.requestPictureInPicture();
+        }
       }
-    });
+    };
   </script>
 </body>
 </html>
+
