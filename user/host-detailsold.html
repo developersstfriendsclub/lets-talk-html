@@ -12,7 +12,7 @@
     .container { max-width:980px; margin:0 auto; padding:16px; }
 
     .profile-card { position:relative; border-radius:16px; overflow:hidden; box-shadow:0 6px 18px rgba(0,0,0,0.08); background:linear-gradient(135deg,#fde1ec,#f8c6d8); }
-    .profile-cover { height:50px; background:linear-gradient(135deg,#ec4899,#b03b6a);  }
+    .profile-cover { height:110px; background:linear-gradient(135deg,#ec4899,#b03b6a); opacity:0.85; }
     .profile-content { display:flex; gap:16px; align-items:center; padding:12px 16px 18px; background:#ffffff; }
     .avatar { width:96px; height:96px; border-radius:12px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,0.18); margin-top:-48px; border:3px solid #fff; }
     .name { font-size:22px; font-weight:900; color:#0f172a; }
@@ -152,24 +152,24 @@
 
     async function startCall(hostMin){
       try {
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(hostMin.id);
-        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id }) });
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(hostMin.id);
+        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId }) });
         const roomData = await roomResp.json();
-        const roomName = roomData?.data?.name || `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
+        const roomName = roomData?.data?.name || `room_${hostMin.user_profile_id||hostMin.id}`;
         window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(hostMin.name||'Host')}`;
       } catch(_){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(hostMin.user_profile_id||hostMin.id))}&name=${encodeURIComponent(hostMin.name||'Host')}`; }
     }
 
     async function startChat(hostMin){
       try {
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(hostMin.id);
+        const callerId = Number(me.id || localStorage.getItem('userId'));
+        const calleeId = Number(hostMin.id);
         let roomName = '';
-        try { const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id }) }); const roomData = await roomResp.json(); roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : ''; } catch(_){ }
-        if (!roomName) roomName = `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
+        try { const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ callerId, calleeId }) }); const roomData = await roomResp.json(); roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : ''; } catch(_){}
+        if (!roomName) roomName = `room_${hostMin.user_profile_id||hostMin.id}`;
         window.location.href = `../room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(hostMin.name||'Host')}&mode=chat`;
-      } catch(_){ }
+      } catch(_){}
     }
 
     document.addEventListener('DOMContentLoaded', loadDetails);

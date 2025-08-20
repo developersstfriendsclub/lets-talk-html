@@ -254,6 +254,13 @@
       <option value="no">No</option>
     
     </select>
+    
+    <select id="agency" required>
+      <option value="" disabled selected>Agency Code: FDCKJP24025</option>
+      <option value="yes">Yes</option>
+      <option value="no">No</option>
+    
+    </select>
 
     <input type="tel" id="phone" placeholder="Phone Number" required /> <!-- ✅ SAME phone field -->
 
@@ -285,12 +292,13 @@
     const phone = document.getElementById('phone').value.trim(); // ✅ uses same value
     const gender = document.getElementById('gender').value.toLowerCase();
     const premium = document.getElementById('premium').value.trim();
+    const agency = document.getElementById('agency').value.trim();
     const dob = document.getElementById('dob').value;
     const password = document.getElementById('password').value;
     const msgDiv = document.getElementById('responseMsg');
 
     const is_premium = premium === 'yes';
-    const payload = { name, email, gender, is_premium, phone, dob, password };
+    const payload = { name, email, gender, is_premium, agency, phone, dob, password };
 
 try {
         const res = await fetch(API_CONFIG.getAuthUrl('/sign-up'), {
