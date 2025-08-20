@@ -8,12 +8,12 @@ body { margin:0; font-family: Inter, system-ui, sans-serif; background:#0e0f12; 
 .stage { position:relative; width:100%; aspect-ratio: 16 / 9; background:#000; border-radius:16px; overflow:hidden; }
 video { width: 100%; height: 100%; object-fit: cover; display:block; background:#000; }
 #localVideo { position:absolute; width: 220px; height: 124px; right:16px; bottom:16px; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.5); }
-.toolbar { display:flex; gap:12px; justify-content:center; align-items:center; margin:16px 0; }
+.toolbar { display:flex; gap:12px; justify-content:center; align-items:center; margin:16px 0; flex-wrap: wrap; }
 .btn { background:#1f2937; border:none; color:#fff; padding:12px 16px; border-radius:22px; cursor:pointer; }
 .btn.red { background:#ef4444; }
 
 /* Chat layout */
-.chat-wrap { max-width: 100%; height:100vh; margin:0; padding:0; display:flex; flex-direction:column; }
+.chat-wrap { max-width: 100%; min-height:100vh; margin:0; padding:0; display:flex; flex-direction:column; }
 .chat-container { flex:1; display:flex; flex-direction:column; padding:12px; }
 .header { display:flex; align-items:center; gap:10px; font-weight:800; margin-bottom:10px; }
 .avatar { width:28px; height:28px; border-radius:50%; background:#1f2a44; display:flex; align-items:center; justify-content:center; font-size:12px; }
@@ -21,12 +21,25 @@ video { width: 100%; height: 100%; object-fit: cover; display:block; background:
 .chatbox { background:#0b1220; border-top:1px solid #1f2a44; border-bottom:1px solid #1f2a44; flex:1; overflow:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
 .typing { position:sticky; bottom:0; left:0; right:0; font-size:12px; color:#cbd5e1; display:none; margin-top:6px; padding:6px 12px; background:rgba(11,18,32,0.6); backdrop-filter: blur(2px); }
 .inputbar { display:flex; gap:8px; padding:12px; }
-.inputbar input { flex:1; padding:12px; border-radius:12px; border:1px solid #1f2a44; background:#0b1220; color:#fff; }
+.inputbar input { flex:1; padding:12px; border-radius:12px; border:1px solid #1f2a44; background:#0b1220; color:#fff; min-width: 0; }
 .inputbar button { padding:12px 16px; border-radius:12px; background:#d6006d; color:#fff; border:none; cursor:pointer; }
 .bubble { max-width: 76%; padding:10px 12px; border-radius:14px; line-height:1.4; box-shadow:0 1px 2px rgba(0,0,0,0.2); }
 .bubble.me { background:#1f2937; align-self:flex-start; border-bottom-left-radius:4px; }
 .bubble.peer { background:#0f172a; align-self:flex-end; border-bottom-right-radius:4px; }
 .bubble .meta { font-size:11px; color:#94a3b8; margin-bottom:4px; opacity:0.9; }
 .time { font-size:10px; color:#64748b; margin-top:6px; text-align:right; }
+
+/* Mobile tweaks */
+@media (max-width: 640px) {
+  .wrap { padding: 8px; }
+  .stage { border-radius: 12px; }
+  #localVideo { width: 34vw; height: 19vw; right:8px; bottom:8px; border-radius:10px; }
+  .toolbar { gap:8px; margin:10px 0; }
+  .btn { padding:10px 12px; font-size: 14px; }
+  .chat-container { padding:8px; }
+  .chatbox { padding:10px; gap:6px; }
+  .inputbar { padding:8px; gap:6px; }
+  .bubble { max-width: 88%; font-size: 14px; }
+}
 
 
