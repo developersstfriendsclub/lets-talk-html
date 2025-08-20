@@ -537,22 +537,44 @@ a:-webkit-any-link{ text-decoration: none!important;}
       });
     }
 
-    function renderPopular(hosts){
-      const root = document.getElementById('popular-container');
-      root.innerHTML = '';
-      if (!hosts || hosts.length===0) return;
-      hosts.forEach(h => {
-        const images = Array.isArray(h.Images) ? h.Images : [];
-        const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-        const displayUrl = (profileImg && profileImg.url)
-          || (images.length > 0 && images[0] && images[0].url)
-          || '../imgs/logo.jpg';
-        const img = document.createElement('img');
-        img.src = displayUrl; img.alt = h.name || 'Host';
-        root.appendChild(img);
-      });
-    }
+    // function renderPopular(hosts){
+    //   const root = document.getElementById('popular-container');
+    //   root.innerHTML = '';
+    //   if (!hosts || hosts.length===0) return;
+    //   hosts.forEach(h => {
+    //     const images = Array.isArray(h.Images) ? h.Images : [];
+    //     const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+    //     const displayUrl = (profileImg && profileImg.url)
+    //       || (images.length > 0 && images[0] && images[0].url)
+    //       || '../imgs/logo.jpg';
+    //     const img = document.createElement('img');
+    //     img.src = displayUrl; img.alt = h.name || 'Host';
+    //     root.appendChild(img);
+    //   });
+    // }
 
+
+      function renderPopular(hosts){
+  const root = document.getElementById('popular-container');
+  root.innerHTML = '';
+  if (!hosts || hosts.length===0) return;
+  hosts.forEach(h => {
+    const images = Array.isArray(h.Images) ? h.Images : [];
+    const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+    const displayUrl = (profileImg && profileImg.url)
+      || (images.length > 0 && images[0] && images[0].url)
+      || '../imgs/logo.jpg';
+
+    // 🔗 Wrap image in <a> that links to host-details.html
+    const a = document.createElement('a');
+    a.href = `host-details.html?user_id=${encodeURIComponent(h.id)}`;
+    const img = document.createElement('img');
+    img.src = displayUrl;
+    img.alt = h.name || 'Host';
+    a.appendChild(img);
+    root.appendChild(a);
+  });
+}
     function filterAndRender(query) {
       const normalized = (query || '').toString().toLowerCase().trim();
       if (!normalized) {
