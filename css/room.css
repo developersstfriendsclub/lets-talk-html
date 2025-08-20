@@ -35,8 +35,15 @@ body {
   z-index: 100;
 }
 #localVideo {
-  transform: rotate(0deg); /* try 90deg, 180deg, 270deg if rotated */
+  transform: scaleX(-1);    /* flip horizontally */
+  transform-origin: center; /* keep it centered */
 }
+
+#remoteVideo{
+  transform: scaleX(-1);    /* flip horizontally */
+  transform-origin: center; /* keep it centered */
+}
+
 
 .call-info {
   display: flex;
