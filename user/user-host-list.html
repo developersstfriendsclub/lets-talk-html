@@ -197,6 +197,29 @@
       left: 50%;
       transform: translateX(-50%);
     }
+
+
+    img.img-flag {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    margin-top: 0em;
+    left: 17em;
+}
+    
+    .footer-item a {
+  text-decoration: none!important; /* removes underline */
+  color: inherit;        /* keeps original icon/text color */
+}
+    
+    .footer-item a img {
+  text-decoration: none!important; /* no underline on icons */
+  border: none;          /* prevents blue border on some browsers */
+}
+a:-webkit-any-link{ text-decoration: none!important;}
+    
+    
+
     @media (max-width: 500px) {
       .banner { width: 90%; height: 0%; }
       .host-card {
@@ -205,7 +228,7 @@
         text-align: center;
       }
       .host-card img { margin-bottom: 10px; }
-      .call-btn { width: 100%; }
+      /* .call-btn { width: 100%; } */
       .bottom-nav { width: 95%; padding: 12px 5px; }
       .nav-item { font-size: 18px; }
       .header-right {
@@ -453,6 +476,10 @@
             <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
               <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
+
+              <img src="../imgs/IndiaWavedFlag.png" class="img-flag"/>
+
+
               <p>${host.phone || ''}</p>
               <div>
                 <button class="call-btn" onclick='startCall(${JSON.stringify({ id: host.id, name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
@@ -465,22 +492,44 @@
       });
     }
 
-    function renderPopular(hosts){
-      const root = document.getElementById('popular-container');
-      root.innerHTML = '';
-      if (!hosts || hosts.length===0) return;
-      hosts.forEach(h => {
-        const images = Array.isArray(h.Images) ? h.Images : [];
-        const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-        const displayUrl = (profileImg && profileImg.url)
-          || (images.length > 0 && images[0] && images[0].url)
-          || '../imgs/logo.jpg';
-        const img = document.createElement('img');
-        img.src = displayUrl; img.alt = h.name || 'Host';
-        root.appendChild(img);
-      });
-    }
+    // function renderPopular(hosts){
+    //   const root = document.getElementById('popular-container');
+    //   root.innerHTML = '';
+    //   if (!hosts || hosts.length===0) return;
+    //   hosts.forEach(h => {
+    //     const images = Array.isArray(h.Images) ? h.Images : [];
+    //     const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+    //     const displayUrl = (profileImg && profileImg.url)
+    //       || (images.length > 0 && images[0] && images[0].url)
+    //       || '../imgs/logo.jpg';
+    //     const img = document.createElement('img');
+    //     img.src = displayUrl; img.alt = h.name || 'Host';
+    //     root.appendChild(img);
+    //   });
+    // }
 
+
+      function renderPopular(hosts){
+  const root = document.getElementById('popular-container');
+  root.innerHTML = '';
+  if (!hosts || hosts.length===0) return;
+  hosts.forEach(h => {
+    const images = Array.isArray(h.Images) ? h.Images : [];
+    const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+    const displayUrl = (profileImg && profileImg.url)
+      || (images.length > 0 && images[0] && images[0].url)
+      || '../imgs/logo.jpg';
+
+    // 🔗 Wrap image in <a> that links to host-details.html
+    const a = document.createElement('a');
+    a.href = `host-details.html?user_id=${encodeURIComponent(h.id)}`;
+    const img = document.createElement('img');
+    img.src = displayUrl;
+    img.alt = h.name || 'Host';
+    a.appendChild(img);
+    root.appendChild(a);
+  });
+}
     function filterAndRender(query) {
       const normalized = (query || '').toString().toLowerCase().trim();
       if (!normalized) {

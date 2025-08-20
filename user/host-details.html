@@ -134,10 +134,20 @@
       .replaceAll('__PID__', String(host.user_profile_id||''));
 
       const imgGrid = document.getElementById('imgGrid');
-      images.forEach(im => { const el = document.createElement('img'); el.src = im.url; el.alt = im.title||''; el.onclick = function(){ openLightbox(im.url); }; imgGrid.appendChild(el); });
-      const vidGrid = document.getElementById('vidGrid');
+    //   images.forEach(im => { const el = document.createElement('img'); el.src = im.url; el.alt = im.title||''; el.onclick = function(){ openLightbox(im.url); }; imgGrid.appendChild(el); });
+     
+     
+    images.filter(im => im.image_type !== 'id_card_photo') 
+  .forEach(im => {
+    const el = document.createElement('img');
+    el.src = im.url;
+    el.alt = im.title || '';
+    el.onclick = function(){ openLightbox(im.url); };
+    imgGrid.appendChild(el);
+  });
+  const vidGrid = document.getElementById('vidGrid');
       videos.forEach(v => { const el = document.createElement('video'); el.controls=true; el.src = v.url; vidGrid.appendChild(el); });
-    }
+}
 
     function openLightbox(url){
       const lb = document.getElementById('lightbox');
