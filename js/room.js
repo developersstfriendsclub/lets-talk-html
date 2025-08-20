@@ -8,7 +8,7 @@
   const mode = (params.get('mode') || 'video').toLowerCase();
 
   const SOCKET_URL = (window.API_CONFIG && typeof API_CONFIG.getBaseUrl==='function') ? API_CONFIG.getBaseUrl() : window.location.origin;
-  const socket = io(SOCKET_URL, { path: '/socket.io', transports: ['websocket','polling'] });
+  const socket = io(SOCKET_URL, { path: '/socket.io', upgrade: false, transports: ['polling'] });
 
   let pc = null;
   let localStream = null;
@@ -82,7 +82,15 @@
     ] });
     localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
     const remoteEl = $('remoteVideo'); if (remoteEl){ remoteEl.muted = true; }
-    pc.ontrack = (e) => { if (remoteEl){ remoteEl.srcObject = e.streams[0]; try { remoteEl.play(); } catch(_){} } };
+    pc.ontrack = (e) => {
+      if (!remoteEl) return;
+      const [stream] = e.streams;
+      if (stream) {
+        remoteEl.srcObject = stream;
+        const tryPlay = () => { try { remoteEl.play(); } catch(_){ setTimeout(tryPlay, 150); } };
+        tryPlay();
+      }
+    };
     pc.onicecandidate = (e) => { if (e.candidate) socket.emit('room-ice-candidate', { roomName, candidate: e.candidate }); };
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'connected' && remoteEl){ setTimeout(()=>{ try { remoteEl.muted = false; } catch(_){} }, 300); }
