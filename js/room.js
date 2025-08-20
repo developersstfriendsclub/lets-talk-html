@@ -96,9 +96,26 @@
   async function setupVideo(){
     try {
       console.log('Setting up video...');
+      
+      // Detect mobile device and adjust video quality
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const videoConstraints = isMobile ? {
+        width: { ideal: 480, max: 640 },
+        height: { ideal: 270, max: 360 },
+        frameRate: { ideal: 15, max: 24 }
+      } : {
+        width: { ideal: 640, max: 1280 },
+        height: { ideal: 360, max: 720 },
+        frameRate: { ideal: 24, max: 30 }
+      };
+      
       localStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: { ideal: 640 }, height: { ideal: 360 } }, 
-        audio: true 
+        video: videoConstraints,
+        audio: { 
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
       });
       
       console.log('Got local stream:', localStream);
@@ -120,18 +137,39 @@
         console.error('Local video element not found!');
       }
 
-      // Setup WebRTC
+      // Setup WebRTC with optimized settings
       pc = new RTCPeerConnection({ 
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
           { urls: 'stun:stun1.l.google.com:19302' }
-        ] 
+        ],
+        iceCandidatePoolSize: 10,
+        bundlePolicy: 'max-bundle',
+        rtcpMuxPolicy: 'require',
+        iceTransportPolicy: 'all'
       });
       
       console.log('WebRTC peer connection created');
       
-      // Add local tracks to peer connection
-      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+      // Add local tracks to peer connection with optimized settings
+      localStream.getTracks().forEach(track => {
+        if (track.kind === 'video') {
+          // Optimize video track
+          const sender = pc.addTrack(track, localStream);
+          if (sender && sender.getParameters) {
+            const params = sender.getParameters();
+            if (params.encodings) {
+              params.encodings.forEach(encoding => {
+                encoding.maxBitrate = isMobile ? 500000 : 1000000; // 500kbps for mobile, 1Mbps for desktop
+                encoding.maxFramerate = isMobile ? 15 : 24;
+              });
+              sender.setParameters(params).catch(console.warn);
+            }
+          }
+        } else {
+          pc.addTrack(track, localStream);
+        }
+      });
       
       // Setup remote video
       const remoteEl = $('remoteVideo');
@@ -140,11 +178,13 @@
         remoteEl.muted = true; // Start muted to avoid autoplay issues
         remoteEl.style.display = 'block'; // Ensure it's visible
         remoteEl.style.background = '#000'; // Set background
+        remoteEl.playsInline = true; // Important for mobile
+        remoteEl.autoplay = true;
       } else {
         console.error('Remote video element not found!');
       }
       
-      // Handle incoming remote stream
+      // Handle incoming remote stream with optimization
       pc.ontrack = (e) => {
         console.log('Received remote track:', e);
         if (remoteEl && e.streams && e.streams[0]) {
@@ -152,16 +192,22 @@
           remoteEl.srcObject = e.streams[0];
           remoteEl.style.background = 'transparent'; // Remove background when stream is set
           
-          // Retry play to handle autoplay restrictions
-          const tryPlay = () => {
-            remoteEl.play().then(() => {
-              console.log('Remote video playing successfully');
-            }).catch(err => {
-              console.warn('Remote video autoplay failed, retrying...', err);
-              setTimeout(tryPlay, 500); // Retry after 500ms
-            });
+          // Optimize remote video playback
+          remoteEl.onloadedmetadata = () => {
+            console.log('Remote video metadata loaded');
+            // Retry play to handle autoplay restrictions
+            const tryPlay = () => {
+              remoteEl.play().then(() => {
+                console.log('Remote video playing successfully');
+                // Optimize video element for performance
+                remoteEl.style.transform = 'scale(1)'; // Ensure no scaling issues
+              }).catch(err => {
+                console.warn('Remote video autoplay failed, retrying...', err);
+                setTimeout(tryPlay, 200); // Faster retry for better performance
+              });
+            };
+            tryPlay();
           };
-          tryPlay();
         }
       };
       
@@ -220,7 +266,11 @@
           console.log('We are offerer:', weAreOfferer);
           if (participants.length >= 2 && weAreOfferer && !pc.currentLocalDescription) {
             console.log('Creating offer...');
-            const offer = await pc.createOffer();
+            const offer = await pc.createOffer({
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true,
+              voiceActivityDetection: true
+            });
             await pc.setLocalDescription(offer);
             socket.emit('room-offer', { roomName, offer });
             console.log('Offer sent');
@@ -235,7 +285,8 @@
           console.log('Creating initial offer...');
           const offer = await pc.createOffer({ 
             offerToReceiveAudio: true, 
-            offerToReceiveVideo: true 
+            offerToReceiveVideo: true,
+            voiceActivityDetection: true
           });
           await pc.setLocalDescription(offer);
           socket.emit('room-offer', { roomName, offer });
@@ -249,7 +300,9 @@
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(offer));
           console.log('Remote description set, creating answer...');
-          const answer = await pc.createAnswer();
+          const answer = await pc.createAnswer({
+            voiceActivityDetection: true
+          });
           await pc.setLocalDescription(answer);
           socket.emit('room-answer', { roomName, answer });
           console.log('Answer sent');
@@ -283,12 +336,28 @@
       // Toolbar controls (if present)
       if ($('btnMute')) $('btnMute').onclick = ()=>{
         localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled); 
-        $('btnMute').textContent = localStream.getAudioTracks()[0]?.enabled ? 'Mute' : 'Unmute'; 
+        const isMuted = !localStream.getAudioTracks()[0]?.enabled;
+        $('btnMute').innerHTML = `<i class="fas fa-${isMuted ? 'microphone-slash' : 'microphone'}"></i><span>${isMuted ? 'Unmute' : 'Mute'}</span>`;
+        
+        // Update button styling
+        if (isMuted) {
+          $('btnMute').style.background = '#ef4444';
+        } else {
+          $('btnMute').style.background = 'rgba(255, 255, 255, 0.1)';
+        }
       };
       
       if ($('btnVideo')) $('btnVideo').onclick = ()=>{
         localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled); 
-        $('btnVideo').textContent = localStream.getVideoTracks()[0]?.enabled ? 'Video Off' : 'Video On'; 
+        const isVideoOff = !localStream.getVideoTracks()[0]?.enabled;
+        $('btnVideo').innerHTML = `<i class="fas fa-${isVideoOff ? 'video-slash' : 'video'}"></i><span>${isVideoOff ? 'Video On' : 'Video Off'}</span>`;
+        
+        // Update button styling
+        if (isVideoOff) {
+          $('btnVideo').style.background = '#ef4444';
+        } else {
+          $('btnVideo').style.background = 'rgba(255, 255, 255, 0.1)';
+        }
       };
       
       if ($('btnHangup')) $('btnHangup').onclick = ()=>{
@@ -300,9 +369,58 @@
         window.history.back(); 
       };
       
+      // Add screen share functionality
+      if ($('btnScreenShare')) $('btnScreenShare').onclick = async ()=>{
+        try {
+          if (!localStream.getVideoTracks()[0].enabled) {
+            alert('Please enable video first to share screen');
+            return;
+          }
+          
+          const screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+            video: { 
+              cursor: 'always',
+              displaySurface: 'monitor'
+            } 
+          });
+          
+          // Replace video track
+          const videoTrack = screenStream.getVideoTracks()[0];
+          const sender = pc.getSenders().find(s => s.track?.kind === 'video');
+          if (sender) {
+            sender.replaceTrack(videoTrack);
+            $('btnScreenShare').innerHTML = '<i class="fas fa-stop"></i><span>Stop</span>';
+            $('btnScreenShare').style.background = '#ef4444';
+            
+            // Handle screen share stop
+            videoTrack.onended = () => {
+              const originalTrack = localStream.getVideoTracks()[0];
+              if (sender && originalTrack) {
+                sender.replaceTrack(originalTrack);
+                $('btnScreenShare').innerHTML = '<i class="fas fa-desktop"></i><span>Share</span>';
+                $('btnScreenShare').style.background = 'rgba(255, 255, 255, 0.1)';
+              }
+            };
+          }
+        } catch(e) {
+          console.error('Screen share failed:', e);
+          alert('Screen sharing not supported or permission denied');
+        }
+      };
+      
     } catch(e) {
       console.error('Failed to setup video:', e);
-      alert('Failed to access camera/microphone. Please check permissions.');
+      let errorMessage = 'Failed to access camera/microphone. ';
+      if (e.name === 'NotAllowedError') {
+        errorMessage += 'Please check permissions and refresh the page.';
+      } else if (e.name === 'NotFoundError') {
+        errorMessage += 'No camera/microphone found.';
+      } else if (e.name === 'NotSupportedError') {
+        errorMessage += 'Your browser does not support video calls.';
+      } else {
+        errorMessage += 'Please check your device and try again.';
+      }
+      alert(errorMessage);
     }
   }
 
