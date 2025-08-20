@@ -34,10 +34,7 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 100;
 }
-#localVideo {
-  transform: scaleX(-1);    /* flip horizontally */
-  transform-origin: center; /* keep it centered */
-}
+
 
 #remoteVideo{
   transform: scaleX(-1);    /* flip horizontally */
@@ -116,6 +113,8 @@ body {
   height: 100%;
   object-fit: cover;
   background: #1a1a1a;
+  transform: scaleX(-1);    /* flip horizontally */
+  transform-origin: center; /* keep it centered */
 }
 
 .video-overlay {
@@ -157,6 +156,8 @@ body {
   height: 100%;
   object-fit: cover;
   background: #000;
+  transform: scaleX(-1);    /* flip horizontally */
+  transform-origin: center; /* keep it centered */
 }
 
 .local-video-controls {
