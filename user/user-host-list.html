@@ -7,6 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
   <script src="../js/config.js"></script>
+  <script src="../js/webrtc-config.js"></script>
+  <script src="../js/incoming-call.js"></script>
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
   <style>
@@ -433,7 +435,7 @@ a:-webkit-any-link{ text-decoration: none!important;}
         try { const out = await resp.json(); if (out?.data?.id) { localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); } } catch(_){ }
         // notify callee via socket with canonical room name
         try { if (socket && me.profileId && host.user_profile_id) socket.emit('call-user', { from: me.profileId, to: host.user_profile_id, roomName }); } catch(_){}
-        window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(host.name||'Host')}`;
+        window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&mode=video`;
       } catch(e){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}`; }
     }
 
@@ -468,11 +470,20 @@ a:-webkit-any-link{ text-decoration: none!important;}
         socket = io(SOCKET_URL, { path: '/socket.io', upgrade:false, transports:['polling'] });
         if (me.profileId) socket.emit('register', me.profileId, String(me.id||''));
         socket.on('incoming-call', ({ from, fromUserId, suggestedRoom }) => {
-          const ovl = document.getElementById('incomingOverlay');
-          document.getElementById('incomingFrom').textContent = `From: ${from}`;
-          ovl.style.display='flex';
-          document.getElementById('ovlAccept').onclick = ()=> { ovl.style.display='none'; window.location.href = `../room-video.html?room=${encodeURIComponent(suggestedRoom||('room_'+from))}&name=${encodeURIComponent(me.name||'Me')}&mode=video`; };
-          document.getElementById('ovlReject').onclick = ()=> { ovl.style.display='none'; try { socket.emit('reject-call', { from: from, to: me.profileId }); } catch(_){} };
+          console.log('Incoming call received in user-host-list:', { from, fromUserId, suggestedRoom });
+          // Use the incoming call handler if available, otherwise fallback to inline handling
+          if (window.incomingCallHandler) {
+            window.incomingCallHandler.showIncomingCall({ from, fromUserId, suggestedRoom });
+          } else {
+            // Fallback to inline handling
+            const ovl = document.getElementById('incomingOverlay');
+            if (ovl) {
+              document.getElementById('incomingFrom').textContent = `From: ${from}`;
+              ovl.style.display='flex';
+              document.getElementById('ovlAccept').onclick = ()=> { ovl.style.display='none'; window.location.href = `../room-video.html?room=${encodeURIComponent(suggestedRoom||('room_'+from))}&name=${encodeURIComponent(me.name||'Me')}&mode=video`; };
+              document.getElementById('ovlReject').onclick = ()=> { ovl.style.display='none'; try { socket.emit('reject-call', { from: from, to: me.profileId }); } catch(_){} };
+            }
+          }
         });
 
         // When someone invites me to chat, open the chat page with the same room
@@ -482,6 +493,14 @@ a:-webkit-any-link{ text-decoration: none!important;}
             window.location.href = `../room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(fromName||'User')}&mode=chat`;
           }
         });
+        
+        // Initialize incoming call handler after socket is ready
+        if (window.incomingCallHandler) {
+          console.log('Incoming call handler already initialized');
+        } else {
+          console.log('Initializing incoming call handler...');
+          // The incoming-call.js script should have already created the handler
+        }
       } catch(_){ }
     }
 

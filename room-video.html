@@ -3,11 +3,262 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Video Call</title>
+  <title>Video Call Room</title>
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <script src="js/config.js"></script>
+  <script src="js/webrtc-config.js"></script>
   <link rel="stylesheet" href="css/room.css"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: white;
+      overflow: hidden;
+    }
+
+    .video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+    }
+
+    .video-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .call-info {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .call-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .call-timer {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .header-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .video-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #remoteVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .video-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 50;
+    }
+
+    .connection-status {
+      background: rgba(0,0,0,0.7);
+      padding: 15px 25px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 16px;
+      backdrop-filter: blur(10px);
+    }
+
+    .local-video-container {
+      position: absolute;
+      top: 100px;
+      right: 20px;
+      width: 200px;
+      height: 150px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.3);
+      z-index: 80;
+    }
+
+    #localVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #333;
+    }
+
+    .local-video-controls {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+    }
+
+    .pip-control {
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: white;
+      padding: 5px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .control-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+      padding: 30px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .control-group {
+      display: flex;
+      gap: 15px;
+    }
+
+    .control-group.center {
+      margin: 0 40px;
+    }
+
+    .control-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      min-width: 80px;
+      backdrop-filter: blur(10px);
+    }
+
+    .control-btn:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+
+    .control-btn.primary {
+      background: #ef4444;
+    }
+
+    .control-btn.primary:hover {
+      background: #dc2626;
+    }
+
+    .control-btn i {
+      font-size: 20px;
+    }
+
+    .control-btn span {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .debug-log {
+      position: absolute;
+      top: 100px;
+      left: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 300px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+      z-index: 90;
+      display: none;
+    }
+
+    .debug-log.show {
+      display: block;
+    }
+
+    .error-message {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    .success-message {
+      background: rgba(34, 197, 94, 0.9);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      margin: 20px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+  </style>
 </head>
 <body>
   <div class="video-container">
@@ -15,16 +266,19 @@
     <div class="video-header">
       <div class="call-info">
         <div class="call-status">
-          <div class="status-dot"></div>
+          <div class="status-dot" id="statusDot"></div>
           <span id="roomTitle">Connecting...</span>
         </div>
         <div class="call-timer" id="callTimer">00:00</div>
       </div>
       <div class="header-actions">
-        <button class="header-btn" id="btnSettings">
+        <button class="header-btn" id="btnDebug" title="Toggle Debug Log">
+          <i class="fas fa-bug"></i>
+        </button>
+        <button class="header-btn" id="btnSettings" title="Settings">
           <i class="fas fa-cog"></i>
         </button>
-        <button class="header-btn" id="btnMinimize">
+        <button class="header-btn" id="btnMinimize" title="Minimize">
           <i class="fas fa-minus"></i>
         </button>
       </div>
@@ -44,7 +298,7 @@
       <div class="local-video-container">
         <video id="localVideo" autoplay playsinline muted></video>
         <div class="local-video-controls">
-          <button class="pip-control" id="btnTogglePIP">
+          <button class="pip-control" id="btnTogglePIP" title="Picture in Picture">
             <i class="fas fa-expand"></i>
           </button>
         </div>
@@ -54,70 +308,45 @@
     <!-- Control Bar -->
     <div class="control-bar">
       <div class="control-group">
-        <button class="control-btn" id="btnMute">
+        <button class="control-btn" id="btnMute" title="Mute/Unmute">
           <i class="fas fa-microphone"></i>
           <span>Mute</span>
         </button>
-        <button class="control-btn" id="btnVideo">
+        <button class="control-btn" id="btnVideo" title="Turn Video On/Off">
           <i class="fas fa-video"></i>
           <span>Video</span>
         </button>
       </div>
       
       <div class="control-group center">
-        <button class="control-btn primary" id="btnHangup">
+        <button class="control-btn primary" id="btnHangup" title="End Call">
           <i class="fas fa-phone-slash"></i>
           <span>End Call</span>
         </button>
       </div>
       
-      <!-- <div class="control-group">
-        <button class="control-btn" id="btnScreenShare">
+      <div class="control-group">
+        <button class="control-btn" id="btnScreenShare" title="Share Screen">
           <i class="fas fa-desktop"></i>
           <span>Share</span>
         </button>
-        <button class="control-btn" id="btnMore">
+        <button class="control-btn" id="btnMore" title="More Options">
           <i class="fas fa-ellipsis-h"></i>
           <span>More</span>
         </button>
-      </div> -->
+      </div>
     </div>
 
-    <!-- Debug Log (hidden by default) -->
-    <div id="log" class="debug-log" style="display: none;"></div>
+    <!-- Debug Log -->
+    <div id="debugLog" class="debug-log">
+      <div style="margin-bottom: 10px; font-weight: bold;">Debug Log</div>
+      <div id="logContent"></div>
+    </div>
+
+    <!-- Status Messages -->
+    <div id="statusMessages"></div>
   </div>
 
-  <script src="js/room.js"></script>
-  <script>
-    // Ensure mode parameter is set
-    if (!location.search.includes('mode=')) { 
-      const u = new URL(location.href); 
-      u.searchParams.set('mode','video'); 
-      location.replace(u.toString()); 
-    }
-    
-    // Call timer
-    let callStartTime = Date.now();
-    setInterval(() => {
-      const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = elapsed % 60;
-      document.getElementById('callTimer').textContent = 
-        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }, 1000);
-    
-    // PIP toggle
-    document.getElementById('btnTogglePIP').onclick = () => {
-      const localVideo = document.getElementById('localVideo');
-      if (localVideo.requestPictureInPicture) {
-        if (document.pictureInPictureElement) {
-          document.exitPictureInPicture();
-        } else {
-          localVideo.requestPictureInPicture();
-        }
-      }
-    };
-  </script>
+  <script src="js/video-room.js"></script>
 </body>
 </html>
-
