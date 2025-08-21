@@ -7,7 +7,7 @@
   <title>Profile Page</title>
   
   <!-- SweetAlert2 -->
-   <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>  -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   
   <!-- API Configuration -->
   <script src="js/config.js"></script>
@@ -402,7 +402,9 @@ async function loadProfile() {
     // }
 
     // Close loading dialog and show success
-    Swal.fire("Success", "Profile loaded successfully!", "success");
+    // Swal.fire("Success", "Profile loaded successfully!", "success");
+    Swal.close();
+
 
   } catch (error) {
     console.error('Error loading profile:', error);
