@@ -476,6 +476,75 @@ body {
   font-size: 14px;
 }
 
+/* Message Styles */
+.message {
+  display: flex;
+  margin-bottom: 16px;
+  animation: fadeInUp 0.3s ease;
+}
+
+.message.own {
+  justify-content: flex-end;
+}
+
+.message.other {
+  justify-content: flex-start;
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 20px;
+  position: relative;
+}
+
+.message.own .message-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-bottom-right-radius: 8px;
+}
+
+.message.other .message-content {
+  background: #fff;
+  color: #111827;
+  border-bottom-left-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.sender-name {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.message-time {
+  opacity: 0.7;
+}
+
+.message-text {
+  font-size: 15px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.system-message {
+  text-align: center;
+  color: #6b7280;
+  font-size: 12px;
+  font-style: italic;
+  margin: 16px 0;
+  padding: 8px;
+  background: #f3f4f6;
+  border-radius: 12px;
+}
+
 /* Chat Input */
 .chat-input {
   padding: 20px;

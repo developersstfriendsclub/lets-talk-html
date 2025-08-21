@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Chat Room</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .button.success {
+      background: #28a745;
+    }
+    .button.danger {
+      background: #dc3545;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Chat Room Test</h1>
+    <p>This page helps test the chat room functionality.</p>
+
+    <div class="info">
+      <strong>Note:</strong> Make sure your backend server is running before testing the chat room.
+    </div>
+
+    <div class="test-section">
+      <h3>1. Test Chat Room</h3>
+      <p>Click the button below to open the chat room in a new tab:</p>
+      <a href="room-chat.html?room=test-chat-123&name=TestUser&peer=TestPeer&mode=chat" target="_blank" class="button success">
+        Open Chat Room
+      </a>
+    </div>
+
+    <div class="test-section">
+      <h3>2. Test with Different Room Names</h3>
+      <p>Test with various room configurations:</p>
+      <a href="room-chat.html?room=chat1&name=Alice&peer=Bob&mode=chat" target="_blank" class="button">
+        Chat Room 1 (Alice & Bob)
+      </a>
+      <a href="room-chat.html?room=chat2&name=John&peer=Jane&mode=chat" target="_blank" class="button">
+        Chat Room 2 (John & Jane)
+      </a>
+      <a href="room-chat.html?room=meeting-chat&name=User&peer=Host&mode=chat" target="_blank" class="button">
+        Meeting Chat (User & Host)
+      </a>
+    </div>
+
+    <div class="test-section">
+      <h3>3. Test Chat Features</h3>
+      <p>Once in the chat room, test these features:</p>
+      <ul>
+        <li>Message sending and receiving</li>
+        <li>Typing indicators</li>
+        <li>User join/leave notifications</li>
+        <li>Video call button (switches to video room)</li>
+        <li>Back button navigation</li>
+        <li>Real-time updates</li>
+      </ul>
+    </div>
+
+    <div class="test-section">
+      <h3>4. Test Multiple Users</h3>
+      <p>To test chat between users:</p>
+      <ol>
+        <li>Open the same chat room URL in two different browser tabs/windows</li>
+        <li>Use different names for each tab</li>
+        <li>Send messages from one tab to see them appear in the other</li>
+        <li>Test typing indicators</li>
+      </ol>
+    </div>
+
+    <div class="test-section">
+      <h3>5. Test Video Call Integration</h3>
+      <p>Test the integration between chat and video:</p>
+      <ul>
+        <li>Click the video call button in chat to switch to video room</li>
+        <li>Verify the room name and parameters are preserved</li>
+        <li>Test switching back to chat from video room</li>
+      </ul>
+    </div>
+
+    <div class="test-section">
+      <h3>6. Troubleshooting</h3>
+      <p>If you encounter issues:</p>
+      <ul>
+        <li>Check the browser console for error messages</li>
+        <li>Ensure your backend server is running</li>
+        <li>Verify the socket connection is established</li>
+        <li>Check if the chat room JavaScript file is loading</li>
+        <li>Verify the CSS styles are applied correctly</li>
+      </ul>
+    </div>
+
+    <div class="test-section">
+      <h3>7. Navigation</h3>
+      <a href="test-video-call.html" class="button">Video Call Test</a>
+      <a href="test-room.html" class="button">Video Room Test</a>
+      <a href="test-incoming-call.html" class="button">Incoming Call Test</a>
+      <a href="index.html" class="button">Back to Main</a>
+    </div>
+  </div>
+</body>
+</html>

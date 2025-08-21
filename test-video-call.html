@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Test Video Call</title>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/webrtc-config.js"></script>
+  <script src="js/incoming-call.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .test-section h3 {
+      margin-top: 0;
+      color: #333;
+    }
+    .button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .button.success {
+      background: #28a745;
+    }
+    .button.danger {
+      background: #dc3545;
+    }
+    .status {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .status.info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    .log {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Video Call Test Page</h1>
+    <p>This page helps test the video call functionality and diagnose any issues.</p>
+
+    <div class="test-section">
+      <h3>1. Configuration Test</h3>
+      <button class="button" onclick="testConfiguration()">Test Configuration</button>
+      <div id="configStatus"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>2. Media Devices Test</h3>
+      <button class="button" onclick="testMediaDevices()">Test Camera/Microphone</button>
+      <div id="mediaStatus"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>3. WebRTC Test</h3>
+      <button class="button" onclick="testWebRTC()">Test WebRTC</button>
+      <div id="webrtcStatus"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>4. Socket Connection Test</h3>
+      <button class="button" onclick="testSocketConnection()">Test Socket</button>
+      <div id="socketStatus"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>5. Video Call Test</h3>
+      <button class="button success" onclick="startTestCall()">Start Test Call</button>
+      <button class="button danger" onclick="endTestCall()">End Test Call</button>
+      <div id="callStatus"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>6. Test Logs</h3>
+      <div id="testLog" class="log"></div>
+    </div>
+  </div>
+
+  <script>
+    let testSocket = null;
+    let testPC = null;
+    let testLocalStream = null;
+
+    function log(message, type = 'info') {
+      const logDiv = document.getElementById('testLog');
+      const timestamp = new Date().toLocaleTimeString();
+      logDiv.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+      logDiv.scrollTop = logDiv.scrollHeight;
+      console.log(`[TEST] ${message}`);
+    }
+
+    function showStatus(elementId, message, type = 'info') {
+      const element = document.getElementById(elementId);
+      element.innerHTML = `<div class="status ${type}">${message}</div>`;
+    }
+
+    // Test 1: Configuration
+    async function testConfiguration() {
+      log('Testing configuration...');
+      
+      try {
+        if (window.API_CONFIG) {
+          log('✓ API_CONFIG loaded successfully');
+          log(`Base URL: ${window.API_CONFIG.getBaseUrl()}`);
+        } else {
+          throw new Error('API_CONFIG not found');
+        }
+
+        if (window.WEBRTC_CONFIG) {
+          log('✓ WEBRTC_CONFIG loaded successfully');
+          log(`ICE Servers: ${window.WEBRTC_CONFIG.ICE_SERVERS.length} servers configured`);
+        } else {
+          throw new Error('WEBRTC_CONFIG not found');
+        }
+
+        showStatus('configStatus', '✓ Configuration loaded successfully', 'success');
+      } catch (error) {
+        log(`✗ Configuration error: ${error.message}`, 'error');
+        showStatus('configStatus', `✗ Configuration error: ${error.message}`, 'error');
+      }
+    }
+
+    // Test 2: Media Devices
+    async function testMediaDevices() {
+      log('Testing media devices...');
+      
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('getUserMedia not supported');
+        }
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter(device => device.kind === 'videoinput');
+        const audioDevices = devices.filter(device => device.kind === 'audioinput');
+
+        log(`✓ Found ${videoDevices.length} video devices and ${audioDevices.length} audio devices`);
+
+        // Test camera access
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: 320, height: 240 }, 
+          audio: true 
+        });
+        
+        log('✓ Camera and microphone access granted');
+        stream.getTracks().forEach(track => track.stop()); // Stop the stream
+
+        showStatus('mediaStatus', '✓ Media devices working correctly', 'success');
+      } catch (error) {
+        log(`✗ Media devices error: ${error.message}`, 'error');
+        showStatus('mediaStatus', `✗ Media devices error: ${error.message}`, 'error');
+      }
+    }
+
+    // Test 3: WebRTC
+    async function testWebRTC() {
+      log('Testing WebRTC...');
+      
+      try {
+        if (!window.RTCPeerConnection) {
+          throw new Error('RTCPeerConnection not supported');
+        }
+
+        const config = window.WEBRTC_CONFIG ? window.WEBRTC_CONFIG.PEER_CONNECTION_CONFIG : {};
+        const pc = new RTCPeerConnection(config);
+        
+        log('✓ RTCPeerConnection created successfully');
+        
+        // Test offer creation
+        const offer = await pc.createOffer();
+        log('✓ Offer created successfully');
+        
+        pc.close();
+        showStatus('webrtcStatus', '✓ WebRTC working correctly', 'success');
+      } catch (error) {
+        log(`✗ WebRTC error: ${error.message}`, 'error');
+        showStatus('webrtcStatus', `✗ WebRTC error: ${error.message}`, 'error');
+      }
+    }
+
+    // Test 4: Socket Connection
+    async function testSocketConnection() {
+      log('Testing socket connection...');
+      
+      try {
+        const socketUrl = window.API_CONFIG ? window.API_CONFIG.getBaseUrl() : window.location.origin;
+        testSocket = io(socketUrl, { 
+          path: '/socket.io', 
+          upgrade: false, 
+          transports: ['polling'] 
+        });
+
+        testSocket.on('connect', () => {
+          log('✓ Socket connected successfully');
+          showStatus('socketStatus', '✓ Socket connected successfully', 'success');
+        });
+
+        testSocket.on('connect_error', (error) => {
+          log(`✗ Socket connection error: ${error.message}`, 'error');
+          showStatus('socketStatus', `✗ Socket connection error: ${error.message}`, 'error');
+        });
+
+        // Test room join
+        testSocket.emit('join-room', { roomName: 'test-room', userName: 'TestUser' });
+        log('✓ Test room join request sent');
+
+      } catch (error) {
+        log(`✗ Socket error: ${error.message}`, 'error');
+        showStatus('socketStatus', `✗ Socket error: ${error.message}`, 'error');
+      }
+    }
+
+    // Test 5: Video Call
+    async function startTestCall() {
+      log('Starting test video call...');
+      
+      try {
+        // Get media stream
+        testLocalStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { width: 320, height: 240 }, 
+          audio: true 
+        });
+
+        // Create peer connection
+        const config = window.WEBRTC_CONFIG ? window.WEBRTC_CONFIG.PEER_CONNECTION_CONFIG : {};
+        testPC = new RTCPeerConnection(config);
+        
+        // Add local stream
+        testLocalStream.getTracks().forEach(track => {
+          testPC.addTrack(track, testLocalStream);
+        });
+
+        // Create offer
+        const offer = await testPC.createOffer();
+        await testPC.setLocalDescription(offer);
+        
+        log('✓ Test call setup completed');
+        showStatus('callStatus', '✓ Test call active', 'success');
+
+        // Simulate incoming call
+        setTimeout(() => {
+          if (window.incomingCallHandler) {
+            window.incomingCallHandler.showIncomingCall({
+              from: 'Test Caller',
+              fromUserId: 'test123',
+              suggestedRoom: 'test-room-123'
+            });
+            log('✓ Incoming call overlay displayed');
+          }
+        }, 2000);
+
+      } catch (error) {
+        log(`✗ Test call error: ${error.message}`, 'error');
+        showStatus('callStatus', `✗ Test call error: ${error.message}`, 'error');
+      }
+    }
+
+    function endTestCall() {
+      log('Ending test call...');
+      
+      if (testLocalStream) {
+        testLocalStream.getTracks().forEach(track => track.stop());
+        testLocalStream = null;
+      }
+      
+      if (testPC) {
+        testPC.close();
+        testPC = null;
+      }
+
+      showStatus('callStatus', 'Test call ended', 'info');
+      log('✓ Test call ended');
+    }
+
+    // Auto-run configuration test on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      log('Test page loaded, running configuration test...');
+      setTimeout(testConfiguration, 500);
+    });
+
+    // Add navigation links
+    function addNavigationLinks() {
+      const container = document.querySelector('.container');
+      if (container) {
+        const navSection = document.createElement('div');
+        navSection.className = 'test-section';
+        navSection.innerHTML = `
+          <h3>6. Navigation</h3>
+          <a href="test-incoming-call.html" class="button">Test Incoming Call</a>
+          <a href="test-room.html" class="button">Test Video Room</a>
+          <a href="test-chat.html" class="button">Test Chat Room</a>
+          <a href="index.html" class="button">Back to Main</a>
+        `;
+        container.appendChild(navSection);
+      }
+    }
+
+    // Add navigation on page load
+    document.addEventListener('DOMContentLoaded', addNavigationLinks);
+  </script>
+</body>
+</html>
