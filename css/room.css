@@ -9,7 +9,7 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #e6a6d1 0%, #764ba2 100%);
   color: #333;
   height: 100vh;
   overflow: hidden;
@@ -34,10 +34,7 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 100;
 }
-#localVideo {
-  transform: scaleX(-1);    /* flip horizontally */
-  transform-origin: center; /* keep it centered */
-}
+
 
 #remoteVideo{
   transform: scaleX(-1);    /* flip horizontally */
@@ -116,6 +113,8 @@ body {
   height: 100%;
   object-fit: cover;
   background: #1a1a1a;
+  transform: scaleX(-1);    /* flip horizontally */
+  transform-origin: center; /* keep it centered */
 }
 
 .video-overlay {
@@ -157,6 +156,8 @@ body {
   height: 100%;
   object-fit: cover;
   background: #000;
+  transform: scaleX(-1);    /* flip horizontally */
+  transform-origin: center; /* keep it centered */
 }
 
 .local-video-controls {
@@ -248,7 +249,7 @@ body {
 
 /* ===== CHAT ROOM STYLES ===== */
 .chat-container {
-  height: 100vh;
+  height: 96vh;
   display: flex;
   flex-direction: column;
   background: #fff;
