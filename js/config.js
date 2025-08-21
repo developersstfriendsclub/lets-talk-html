@@ -6,21 +6,21 @@ const API_CONFIG = {
     STAGING: 'https://staging.clientfriendclub.com',
     PRODUCTION: 'https://clientfriendclub.com'
   },
-  
+
   // Current environment (can be set via environment variable or manually)
   CURRENT_ENV: 'production', // Change this to 'local' for development
   // CURRENT_ENV: 'local', // Change this to 'local' for development
-  
+
   // Get current base URL
-  getBaseUrl: function() {
+  getBaseUrl: function () {
     return this.BASE_URLS[this.CURRENT_ENV.toUpperCase()] || this.BASE_URLS.PRODUCTION;
   },
-  
+
   // Get API base URL
-  getApiBaseUrl: function() {
+  getApiBaseUrl: function () {
     return `${this.getBaseUrl()}/api/v1`;
   },
-  
+
   // API Endpoints
   ENDPOINTS: {
     AUTH: {
@@ -48,25 +48,25 @@ const API_CONFIG = {
       CHAT_CREATE: '/chat/create',
       ROOM_CREATE: '/room/create'
     },
-    
+
     IMAGES: {
       SINGLE: '/single',
       TYPES_WISE: '/single/types_wise',
       DELETE: '/delete'
     },
-    
+
     VIDEOS: {
       SINGLE: '/single',
       DELETE: '/delete'
     },
-    
+
     BANK_ACCOUNT: {
       CREATE: '/create',
       GET_ALL: '/get-all',
       UPDATE: '/update',
       DELETE: '/delete'
     },
-    
+
     VIDEO_CALL: {
       CREATE: '/create',
       GET_ALL: '/get-all',
@@ -78,6 +78,12 @@ const API_CONFIG = {
     USER_AUH: {
       LOGIN: '/user-login',
       GET_HOST_ALL: '/host-list-for-user',
+    },
+
+    PAYMENTS: {
+      CREATE_ORDER: '/payments/create-order',
+      VERIFY: '/payments/verify',
+      WEBHOOK: '/payments/webhook'
     }
   },
 
@@ -89,37 +95,37 @@ const API_CONFIG = {
   },
 
   // Get Google Client ID for current env
-  getGoogleClientId: function() {
+  getGoogleClientId: function () {
     return this.GOOGLE_CLIENT_IDS[this.CURRENT_ENV.toUpperCase()] || '';
   },
-  
+
   // Helper function to get full API URL
-  getApiUrl: function(endpoint) {
+  getApiUrl: function (endpoint) {
     return `${this.getApiBaseUrl()}${endpoint}`;
   },
-  
+
   // Helper function to get auth endpoint URL
-  getAuthUrl: function(endpoint) {
+  getAuthUrl: function (endpoint) {
     return this.getApiUrl(endpoint);
   },
-  
+
   // Helper function to get image endpoint URL
-  getImageUrl: function(endpoint) {
+  getImageUrl: function (endpoint) {
     return this.getApiUrl(`/images${endpoint}`);
   },
-  
+
   // Helper function to get video endpoint URL
-  getVideoUrl: function(endpoint) {
+  getVideoUrl: function (endpoint) {
     return this.getApiUrl(`/videos${endpoint}`);
   },
-  
+
   // Helper function to get bank account endpoint URL
-  getBankAccountUrl: function(endpoint) {
+  getBankAccountUrl: function (endpoint) {
     return this.getApiUrl(`/bank-accounts${endpoint}`);
   },
-  
+
   // Helper function to get video call endpoint URL
-  getVideoCallUrl: function(endpoint) {
+  getVideoCallUrl: function (endpoint) {
     return this.getApiUrl(`/video-calls${endpoint}`);
   }
 };
