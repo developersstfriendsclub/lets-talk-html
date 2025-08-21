@@ -249,7 +249,7 @@ body {
 
 /* ===== CHAT ROOM STYLES ===== */
 .chat-container {
-  height: 80vh;
+  height: 83vh;
   display: flex;
   flex-direction: column;
   background: #fff;
