@@ -298,10 +298,9 @@
     </div>
 
     <div class="container">
-        <img src="./imgs/logo1.png" class="logo" alt="Logo" />
-        <button class="back-btn" onclick="goBack()">← Back to Host List</button>
+        <button class="back-btn" onclick="goBack()">← Back to Plans</button>
 
-        <h2>Recharge Your Minutes</h2>
+        <h2 id="pageTitle">Recharge Your Minutes</h2>
 
         <div class="amount-section">
             <div class="amount-options">
@@ -328,7 +327,7 @@
         </div>
 
         <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
-            Pay ₹<span id="selectedAmount">100</span>
+            Pay ₹<span id="selectedAmount">0</span>
         </button>
     </div>
 
@@ -351,35 +350,36 @@
         function showPageLoader() { document.getElementById('pageLoader').classList.add('show'); }
         function hidePageLoader() { document.getElementById('pageLoader').classList.remove('show'); }
 
-        let selectedAmountValue = 100;
+        let selectedAmountValue = 25; // Default to 0
 
         function selectAmount(amount) {
             selectedAmountValue = amount;
             document.getElementById('selectedAmount').textContent = amount;
             document.getElementById('customAmount').value = '';
             document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
-            document.querySelector(`[data-amount="${amount}"]`).classList.add('selected');
+
+            const selectedBtn = document.querySelector(`[data-amount="${amount}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('selected');
+            }
         }
 
         function handleCustomAmount() {
             const customInput = document.getElementById('customAmount');
-            // Ensure we handle empty input gracefully
             const customAmount = customInput.value ? parseInt(customInput.value) : 0;
             if (customAmount > 0) {
                 selectedAmountValue = customAmount;
                 document.getElementById('selectedAmount').textContent = customAmount;
                 document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
             } else if (document.querySelectorAll('.amount-btn.selected').length === 0) {
-                // If custom amount is cleared, revert to a default or clear the pay button
-                selectAmount(100); // Re-select default if input is cleared
+                selectAmount(100);
             }
         }
 
         function goBack() {
-            window.location.href = 'user-host-list.html';
+            window.location.href = 'talktime.html';
         }
 
-        // Main payment function
         async function initiatePayment() {
             const token = localStorage.getItem('userToken');
             if (!token) {
@@ -389,7 +389,7 @@
             }
 
             if (!selectedAmountValue || selectedAmountValue < 1) {
-                showModal('error', 'Invalid Amount', 'Minimum recharge amount is ₹1.');
+                showModal('error', 'Invalid Amount', 'Please select a valid amount to recharge.');
                 return;
             }
 
@@ -398,7 +398,7 @@
             showPageLoader();
 
             try {
-                // Step 1: Create order in backend
+                // Create order in backend
                 const orderResponse = await fetch(API_CONFIG.getApiUrl('/payments/create-order'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -412,7 +412,6 @@
 
                 //Initialize Razorpay checkout
                 const options = {
-
                     key: orderData.order.key_id,
                     amount: orderData.order.amount,
                     currency: orderData.order.currency,
@@ -448,11 +447,7 @@
                             payBtn.disabled = false;
                         }
                     },
-                    prefill: {
-                        // NOTE: You can prefill this with user data for a better experience
-                        // name: localStorage.getItem('userName') || "User",
-                        // email: localStorage.getItem('userEmail') || "",
-                    },
+                    prefill: {},
                     theme: {
                         color: "#b03b6a"
                     }
@@ -481,7 +476,22 @@
                 setTimeout(() => { window.location.href = 'user-login.html'; }, 2000);
                 return;
             }
-            selectAmount(100); // Set default amount
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const amountFromUrl = urlParams.get('amount');
+
+            if (amountFromUrl && !isNaN(amountFromUrl)) {
+                const amount = parseInt(amountFromUrl);
+                selectedAmountValue = amount;
+
+                document.getElementById('pageTitle').textContent = 'Confirm Your Recharge';
+                document.getElementById('selectedAmount').textContent = amount;
+                document.querySelector('.amount-section').style.display = 'none';
+
+            } else {
+                //alert(`Plese Enter a valid amount`);
+                selectAmount(50);
+            }
         };
     </script>
 </body>
