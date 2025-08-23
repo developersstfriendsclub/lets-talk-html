@@ -11,6 +11,8 @@ class ChatRoom {
     this.messages = [];
     this.isTyping = false;
     this.typingTimeout = null;
+    this.currentUserId = null;
+    this.peerUserId = null;
     
     this.init();
   }
@@ -20,7 +22,7 @@ class ChatRoom {
     this.setupUI();
     this.connectSocket();
     this.setupEventListeners();
-    this.loadChatHistory();
+    this.initializeRoom();
   }
 
   setupUI() {
@@ -43,6 +45,66 @@ class ChatRoom {
     }
   }
 
+  async initializeRoom() {
+    try {
+      // Get current user ID and peer user ID from localStorage or URL params
+      this.currentUserId = this.getUserId();
+      this.peerUserId = this.getPeerUserId();
+      
+      if (this.currentUserId && this.peerUserId) {
+        // Create or get existing room
+        await this.createRoom();
+        // Load chat history after room is ready
+        await this.loadChatHistory();
+      } else {
+        this.log('User IDs not available, skipping room initialization', 'warning');
+      }
+    } catch (error) {
+      this.log(`Failed to initialize room: ${error.message}`, 'error');
+    }
+  }
+
+  async createRoom() {
+    try {
+      if (!window.API_CONFIG) {
+        throw new Error('API configuration not available');
+      }
+
+      const response = await fetch(window.API_CONFIG.getAuthUrl('/room/create'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+        },
+        body: JSON.stringify({
+          sender_id: this.currentUserId,
+          receiver_id: this.peerUserId
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create room: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.success && data.data) {
+        // Update room name with the normalized name from backend
+        this.roomName = data.data.name;
+        this.log(`Room created/retrieved: ${this.roomName}`);
+        
+        // Join the room via socket
+        if (this.socket) {
+          this.socket.emit('join-room', { 
+            roomName: this.roomName, 
+            userName: this.displayName 
+          });
+        }
+      }
+    } catch (error) {
+      this.log(`Failed to create room: ${error.message}`, 'error');
+    }
+  }
+
   connectSocket() {
     try {
       const socketUrl = window.API_CONFIG ? window.API_CONFIG.getBaseUrl() : window.location.origin;
@@ -55,7 +117,7 @@ class ChatRoom {
       this.socket.on('connect', () => {
         this.log('Socket connected successfully');
         this.updateStatus('Online', 'success');
-        this.socket.emit('join-room', { roomName: this.roomName, userName: this.displayName });
+        // Room joining will be handled after room creation
       });
 
       this.socket.on('connect_error', (error) => {
@@ -121,22 +183,25 @@ class ChatRoom {
     }
   }
 
-  sendMessage() {
+  async sendMessage() {
     const msgInput = document.getElementById('msg');
     const message = msgInput?.value?.trim();
     
     if (!message) return;
 
     try {
-      // Add message to local display
+      // Add message to local display first
       this.addMessage(this.displayName, message, Date.now(), true);
       
-      // Send via socket
+      // Save message to database
+      await this.saveMessageToDatabase(message);
+      
+      // Send via socket for real-time communication
       this.socket.emit('room-message', {
         roomName: this.roomName,
         from: this.displayName,
         message: message,
-        senderId: this.getUserId()
+        senderId: this.currentUserId
       });
 
       // Clear input
@@ -145,9 +210,57 @@ class ChatRoom {
       // Stop typing indicator
       this.stopTypingIndicator();
       
-      this.log('Message sent successfully');
+      this.log('Message sent and saved successfully');
     } catch (error) {
       this.log(`Failed to send message: ${error.message}`, 'error');
+      // Remove the message from display if saving failed
+      this.removeLastMessage();
+    }
+  }
+
+  async saveMessageToDatabase(message) {
+    try {
+      if (!window.API_CONFIG) {
+        throw new Error('API configuration not available');
+      }
+
+      const response = await fetch(window.API_CONFIG.getAuthUrl('/chat/create'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('userToken')}`
+        },
+        body: JSON.stringify({
+          roomName: this.roomName,
+          senderId: this.currentUserId,
+          message: message
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save message: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        this.log('Message saved to database successfully');
+      } else {
+        throw new Error(data.message || 'Failed to save message');
+      }
+    } catch (error) {
+      this.log(`Failed to save message to database: ${error.message}`, 'error');
+      throw error;
+    }
+  }
+
+  removeLastMessage() {
+    const chatList = document.getElementById('chatList');
+    if (chatList && chatList.lastChild) {
+      chatList.removeChild(chatList.lastChild);
+    }
+    // Also remove from messages array
+    if (this.messages.length > 0) {
+      this.messages.pop();
     }
   }
 
@@ -277,22 +390,38 @@ class ChatRoom {
 
   async loadChatHistory() {
     try {
-      // Load chat history from API if available
-      if (window.API_CONFIG) {
-        const response = await fetch(window.API_CONFIG.getAuthUrl(`/chat-history/${this.roomName}`), {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('userToken')}`
-          }
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.messages) {
-            data.messages.forEach(msg => {
-              this.addMessage(msg.sender, msg.message, msg.timestamp, msg.sender === this.displayName);
-            });
-          }
+      if (!window.API_CONFIG || !this.roomName) {
+        this.log('API config or room name not available for loading chat history', 'warning');
+        return;
+      }
+
+      const response = await fetch(window.API_CONFIG.getAuthUrl(`/chat/list?roomName=${encodeURIComponent(this.roomName)}&limit=50`), {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('userToken')}`
         }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.data) {
+          // Clear existing messages
+          this.messages = [];
+          const chatList = document.getElementById('chatList');
+          if (chatList) {
+            chatList.innerHTML = '';
+          }
+          
+          // Add messages from history
+          data.data.forEach(msg => {
+            const isOwn = msg.senderId === this.currentUserId;
+            const senderName = isOwn ? this.displayName : this.peerName;
+            this.addMessage(senderName, msg.message, new Date(msg.createdAt).getTime(), isOwn);
+          });
+          
+          this.log(`Loaded ${data.data.length} messages from chat history`);
+        }
+      } else {
+        this.log(`Failed to load chat history: ${response.statusText}`, 'warning');
       }
     } catch (error) {
       this.log(`Failed to load chat history: ${error.message}`, 'error');
@@ -301,7 +430,12 @@ class ChatRoom {
 
   getUserId() {
     // Get user ID from localStorage or other sources
-    return localStorage.getItem('userId') || null;
+    return localStorage.getItem('userId') || this.params.get('userId') || null;
+  }
+
+  getPeerUserId() {
+    // Get peer user ID from URL params or localStorage
+    return this.params.get('peerId') || localStorage.getItem('peerUserId') || null;
   }
 
   escapeHtml(text) {
@@ -312,6 +446,16 @@ class ChatRoom {
 
   log(message, type = 'info') {
     console.log(`[ChatRoom] ${message}`);
+    
+    // Also show in UI if there's a log element
+    const logElement = document.getElementById('logMessages');
+    if (logElement) {
+      const logEntry = document.createElement('div');
+      logEntry.className = `log-entry log-${type}`;
+      logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logElement.appendChild(logEntry);
+      logElement.scrollTop = logElement.scrollHeight;
+    }
   }
 }
 

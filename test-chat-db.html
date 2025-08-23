@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Database Test</title>
+  <script src="js/config.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .button {
+      display: inline-block;
+      padding: 10px 20px;
+      margin: 5px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background: #0056b3;
+    }
+    .button.success {
+      background: #28a745;
+    }
+    .button.danger {
+      background: #dc3545;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 15px 0;
+    }
+    .log {
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
+      padding: 15px;
+      margin: 15px 0;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .log-entry {
+      margin: 5px 0;
+      padding: 5px;
+      border-radius: 3px;
+    }
+    .log-info { background: #d1ecf1; }
+    .log-success { background: #d4edda; }
+    .log-error { background: #f8d7da; }
+    .log-warning { background: #fff3cd; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Chat Database Test</h1>
+    <p>This page tests the chat database functionality to ensure messages are being saved properly.</p>
+
+    <div class="info">
+      <strong>Prerequisites:</strong>
+      <ul>
+        <li>Backend server must be running</li>
+        <li>User must be logged in (check localStorage for userToken)</li>
+        <li>Database tables must be created (chat_messages, rooms)</li>
+      </ul>
+    </div>
+
+    <div class="test-section">
+      <h3>1. Check Authentication Status</h3>
+      <p>Current token: <span id="tokenStatus">Checking...</span></p>
+      <button class="button" onclick="checkAuth()">Check Auth</button>
+    </div>
+
+    <div class="test-section">
+      <h3>2. Test Room Creation</h3>
+      <p>Create a test room between users:</p>
+      <input type="number" id="senderId" placeholder="Sender ID" value="1" style="width: 100px; margin: 5px;">
+      <input type="number" id="receiverId" placeholder="Receiver ID" value="2" style="width: 100px; margin: 5px;">
+      <button class="button" onclick="testCreateRoom()">Create Room</button>
+      <div id="roomResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>3. Test Chat Message Creation</h3>
+      <p>Send a test message to the database:</p>
+      <input type="text" id="roomName" placeholder="Room Name" value="room_1_2" style="width: 200px; margin: 5px;">
+      <input type="number" id="senderIdMsg" placeholder="Sender ID" value="1" style="width: 100px; margin: 5px;">
+      <input type="text" id="messageText" placeholder="Message" value="Hello, this is a test message!" style="width: 300px; margin: 5px;">
+      <button class="button" onclick="testCreateMessage()">Send Message</button>
+      <div id="messageResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>4. Test Chat Message Retrieval</h3>
+      <p>Retrieve messages from a room:</p>
+      <input type="text" id="retrieveRoomName" placeholder="Room Name" value="room_1_2" style="width: 200px; margin: 5px;">
+      <button class="button" onclick="testRetrieveMessages()">Get Messages</button>
+      <div id="retrieveResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>5. Test Complete Chat Flow</h3>
+      <p>Test the complete flow: create room, send message, retrieve messages:</p>
+      <button class="button success" onclick="testCompleteFlow()">Run Complete Test</button>
+      <div id="completeTestResult"></div>
+    </div>
+
+    <div class="test-section">
+      <h3>6. Test Chat Room Integration</h3>
+      <p>Open the actual chat room with the test data:</p>
+      <button class="button" onclick="openTestChatRoom()">Open Test Chat Room</button>
+    </div>
+
+    <div class="test-section">
+      <h3>7. Log Output</h3>
+      <div id="logOutput" class="log"></div>
+      <button class="button" onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+      <h3>8. Navigation</h3>
+      <a href="test-chat.html" class="button">Back to Chat Test</a>
+      <a href="index.html" class="button">Back to Main</a>
+    </div>
+  </div>
+
+  <script>
+    function log(message, type = 'info') {
+      const logOutput = document.getElementById('logOutput');
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logOutput.appendChild(entry);
+      logOutput.scrollTop = logOutput.scrollHeight;
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+
+    function clearLog() {
+      document.getElementById('logOutput').innerHTML = '';
+    }
+
+    function checkAuth() {
+      const token = localStorage.getItem('userToken') || localStorage.getItem('authToken');
+      const tokenStatus = document.getElementById('tokenStatus');
+      
+      if (token) {
+        tokenStatus.textContent = '✅ Token found';
+        tokenStatus.style.color = 'green';
+        log('Authentication token found', 'success');
+      } else {
+        tokenStatus.textContent = '❌ No token found';
+        tokenStatus.style.color = 'red';
+        log('No authentication token found', 'error');
+      }
+    }
+
+    async function testCreateRoom() {
+      const senderId = parseInt(document.getElementById('senderId').value);
+      const receiverId = parseInt(document.getElementById('receiverId').value);
+      
+      if (!senderId || !receiverId) {
+        log('Please enter valid sender and receiver IDs', 'error');
+        return;
+      }
+
+      try {
+        log(`Creating room between user ${senderId} and ${receiverId}...`, 'info');
+        
+        const response = await fetch(window.API_CONFIG.getAuthUrl('/room/create'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('userToken') || localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({ sender_id: senderId, receiver_id: receiverId })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          document.getElementById('roomResult').innerHTML = `<div style="color: green;">✅ Room created: ${data.data.name}</div>`;
+          log(`Room created successfully: ${data.data.name}`, 'success');
+        } else {
+          document.getElementById('roomResult').innerHTML = `<div style="color: red;">❌ Failed: ${data.message || 'Unknown error'}</div>`;
+          log(`Room creation failed: ${data.message || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        document.getElementById('roomResult').innerHTML = `<div style="color: red;">❌ Error: ${error.message}</div>`;
+        log(`Room creation error: ${error.message}`, 'error');
+      }
+    }
+
+    async function testCreateMessage() {
+      const roomName = document.getElementById('roomName').value;
+      const senderId = parseInt(document.getElementById('senderIdMsg').value);
+      const message = document.getElementById('messageText').value;
+      
+      if (!roomName || !senderId || !message) {
+        log('Please fill in all fields', 'error');
+        return;
+      }
+
+      try {
+        log(`Sending message to room ${roomName}...`, 'info');
+        
+        const response = await fetch(window.API_CONFIG.getAuthUrl('/chat/create'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('userToken') || localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({ roomName, senderId, message })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          document.getElementById('messageResult').innerHTML = `<div style="color: green;">✅ Message sent: ID ${data.data.id}</div>`;
+          log(`Message sent successfully: ID ${data.data.id}`, 'success');
+        } else {
+          document.getElementById('messageResult').innerHTML = `<div style="color: red;">❌ Failed: ${data.message || 'Unknown error'}</div>`;
+          log(`Message sending failed: ${data.message || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        document.getElementById('messageResult').innerHTML = `<div style="color: red;">❌ Error: ${error.message}</div>`;
+        log(`Message sending error: ${error.message}`, 'error');
+      }
+    }
+
+    async function testRetrieveMessages() {
+      const roomName = document.getElementById('retrieveRoomName').value;
+      
+      if (!roomName) {
+        log('Please enter a room name', 'error');
+        return;
+      }
+
+      try {
+        log(`Retrieving messages from room ${roomName}...`, 'info');
+        
+        const response = await fetch(window.API_CONFIG.getAuthUrl(`/chat/list?roomName=${encodeURIComponent(roomName)}&limit=50`), {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('userToken') || localStorage.getItem('authToken')}`
+          }
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+          const messageCount = data.data ? data.data.length : 0;
+          document.getElementById('retrieveResult').innerHTML = `<div style="color: green;">✅ Retrieved ${messageCount} messages</div>`;
+          log(`Retrieved ${messageCount} messages successfully`, 'success');
+          
+          if (data.data && data.data.length > 0) {
+            log('Message preview:', 'info');
+            data.data.slice(0, 3).forEach((msg, index) => {
+              log(`  ${index + 1}. [${msg.senderId}] ${msg.message.substring(0, 50)}...`, 'info');
+            });
+          }
+        } else {
+          document.getElementById('retrieveResult').innerHTML = `<div style="color: red;">❌ Failed: ${data.message || 'Unknown error'}</div>`;
+          log(`Message retrieval failed: ${data.message || 'Unknown error'}`, 'error');
+        }
+      } catch (error) {
+        document.getElementById('retrieveResult').innerHTML = `<div style="color: red;">❌ Error: ${error.message}</div>`;
+        log(`Message retrieval error: ${error.message}`, 'error');
+      }
+    }
+
+    async function testCompleteFlow() {
+      log('Starting complete test flow...', 'info');
+      
+      try {
+        // Step 1: Create room
+        log('Step 1: Creating room...', 'info');
+        const roomResponse = await fetch(window.API_CONFIG.getAuthUrl('/room/create'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('userToken') || localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({ sender_id: 1, receiver_id: 2 })
+        });
+        
+        const roomData = await roomResponse.json();
+        if (!roomResponse.ok || !roomData.success) {
+          throw new Error(`Room creation failed: ${roomData.message || 'Unknown error'}`);
+        }
+        
+        const roomName = roomData.data.name;
+        log(`Room created: ${roomName}`, 'success');
+        
+        // Step 2: Send message
+        log('Step 2: Sending message...', 'info');
+        const messageResponse = await fetch(window.API_CONFIG.getAuthUrl('/chat/create'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('userToken') || localStorage.getItem('authToken')}`
+          },
+          body: JSON.stringify({ roomName, senderId: 1, message: 'Test message from complete flow' })
+        });
+        
+        const messageData = await messageResponse.json();
+        if (!messageResponse.ok || !messageData.success) {
+          throw new Error(`Message sending failed: ${messageData.message || 'Unknown error'}`);
+        }
+        
+        log(`Message sent: ID ${messageData.data.id}`, 'success');
+        
+        // Step 3: Retrieve messages
+        log('Step 3: Retrieving messages...', 'info');
+        const retrieveResponse = await fetch(window.API_CONFIG.getAuthUrl(`/chat/list?roomName=${encodeURIComponent(roomName)}&limit=50`), {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('userToken') || localStorage.getItem('authToken')}`
+          }
+        });
+        
+        const retrieveData = await retrieveResponse.json();
+        if (!retrieveResponse.ok || !retrieveData.success) {
+          throw new Error(`Message retrieval failed: ${retrieveData.message || 'Unknown error'}`);
+        }
+        
+        const messageCount = retrieveData.data ? retrieveData.data.length : 0;
+        log(`Retrieved ${messageCount} messages`, 'success');
+        
+        document.getElementById('completeTestResult').innerHTML = `
+          <div style="color: green;">
+            ✅ Complete test passed!<br>
+            Room: ${roomName}<br>
+            Messages: ${messageCount}<br>
+            Last message ID: ${messageData.data.id}
+          </div>
+        `;
+        
+        log('Complete test flow passed successfully!', 'success');
+        
+      } catch (error) {
+        document.getElementById('completeTestResult').innerHTML = `<div style="color: red;">❌ Test failed: ${error.message}</div>`;
+        log(`Complete test failed: ${error.message}`, 'error');
+      }
+    }
+
+    function openTestChatRoom() {
+      const roomName = document.getElementById('roomName').value || 'room_1_2';
+      const senderId = document.getElementById('senderId').value || '1';
+      const receiverId = document.getElementById('receiverId').value || '2';
+      
+      const url = `room-chat.html?room=${encodeURIComponent(roomName)}&name=TestUser&peer=TestPeer&mode=chat&userId=${senderId}&peerId=${receiverId}`;
+      window.open(url, '_blank');
+      log(`Opening test chat room: ${url}`, 'info');
+    }
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      log('Chat Database Test page loaded', 'info');
+      checkAuth();
+    });
+  </script>
+</body>
+</html>
