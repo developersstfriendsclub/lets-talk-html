@@ -8,7 +8,7 @@
   <script src="../js/config.js"></script>
   <script src="../js/env-switcher.js"></script>
   <style>
-    body {
+    /* body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
       background-color: #fef9f9;
@@ -28,6 +28,26 @@
       background: #ffffff;
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(176, 59, 106, 0.15);
+    } */
+
+    body {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      max-width: 400px;
+      width: 100%;
+      padding: 40px 20px 60px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00000060;
+      position: relative;
+      text-align: center;
     }
 
     .logo {
@@ -123,7 +143,7 @@
       color: #888;
       margin-top: auto;
       padding: 10px 0;
-      background-color: #f6f6f6;
+      /* background-color: #f6f6f6; */
     }
 
     @media (max-width: 400px) {
@@ -194,7 +214,7 @@
     <div class="spinner"></div>
   </div>
   <div class="container">
-    <img src="../imgs/logo1.png" class="logo" alt="Logo" />
+    <img src="../imgs/friendslogo1.png" class="logo" alt="Logo" />
     <h2 style="margin-bottom: 6px;">Welcome Back</h2>
     <h3 style="margin-top: 0; color: #8d2f58; letter-spacing: .5px;">For Users</h3>
 
@@ -212,11 +232,14 @@
     <!--<div class="signup">-->
     <!--  Don't have an account? <a href="#">Sign Up</a>-->
     <!--</div>-->
+      <footer>
+         <div class="footer-text">TM</div>
+      <img src="imgs1/female1.jpg" alt="Silhouette" />
+    <p>CopyRight © 2025 Friends Club. All Rights Reserved</p>
+  </footer>
   </div>
 
-  <footer>
-    CopyRight © 2025 Pick N Pin. All Rights Reserved
-  </footer>
+
 
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
