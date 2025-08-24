@@ -169,24 +169,30 @@
   async function loadProfile() {
     try {
       const response = await fetch("https://clientfriendclub.com/api/v1/show-profile", {
-        credentials: "include" // if it requires cookies/session
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NzcsImVtYWlsIjoiYW1idWpjaGFuZDg1QGdtYWlsLmNvbSIsImlhdCI6MTc1NjAwODY5NywiZXhwIjoxNzU2NjEzNDk3fQ.nZ44197Aruay1Xg9eXhTeolcnRBTTOoPBMOgm62pffs"
+        },
+        credentials: "include"
       });
+
       const data = await response.json();
-      console.log("API Response:", data);  // 🔍 Check the exact keys
+      console.log("API Response:", data);
 
-      // Adjust based on actual response keys
-      // Example: if data.user exists inside `data.data`, we need data.data.user
-      const user = data.data || data.user || data;  
+      // 🔍 Adjust here once we know the JSON structure
+      const user = data.data || data.user || data;
 
+      // username + id
       document.getElementById("username").innerText = `#User${user.id}_${user.name}`;
       document.getElementById("userId").innerText = "userID : " + user.id;
 
-      // Profile pic
+      // profile pic
       if (user.profile_pic) {
         document.getElementById("profilePic").src = user.profile_pic;
       }
 
-      // Interest logic based on gender
+      // gender → interest
       if (user.gender === "Men") {
         document.getElementById("interest").innerText = "Interest in Women";
       } else if (user.gender === "Women") {
@@ -202,6 +208,7 @@
 
   loadProfile();
 </script>
+
 
 
 </body>
