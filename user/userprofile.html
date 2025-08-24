@@ -236,15 +236,15 @@
   </div>
 
   <script>
+    // Debug: Check if config.js loaded
+    console.log('Config.js loaded, API_CONFIG available:', typeof API_CONFIG !== 'undefined');
+    if (typeof API_CONFIG !== 'undefined') {
+      console.log('Current environment:', API_CONFIG.CURRENT_ENV);
+      console.log('Base URL:', API_CONFIG.getBaseUrl());
+    }
     // Function to get token from localStorage or prompt user
     function getAuthToken() {
-      let token = localStorage.getItem('authToken');
-      if (!token) {
-        // For testing purposes, you can set a default token here
-        // In production, this should redirect to login
-        token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJhbWJ1anVzZXJAZ21haWwuY29tIiwiaWF0IjoxNzU2MDU2NjU5LCJleHAiOjE3NTY2NjE0NTl9.MzV3DbWm3DbgbM2i7RnvjY50myvsqJOOIsrxYY5tDVo';
-        console.warn('No auth token found, using default token for testing');
-      }
+      const token = localStorage.getItem("userToken");
       return token;
     }
 
@@ -322,7 +322,21 @@
         showLoading();
         
         const token = getAuthToken();
-        const response = await fetch("http://localhost:5000/api/v1/show-profile", {
+        
+        // Check if config.js is loaded and get API URL
+        let apiUrl;
+        if (typeof API_CONFIG === 'undefined') {
+          console.error('API_CONFIG is not defined. config.js may not have loaded properly.');
+          // Fallback to localhost for development
+          apiUrl = 'http://localhost:5000/api/v1/show-profile';
+          console.log('Using fallback API URL:', apiUrl);
+        } else {
+          // Use config.js to get the dynamic API URL
+          apiUrl = API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE);
+          console.log('Using API URL from config:', apiUrl);
+        }
+        
+        const response = await fetch(apiUrl, {
           method: "GET",
           headers: {
             "Accept": "application/json",
