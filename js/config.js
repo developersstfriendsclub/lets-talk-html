@@ -8,8 +8,8 @@ const API_CONFIG = {
   },
 
   // Current environment (can be set via environment variable or manually)
-  // CURRENT_ENV: 'production', // Change this to 'local' for development
-  CURRENT_ENV: 'local', // Change this to 'local' for development
+  CURRENT_ENV: 'production', // Change this to 'local' for development
+  // CURRENT_ENV: 'local', // Change this to 'local' for development
 
   // Get current base URL
   getBaseUrl: function () {
