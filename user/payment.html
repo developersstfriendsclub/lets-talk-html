@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recharge Minutes</title>
+    <title>Confirm Recharge</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="../js/config.js"></script>
@@ -33,65 +33,9 @@
             box-shadow: 0 10px 30px rgba(176, 59, 106, 0.15);
         }
 
-        .logo {
-            width: 110px;
-            margin: 0 auto 20px;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
-        }
-
         h2 {
             color: #b03b6a;
             margin: 10px 0 20px 0;
-        }
-
-        .amount-section {
-            margin-bottom: 20px;
-        }
-
-        .amount-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .amount-btn {
-            padding: 12px;
-            border: 2px solid #c77492;
-            border-radius: 10px;
-            background: white;
-            color: #b03b6a;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            transition: all 0.2s ease;
-        }
-
-        .amount-btn:hover {
-            background: #b03b6a;
-            color: white;
-        }
-
-        .amount-btn.selected {
-            background: #b03b6a;
-            color: white;
-            border-color: #b03b6a;
-        }
-
-        .custom-amount {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1.5px solid #c77492;
-            border-radius: 10px;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        .custom-amount:focus {
-            outline: none;
-            border-color: #c95a86;
-            box-shadow: 0 0 0 3px rgba(176, 59, 106, 0.15);
         }
 
         .pay-btn {
@@ -133,12 +77,6 @@
             color: white;
         }
 
-        .info-text {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 15px;
-        }
-
         footer {
             text-align: center;
             font-size: 13px;
@@ -148,7 +86,7 @@
             background-color: #f6f6f6;
         }
 
-        /* Modal & Loader styles */
+        /* Modal & Loader styles (kept for payment status popups) */
         .modal {
             display: none;
             position: fixed;
@@ -158,7 +96,6 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease-in-out;
         }
 
         .modal.show {
@@ -175,7 +112,6 @@
             max-width: 380px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease-out;
         }
 
         .modal-icon {
@@ -195,7 +131,6 @@
             font-size: 22px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #333;
         }
 
         .modal-message {
@@ -248,38 +183,6 @@
                 transform: rotate(360deg);
             }
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateY(-30px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .container {
-                padding: 15px;
-            }
-
-            .amount-options {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
     </style>
 </head>
 
@@ -300,31 +203,7 @@
     <div class="container">
         <button class="back-btn" onclick="goBack()">← Back to Plans</button>
 
-        <h2 id="pageTitle">Recharge Your Minutes</h2>
-
-        <div class="amount-section">
-            <div class="amount-options">
-                <button class="amount-btn" onclick="selectAmount(100)" data-amount="100">₹100<br><small>60
-                        min</small></button>
-                <button class="amount-btn" onclick="selectAmount(200)" data-amount="200">₹200<br><small>120
-                        min</small></button>
-                <button class="amount-btn" onclick="selectAmount(500)" data-amount="500">₹500<br><small>300
-                        min</small></button>
-                <button class="amount-btn" onclick="selectAmount(1000)" data-amount="1000">₹1000<br><small>600
-                        min</small></button>
-                <button class="amount-btn" onclick="selectAmount(2000)" data-amount="2000">₹2000<br><small>1200
-                        min</small></button>
-                <button class="amount-btn" onclick="selectAmount(5000)" data-amount="5000">₹5000<br><small>3000
-                        min</small></button>
-            </div>
-
-            <input type="number" id="customAmount" class="custom-amount" placeholder="Or enter custom amount (₹)"
-                min="1" max="50000" oninput="handleCustomAmount()">
-
-            <div class="info-text">
-                Minimum recharge: ₹1 • 1 Rupee = 1 Minute
-            </div>
-        </div>
+        <h2 id="pageTitle">Confirm Your Recharge</h2>
 
         <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
             Pay ₹<span id="selectedAmount">0</span>
@@ -336,7 +215,7 @@
     </footer>
 
     <script>
-        // Modal and loader functions
+        // Modal and loader functions (unchanged)
         function showModal(type, title, message) {
             const modal = document.getElementById('messageModal');
             const icon = document.getElementById('modalIcon');
@@ -350,31 +229,9 @@
         function showPageLoader() { document.getElementById('pageLoader').classList.add('show'); }
         function hidePageLoader() { document.getElementById('pageLoader').classList.remove('show'); }
 
-        let selectedAmountValue = 25; // Default to 0
+        let selectedAmountValue = 0; // Initialize with 0
 
-        function selectAmount(amount) {
-            selectedAmountValue = amount;
-            document.getElementById('selectedAmount').textContent = amount;
-            document.getElementById('customAmount').value = '';
-            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
-
-            const selectedBtn = document.querySelector(`[data-amount="${amount}"]`);
-            if (selectedBtn) {
-                selectedBtn.classList.add('selected');
-            }
-        }
-
-        function handleCustomAmount() {
-            const customInput = document.getElementById('customAmount');
-            const customAmount = customInput.value ? parseInt(customInput.value) : 0;
-            if (customAmount > 0) {
-                selectedAmountValue = customAmount;
-                document.getElementById('selectedAmount').textContent = customAmount;
-                document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('selected'));
-            } else if (document.querySelectorAll('.amount-btn.selected').length === 0) {
-                selectAmount(100);
-            }
-        }
+        // MODIFICATION: Removed the selectAmount() and handleCustomAmount() functions.
 
         function goBack() {
             window.location.href = 'talktime.html';
@@ -389,7 +246,7 @@
             }
 
             if (!selectedAmountValue || selectedAmountValue < 1) {
-                showModal('error', 'Invalid Amount', 'Please select a valid amount to recharge.');
+                showModal('error', 'Invalid Amount', 'Please go back and select a valid recharge plan.');
                 return;
             }
 
@@ -398,7 +255,7 @@
             showPageLoader();
 
             try {
-                // Create order in backend
+                // Step 1: Create order in backend
                 const orderResponse = await fetch(API_CONFIG.getApiUrl('/payments/create-order'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -415,8 +272,9 @@
                     key: orderData.order.key_id,
                     amount: orderData.order.amount,
                     currency: orderData.order.currency,
-                    name: "Let's Talk",
+                    name: "Friends Club", // MODIFICATION: Changed name
                     description: `Recharge for ₹${selectedAmountValue}`,
+                    image: "https://friendsclub.clientfriendclub.com/imgs/logo1.png", // MODIFICATION: Added your logo
                     order_id: orderData.order.id,
                     handler: async function (response) {
                         showPageLoader();
@@ -477,20 +335,18 @@
                 return;
             }
 
+            // This is the main logic now
             const urlParams = new URLSearchParams(window.location.search);
             const amountFromUrl = urlParams.get('amount');
 
             if (amountFromUrl && !isNaN(amountFromUrl)) {
                 const amount = parseInt(amountFromUrl);
                 selectedAmountValue = amount;
-
-                document.getElementById('pageTitle').textContent = 'Confirm Your Recharge';
                 document.getElementById('selectedAmount').textContent = amount;
-                document.querySelector('.amount-section').style.display = 'none';
-
             } else {
-                //alert(`Plese Enter a valid amount`);
-                selectAmount(50);
+                // If no amount is found in URL, show an error and send user back
+                showModal('error', 'No Plan Selected', 'Redirecting back to plans page.');
+                setTimeout(() => { goBack(); }, 2500);
             }
         };
     </script>
