@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fafafa;
+      color: #333;
+    }
+
+    .header {
+      background-color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      color: #b23b75;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .section {
+      background-color: white;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      padding: 15px;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 16px;
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #888;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .link {
+      color: #333;
+      text-decoration: none;
+      display: block;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .link:last-child {
+      border-bottom: none;
+    }
+
+    .link-blue {
+      color: #007BFF;
+      font-weight: 500;
+    }
+
+    .link-red {
+      color: #d9534f;
+      font-weight: 500;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #b23b75;
+      display: flex;
+      justify-content:space-evenly;
+      padding: 12px 0;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    .bottom-nav i {
+      color: white;
+      font-size: 22px;
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #b23b75;
+      border-radius: 4px;
+      display: inline-block;
+    }
+    
+    .accordion-btn {
+  background-color: transparent;
+  color: #333;
+  cursor: pointer;
+  padding: 12px 0;
+  width: 100%;
+  border: none;
+  text-align: left;
+  font-size: 16px;
+  font-weight: 500;
+  border-bottom: 1px solid #eee;
+}
+
+.accordion-btn::after {
+  content: '\25BC';
+  float: right;
+  transition: transform 0.3s;
+}
+
+.accordion-btn.active::after {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  padding-left: 10px;
+  font-size: 13px;
+  color: #666;
+}
+
+
+    @media (max-width: 480px) {
+      .header {
+        font-size: 18px;
+      }
+      .setting-item, .link {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">Settings</div>
+
+  <div class="container">
+    <!-- Do Not Disturb -->
+    <div class="section">
+      <div class="setting-item">
+        <span>Do Not Disturb</span>
+        <input type="checkbox" />
+      </div>
+    </div>
+
+    <!-- Policies -->
+    <!--<div class="section">-->
+    <!--  <div class="section-title">Our Policies</div>-->
+    <!--  <a href="#" class="link">Privacy Policy</a>-->
+    <!--  <a href="#" class="link">Terms of Use</a>-->
+    <!--  <a href="#" class="link">Delivery, Refund & Cancellation Policy</a>-->
+    <!--  <a href="#" class="link">Community Guidelines</a>-->
+    <!--  <a href="#" class="link">Compliance Statement</a>-->
+    <!--  <a href="#" class="link">Content Moderation Policy</a>-->
+    <!--</div>-->
+    
+    <!-- Policies Accordion -->
+<div class="section">
+  <div class="section-title">Our Policies</div>
+
+  <div class="accordion-item">
+    <button class="accordion-btn">Privacy Policy</button>
+    <div class="accordion-content">
+    <p> At Friends Club, your privacy is very important to us. This Privacy Policy explains how we collect, use, disclose, and protect your personal information when you use our platform, which includes our social networking features, friend-matching tools, and online gaming services (excluding casino or gambling content).
+By using our Services, you agree to the practices described in this Privacy Policy. This policy is designed to be compliant with common privacy regulations like GDPR, CCPA, and India's IT Act, 2000 </p>
+ <h3 >Information We Collect</h3>
+
+                                        <p> We collect the following types of information:<br>
+                                        a. Personal Information
+                                        When you register or use our Services, we may collect:<br>
+                                        
+                                       Full name, Date of birth, Email address, Phone number (optional), Profile photo and bio, Location (if permission is granted), Login credentials (encrypted)<br>
+                                        <p> b. Usage Information </p>
+                                        We collect data about how you use the platform: Games played, Friends and social interactions, Messages (not shared or sold),  Content you post (photos, status updates, etc.)
+                                        <br>
+                                        
+                                        
+                                        <p >c. Device & Technical Information</p>
+                                        
+                                        <p>IP address, Browser type, Operating system, Device type, Log files and crash data </p>
+                                       
+                                        
+                                        <p>d. In-App Purchases (if applicable)<br>
+                                        Payment details are handled by third-party payment processors. We do not store full credit card or payment information.</p>
+                                        
+                                        
+                                        
+                                        <h3>How We Use Your Information</h3>
+
+                                       
+                                        
+                                        <p>We use your data to:</p>                                  
+                                        
+
+                                          <p>Create and manage your account, Recommend games, content, or users, Ensure platform safety and prevent abuse, Send important updates, service notifications, and offers (you can opt-out of marketing)</p>
+                                    
+                                        
+                                        <h3>How We Share Your Information</h3>
+
+                                        <p > We do not sell your personal information. We may share data only in the following circumstances:</p>
+                                         <ul class="points">With other users based on your profile visibility settings
+                                        <li>With service providers (e.g., hosting, analytics, payment gateways)</li>
+                                        <li>With law enforcement or authorities if legally required</li>
+                                        <li>With affiliates or business partners during mergers or acquisitions (you will be notified)</li>
+                                        </ul>
+                                        
+                                        <h3 >Your Privacy Choices</h3>
+                                        <p >You can:</p>
+                                         <ul class="points">
+                                            
+                                            <li>	View, update, or delete your personal information</li>
+                                            <li>	Delete your account at any time</li>
+                                            <li>	Opt-out of promotional emails and notifications</li>
+                                            <li>	Control profile visibility (public, friends-only, private)</li>
+                                            For data deletion requests, email us at [privacy@clientfriendsclub.com].
+                                            </ul>
+                                         
+                                        
+                                        <h3 >Data Security</h3>
+
+                                        <p > We use industry-standard security practices to protect your data, including:</p>
+                                         <ul class="points">
+                                            <li>	Encrypted connections (HTTPS)</li>
+                                            <li>	Secure server infrastructure</li>
+                                            <li>	Access controls and regular audits</li>
+                                            However, no system is 100% secure. Please use strong passwords and protect your login details.
+                                            
+                                            </ul>
+
+                                       
+                                        
+                                        <h3 >Children Privacy</h3>
+
+                                        <p > Our Services are not intended for users under 18. If we become aware that a child under 18 has registered, we will delete their account and data promptly.</p>
+                           
+                                     
+                                     <h3 >Data retention </h3>
+
+                                        <p >We retain your personal data only for as long as necessary:</p>
+                                         <ul class="points">
+                                        <li>	To provide our services</li>
+                                        <li>	To comply with legal obligations</li>
+                                        <li>	To resolve disputes or enforce policies</li>
+                                        You may request early deletion of your data at any time.</ul>
+                                        
+                                        
+                                        
+                                        
+                                        
+                                         <h3> International Users</h3>
+                                         <p>If you are accessing Friends Club from outside your country of residence, you consent to your information being transferred and processed in that region.</p>
+                                        
+
+
+
+
+                                             <h3>Changes to This Policy</h3>
+                                          <p>We may update this Privacy Policy occasionally. When we do, we will:</p>
+                                          <ul class="points">
+                                
+
+                                        <li>	Notify users via email or app notification (for significant changes)</li>
+                                        <li>Update the "Effective Date" above</li>
+                                        
+                                        Your continued use of the platform signifies your acceptance of the revised policy.</ul>
+                                        
+                                                    <h3>Contact Us</h3>
+                                          <p>If you have questions, concerns, or data-related requests, contact:</p>
+                                           <ul class="points">
+                                        <li>Friends Club – Privacy Officer</li>
+                                        <li>Email: privacy@clientfriendsclub.com</li>
+                                        <li>Address: [Holding No :- 372, WEST TOWER, 11 W 2 ROOM NO. 22, ACTION AREA 1, IIF, NEW TOWN, CHAKPACHURIA , <br>District :- North 24 Parganas, Pincode :- 700156 in ward no. 11</li>
+                                        
+                                        
+                                    
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-btn">Terms of Use</button>
+    <div class="accordion-content">
+     
+     
+              <h3>Effective Date: 29-06-2025</h3>
+                                        <p>Welcome to [FRIENDS CLUB] ("we", "us", "our"). These Terms of Use (“Terms”) govern your use of our online platform, including our social networking features, friendship-building tools, and non-casino gaming services (collectively, the “Services”).
+By accessing or using our platform (web or mobile), you agree to be bound by these Terms. If you do not agree, please do not use the Services. </p>
+
+                                         <h3>Eligibility</h3>
+
+                                        <p> You must be at least 18 years old to use the platform. If you are under the age of 18, you must have your parent or guardian’s permission.
+                                        By using the Services, you represent that:</p>
+                                        <ul class="points">
+                                          <li>You are eligible to use the platform;</li>
+                                          <li>The information you provide is accurate and truthful;</li>
+                                          <li>You will comply with these Terms and all applicable laws.</li>
+                                        </ul>
+                                        
+                                        <h3>User Accounts</h3>
+
+                                        <p> To access certain features, you may be required to create an account. You are responsible for:</p>
+
+                                        <ul class="points">
+                                          <li>Maintaining the confidentiality of your login credentials;</li>
+                                          <li>All activity that occurs under your account;</li>
+                                          <li>Updating your information to keep it accurate.</li>
+                                        </ul>
+                                        We reserve the right to suspend or terminate accounts that violate these Terms or appear to be fraudulent.
+                                        
+                                        <h3>Permitted Use</h3>
+
+                                        <p> You agree to use the platform only for lawful purposes, including:</p>
+                                         <ul class="points">
+                                        <li>	Connecting with friends and making new social connections;</li>
+                                        <li>	Participating in non-casino online games for entertainment;</li>
+                                        <li>	Sharing content that complies with our community guidelines.</li>
+                                        </ul>
+                                        
+                                     <ul class="points">You may not:
+                                    <li>	Harass, bully, impersonate, or threaten others;</li>
+                                    <li>	Post harmful, illegal, obscene, or violent content;</li>
+                                    <li>	Attempt to hack, exploit, or disrupt the platform or its services;</li>
+                                    <li>	Use bots, scripts, or automated systems to manipulate gameplay or social features.</li>
+                                     </ul>
+                                     
+                                     <h3>Content Ownership and Use</h3>
+
+                                        
+                                         <ul class="points">
+                                        <li>You retain ownership of the content you post but grant us a non-exclusive, worldwide, royalty-free license to use, reproduce, display, and distribute your content for the purpose of operating the platform.</li>
+                                        <li>You are responsible for the content you share. Do not post anything you do not have the right to use or distribute.</li>
+                                      
+                                        </ul>
+                                        
+                                         <h3> Gaming Features</h3>
+                                          <ul class="points">
+                                         <li>	All games are for entertainment purposes only. There are no gambling, betting, or monetary rewards involved.</li>
+                                        <li>In-game purchases (if any) are non-refundable and do not carry real-world monetary value.</li></ul>
+                                        
+                                     
+                                
+                                          
+                                        <h3 >Privacy</h3>
+                                        <p >Your use of the platform is subject to our Privacy Policy, which outlines how we collect, use, and protect your personal information. By using our Services, you consent to the collection and use of your data in accordance with our Privacy Policy. </p>
+
+                                         
+                                        
+                                        <h3>Termination</h3>
+
+                                        <p> We may suspend or terminate your access to the platform without prior notice if:</p>
+
+                                        <ul class="points">
+                                          <li>You violate these Terms or community standards;</li>
+                                          <li>We are required to do so by law;</li>
+                                          <li>We detect fraudulent or abusive behavior.</li>
+                                        </ul>
+                                       You may delete your account at any time by contacting support or using the platform settings.
+                                        
+                                        <h3>Limitation of Liability</h3>
+
+                                        <p> We provide the Services “as-is” and make no warranties regarding:</p>
+                                         <ul class="points">
+                                        <li>Platform availability or error-free functionality;</li>
+                                        <li>User behavior or posted content;</li>
+                                        <li>Compatibility with your device or browser.</li>
+                                        </ul>
+                                        
+                                          To the maximum extent permitted by law, we are not liable for any damages (including loss of data, revenue, or reputation) arising from your use of the platform.
+                                     
+                                     <h3>Changes to Terms</h3>
+
+                                        <p >We reserve the right to update these Terms at any time. Changes will be posted on this page, and your continued use of the platform signifies your acceptance of the updated Terms. </p>
+                                       
+                                        
+                                         <h3 > Governing Law</h3>
+                                         <p>These Terms are governed by the laws of [Insert Jurisdiction/Country], without regard to conflict of law principles. Any disputes shall be resolved in the courts of [Insert Jurisdiction].</p>
+                                        
+                                     
+
+
+                                             <h3>Contact Us</h3>
+                                          <p >If you have any questions or concerns about these Terms, please contact us at:</p>
+                                           <ul class="points">
+                                        <li>Platform Name : Friends Club</li>
+                                        <li>Email: [customercare@clientfriendsclub.com]</li>
+                                        <li>Address: [Holding No :- 372, WEST TOWER, 11 W 2 ROOM NO. 22, ACTION AREA 1, IIF, NEW TOWN, CHAKPACHURIA ,<br> District :- North 24 Parganas, Pincode :- 700156 in ward no. 11]</li>
+                                        <li>Phone Contact Details:+918240210845</li>
+                                        
+                                        </ul>
+     </div>
+  </div>
+
+                  <div class="accordion-item">
+                    <button class="accordion-btn">Refund Policy</button>
+                    <div class="accordion-content">
+                    
+                     <h3> Effective Date: 29-06-2025</h3>
+                                                        <p >At Friends Club, we aim to ensure you have a positive and fair experience on our platform. This Refund Policy outlines the terms under which purchases made on our platform are eligible for a refund. </p>
+                
+                                                         <h3 >Digital Goods & In-App Purchases</h3>
+                
+                                                        <p > All purchases made for digital content, in-game items, or upgrades on Friends Club are non-refundable, except in the following cases:</p>
+                                                        <ul class="points">Eligible for Refund:
+                                                          <li>You were charged multiple times for the same purchase due to a technical error.</li>
+                                                          <li>You made a purchase without receiving the item or feature due to a system malfunction.</li>
+                                                          <li>Your account was compromised and purchases were made fraudulently (with proof and investigation).</li>
+                                                        </ul>
+                                                        <ul class="points">Not Eligible for Refund:
+                                                           <li>You changed your mind after purchase.</li> 
+                                                           <li>You made the purchase by mistake.</li> 
+                                                           <li>You no longer want or use the purchased item or feature.</li> 
+                                                           <li>In-game items or credits that have been partially used or consumed.</li>
+                                                        </ul>
+                                                        
+                                                        <h3>Subscription Plans (if applicable)</h3>
+                
+                                                        <p>If you purchased a subscription plan (e.g., Friends Club Premium):</p>
+                
+                                                        <ul class="points">
+                                                          <li>You may cancel anytime, but no partial refunds are provided for unused time in the billing cycle.</li>
+                                                          <li>If a subscription renewal was processed in error, contact us within 48 hours of charge to request a refund.</li>
+                                                        
+                                                        </ul>
+                                                       
+                                                        
+                                                        <h3>How to Request a Refund</h3>
+                
+                                                        <p > To request a refund:</p>
+                                                         <ul class="points">
+                                                        <li>Email us at support@clientfriendsclub.com</li>
+                                                        <li>Include:</li>
+                                                        <li> Your username/email ID   </li>
+                                                        <li>Transaction ID or receipt</li>	
+                                                        <li>Reason for refund request</li>
+                                                        
+                                                        
+                                                        </ul>
+                                                        
+                                                 
+                                                     We will respond within 5 business days and process eligible refunds within 7–10 business days, depending on your payment method.
+                                                     
+                                                        <h3 >Third-Party Platforms</h3>
+                                                        <p>If you made a purchase through a third-party platform (e.g., Google Play or Apple App Store), their refund policies apply, and you must contact them directly. </p>
+                
+                                                         
+                                                        
+                                                        <h3>Policy Updates</h3>
+                
+                                                        <p> We reserve the right to update this Refund Policy at any time. Updates will be posted on this page. Continued use of the platform after changes implies acceptance of the updated policy.</p>
+                
+                                                
+                
+                                                             <h3 >Contact Us</h3>
+                                                          <p>For all refund-related questions or issues:</p>
+                                                           <ul class="points">
+                                                        <li>Email: support@clientfriendsclub.com</li>
+                                                        <li>Email: [customercare@clientfriendsclub.com]</li>
+                                                        <li>Address: [Holding No :- 372, WEST TOWER, 11 W 2 ROOM NO. 22, ACTION AREA 1, IIF, NEW TOWN, CHAKPACHURIA , <br>District :- North 24 Parganas, Pincode :- 700156 in ward no. 11]]</li>
+                                                        
+                                                        
+                                                        </ul>
+                    
+      
+    
+                                                            </div>
+                                                          </div>
+
+  <div class="accordion-item">
+    <button class="accordion-btn">Community Guidelines</button>
+    <div class="accordion-content">
+      <p>Respectful behavior is expected. Harassment or abuse is not tolerated...</p>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-btn">Compliance Statement</button>
+    <div class="accordion-content">
+      <p>We comply with all local regulations and standards...</p>
+    </div>
+  </div>
+
+  <div class="accordion-item">
+    <button class="accordion-btn">Content Moderation Policy</button>
+    <div class="accordion-content">
+      <p>All content is reviewed to ensure it meets community standards...</p>
+    </div>
+  </div>
+</div>
+
+    
+    
+    
+
+    <!-- Actions -->
+    <div class="section">
+      <a href="#" class="link">Report a Problem</a>
+      <a href="#" class="link link-red">Delete Account</a>
+      <a href="userlogin.html" class="link">Logout</a>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+   <div class="bottom-nav">
+    <div class="nav-item">
+      <i class="fas fa-video"></i>
+    </div>
+    <a href="mychats.html" ><div class="nav-item">
+      <i class="fas fa-comment-alt"></i>
+    </div></a>
+     <a href="host-list.html" ><div class="nav-item active">
+      <i class="fas fa-home"></i>
+    </div></a>
+     <a href="notifications.html"><div class="nav-item">
+      <i class="fas fa-bell"></i>
+    </div></a>
+     <a href="userprofile.html"><div class="nav-item">
+      <i class="fas fa-user"></i>
+    </div></a>
+  </div>
+  <script>
+  const accordionBtns = document.querySelectorAll('.accordion-btn');
+
+  accordionBtns.forEach(btn => {
+    btn.addEventListener('click', function () {
+      const content = this.nextElementSibling;
+
+      this.classList.toggle('active');
+      if (content.style.maxHeight) {
+        content.style.maxHeight = null;
+      } else {
+        content.style.maxHeight = content.scrollHeight + "px";
+      }
+    });
+  });
+</script>
+</body>
+</html>

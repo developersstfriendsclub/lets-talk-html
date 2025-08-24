@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Achievement Level</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+      color: #333;
+    }
+
+    .topbar {
+      background-color: #f8d1e4;
+      padding: 15px;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #b23b75;
+    }
+
+    .level-card {
+      background: #1e90ff;
+      color: white;
+      margin: 20px;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .level-card h3 {
+      margin: 0 0 10px;
+    }
+
+    .bar-container {
+      background: #ccc;
+      height: 6px;
+      border-radius: 4px;
+      margin-top: 10px;
+      position: relative;
+    }
+
+    .bar-fill {
+      background: #fff;
+      width: 40%;
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .my-level {
+      background: white;
+      color: #1e90ff;
+      border-radius: 20px;
+      padding: 6px 16px;
+      display: inline-block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .levels-section {
+      padding: 0 20px;
+    }
+
+    .levels-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      color: goldenrod;
+      margin-bottom: 8px;
+    }
+
+    .level-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .level-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: goldenrod;
+      font-weight: bold;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #b23b75;
+      display: flex;
+     justify-content:space-evenly;
+      padding: 12px 0;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    .bottom-nav i {
+      color: white;
+      font-size: 22px;
+    }
+
+    @media (max-width: 480px) {
+      .level-card h3 {
+        font-size: 16px;
+      }
+      .bottom-nav i {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">Achievement Level</div>
+
+  <div class="level-card">
+    <h3>My Level</h3>
+    <img src="https://img.icons8.com/fluency/48/000000/combo-chart.png" style="width: 80px;" alt="chart" />
+    <div class="my-level">My Level 0</div>
+    <div style="margin-top: 8px;">12 Level</div>
+    <div class="bar-container">
+      <div class="bar-fill"></div>
+    </div>
+  </div>
+
+  <div class="levels-section">
+    <div class="levels-header">
+      <div>Levels</div>
+      <div>Total recharge amount</div>
+    </div>
+
+    <div class="level-item">
+      <div class="level-left"><i class="fa-solid fa-shield-halved"></i> Level 0</div>
+      <div>₹0</div>
+    </div>
+    <div class="level-item">
+      <div class="level-left"><i class="fa-solid fa-shield-halved"></i> Level 12</div>
+      <div>₹500</div>
+    </div>
+    <div class="level-item">
+      <div class="level-left"><i class="fa-solid fa-shield-halved"></i> Level 2</div>
+      <div>₹2500</div>
+    </div>
+    <div class="level-item">
+      <div class="level-left"><i class="fa-solid fa-shield-halved"></i> Level 3</div>
+      <div>₹5000</div>
+    </div>
+    <div class="level-item">
+      <div class="level-left"><i class="fa-solid fa-shield-halved"></i> Level 4</div>
+      <div>₹10000</div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <i class="fa-solid fa-video"></i>
+    <i class="fa-solid fa-comment"></i>
+    <i class="fa-solid fa-house"></i>
+    <i class="fa-solid fa-bell"></i>
+    <i class="fa-solid fa-user"></i>
+  </div>
+
+</body>
+</html>
