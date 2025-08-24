@@ -235,6 +235,9 @@
     <a href="userprofile.html"><div class="nav-item"><i class="fas fa-user"></i></div></a>
   </div>
 
+  <!-- Include config.js before the main script -->
+  <script src="../js/config.js"></script>
+  
   <script>
     // Function to get token from localStorage or prompt user
     function getAuthToken() {
@@ -322,7 +325,12 @@
         showLoading();
         
         const token = getAuthToken();
-        const response = await fetch("http://localhost:5000/api/v1/show-profile", {
+        
+        // Use config.js to get the dynamic API URL
+        const apiUrl = API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE);
+        console.log('Using API URL:', apiUrl);
+        
+        const response = await fetch(apiUrl, {
           method: "GET",
           headers: {
             "Accept": "application/json",
