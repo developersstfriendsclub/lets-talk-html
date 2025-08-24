@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Notification</title>
+  <script src="js/config.js"></script>
+  <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 400px;
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px #00000040;
+      text-align: center;
+      position: relative;
+    }
+
+    .header {
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #d6006d;
+      color: white;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .notification-card {
+      display: flex;
+      align-items: flex-start;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .status-badge { display:inline-block; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:700; }
+    .status-approved { background:#e6f4ea; color:#137333; }
+    .status-rejected { background:#fdecea; color:#a50e0e; }
+    .status-pending { background:#fff4e5; color:#b26a00; }
+
+    .notification-card img {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: contain;
+      margin-right: 10px;
+    }
+
+    .notification-info {
+      text-align: left;
+      flex: 1;
+    }
+
+    .notification-info h4 {
+      font-size: 14px;
+      color: #222;
+      margin-bottom: 4px;
+    }
+
+    .notification-info p {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 2px;
+    }
+
+    .icon {
+      color: #d6006d;
+      font-size: 14px;
+      margin-right: 4px;
+    }
+     /* Waiting for Approval Box */
+    .waiting-box {
+      background: #fff0f6;
+      border: 2px dashed #d6006d;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #a00050;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .footer-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f84d91;
+      width: 100%;
+      max-width: 400px;
+      height: 60px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 0 10px;
+      box-shadow: 0 -2px 10px #00000030;
+      z-index: 1000;
+    }
+
+    .footer-item {
+      width: 40px;
+      height: 40px;
+      background: #ffffffaa;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 2px 5px #00000020;
+      cursor: pointer;
+    }
+
+    .footer-item img {
+      width: 20px;
+      height: 20px;
+    }
+
+    .footer-center {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 4px 8px #00000030;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 2;
+    }
+
+    .footer-center img {
+      width: 30px;
+      height: 30px;
+    }
+
+    .footer {
+      margin-top: 40px;
+      opacity: 0.2;
+    }
+
+    .footer img {
+      width: 80%;
+      /* filter: drop-shadow(0 0 8px #ff5e92); */
+    }
+
+    .footer-text {
+      font-size: 20px;
+      font-weight: bold;
+      color: #d6006d;
+      margin-top: 5px;
+    }
+    
+      .goog-logo-link,
+    .goog-te-gadget span {
+      display: none !important;
+    }
+
+    #google_translate_element {
+      color: transparent !important;
+    }
+
+    .goog-te-gadget {
+      color: #66666600 !important;
+    }
+
+    @media (max-width: 480px) {
+      .notification-card img {
+        width: 36px;
+        height: 36px;
+      }
+
+      .notification-info h4 {
+        font-size: 13px;
+      }
+
+      .notification-info p {
+        font-size: 11px;
+      }
+
+      .footer img {
+        width: 130px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+       <div id="google_translate_element"></div>
+    <div class="header">Notification</div>
+    
+
+    <div id="notificationList"></div>
+    
+    <div id="approvalBox" class="waiting-box" style="display:none;">
+      ⏳ Waiting for Approval by Admin.  <br>You will be notified soon.
+    </div>
+    <br> 
+     <span style="color:red; font-weight:600;">** Welcome Bonus ₹400 each upon approval.** valid till 21.08.2025<br> We are working on Profile page </span>
+
+    <!-- Footer Graphic -->
+    <div class="footer">
+        <div class="footer-text">TM</div>
+      <img src="imgs/female1.jpg" alt="Silhouette" />
+      
+    </div>
+      <!-- Footer Navigation -->
+  <div class="footer-nav">
+    <div class="footer-item"><a href="call-list.html"><img src="icons/video.png" alt="Video"></a></div>
+    <div class="footer-item"><a href="my-chats.html"><img src="icons/chat.png" alt="Chat"></a></div>
+
+    <div class="footer-center">
+     <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
+    </div>
+
+    <div class="footer-item"><a href="notifications.html"><img src="icons/bell.png" alt="Notification"></a></div>  
+    <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+      try {
+        const token = localStorage.getItem('authToken') || localStorage.getItem('userToken');
+        if (!token) {
+          document.getElementById('approvalBox').style.display = 'block';
+          return;
+        }
+        const res = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE), {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const isApproved = Boolean(data?.data?.is_verified);
+        const status = (data?.data?.approval_status) || (isApproved ? 'approved' : 'pending');
+        document.getElementById('approvalBox').style.display = status === 'pending' ? 'block' : 'none';
+
+        const list = document.getElementById('notificationList');
+        list.innerHTML = '';
+        const now = new Date().toLocaleString();
+        if (status === 'approved') {
+          list.innerHTML += `<div class="notification-card"><img src="icons/bell.png" alt="Icon"/><div class="notification-info"><h4>Account Status <span class="status-badge status-approved">Approved</span></h4><p>${now}</p><p>Your host account has been approved. Enjoy premium access.</p></div></div>`;
+        } else if (status === 'rejected') {
+          list.innerHTML += `<div class="notification-card"><img src="icons/bell.png" alt="Icon"/><div class="notification-info"><h4>Account Status <span class="status-badge status-rejected">Rejected</span></h4><p>${now}</p><p>Your host account was rejected. Please update your details and try again.</p></div></div>`;
+        } else {
+          list.innerHTML += `<div class="notification-card"><img src="icons/bell.png" alt="Icon"/><div class="notification-info"><h4>Account Status <span class="status-badge status-pending">Pending</span></h4><p>${now}</p><p>Waiting for Approval by Admin. You will be notified soon.</p></div></div>`;
+        }
+      } catch (e) {
+        document.getElementById('approvalBox').style.display = 'block';
+      }
+    });
+  </script>
+  </div>
+   <!-- Google Translate (Optional) -->
+<script type="text/javascript">
+  function googleTranslateElementInit() {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+  }
+</script>
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+</html>
