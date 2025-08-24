@@ -433,9 +433,17 @@ a:-webkit-any-link{ text-decoration: none!important;}
         const resp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.CALL_CREATE), {
           method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id, roomName, startedAt: Date.now() })
         });
-        try { const out = await resp.json(); if (out?.data?.id) { localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); } } catch(_){ }
+        try { 
+          const out = await resp.json();
+           if (out?.data?.id) {
+             localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); 
+            } } catch(_){ }
         // notify callee via socket with canonical room name
-        try { if (socket && me.profileId && host.user_profile_id) socket.emit('call-user', { from: me.profileId, to: host.user_profile_id, roomName }); } catch(_){}
+        try { 
+          // if (socket && me.profileId && host.user_profile_id) {
+            socket.emit('call-user', { from: me.profileId, to: host.user_profile_id, roomName });
+          // }
+        } catch(_){}
         window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&mode=video`;
       } catch(e){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}`; }
     }
