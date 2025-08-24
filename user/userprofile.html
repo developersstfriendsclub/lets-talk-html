@@ -168,24 +168,28 @@
 <script>
   async function loadProfile() {
     try {
-      const response = await fetch("https://clientfriendclub.com/api/v1/show-profile");
+      const response = await fetch("https://clientfriendclub.com/api/v1/show-profile", {
+        credentials: "include" // if it requires cookies/session
+      });
       const data = await response.json();
+      console.log("API Response:", data);  // 🔍 Check the exact keys
 
-      // Assuming response structure
-      // Example: { userId: 5999999, username: "Anjali Singh", gender: "Women", profilePic: "url" }
+      // Adjust based on actual response keys
+      // Example: if data.user exists inside `data.data`, we need data.data.user
+      const user = data.data || data.user || data;  
 
-      document.getElementById("username").innerText = `#User${data.userId}_${data.username}`;
-      document.getElementById("userId").innerText = "userID : " + data.userId;
+      document.getElementById("username").innerText = `#User${user.id}_${user.name}`;
+      document.getElementById("userId").innerText = "userID : " + user.id;
 
       // Profile pic
-      if (data.profilePic) {
-        document.getElementById("profilePic").src = data.profilePic;
+      if (user.profile_pic) {
+        document.getElementById("profilePic").src = user.profile_pic;
       }
 
-      // Interest logic
-      if (data.gender === "Men") {
+      // Interest logic based on gender
+      if (user.gender === "Men") {
         document.getElementById("interest").innerText = "Interest in Women";
-      } else if (data.gender === "Women") {
+      } else if (user.gender === "Women") {
         document.getElementById("interest").innerText = "Interest in Men";
       } else {
         document.getElementById("interest").innerText = "Interest not set";
@@ -198,6 +202,7 @@
 
   loadProfile();
 </script>
+
 
 </body>
 </html>
