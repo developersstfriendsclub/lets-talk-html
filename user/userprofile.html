@@ -242,12 +242,6 @@
     // Function to get token from localStorage or prompt user
     function getAuthToken() {
       let token = localStorage.getItem('authToken');
-      if (!token) {
-        // For testing purposes, you can set a default token here
-        // In production, this should redirect to login
-        token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJhbWJ1anVzZXJAZ21haWwuY29tIiwiaWF0IjoxNzU2MDU2NjU5LCJleHAiOjE3NTY2NjE0NTl9.MzV3DbWm3DbgbM2i7RnvjY50myvsqJOOIsrxYY5tDVo';
-        console.warn('No auth token found, using default token for testing');
-      }
       return token;
     }
 
