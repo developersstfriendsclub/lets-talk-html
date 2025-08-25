@@ -1184,6 +1184,9 @@ class VideoCallRoom {
       if (state === 'connected' && !this.callStartTime) {
         this.callStartTime = Date.now();
         this.startCallTimer();
+        document.getElementById('connectionStatus').style.display = 'none';
+        document.getElementById('roomTitle').textContent = 'Connected';
+        document.getElementById('statusDot').style.background = '#22c55e';
       } else if (['disconnected', 'failed', 'closed'].includes(state)) {
         this.stopCallTimer();
       }
