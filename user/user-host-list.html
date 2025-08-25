@@ -12,13 +12,13 @@
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
 
   <style>
-    body, html { user-select: none; }
+    body, html { user-select: none;  overflow-x: hidden;}
     body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
       background: #fff;
       color: #333;
-      overflow-x: hidden;
+     
     }
     header {
       font-size: 22px;
@@ -295,13 +295,13 @@ a:-webkit-any-link{ text-decoration: none!important;}
 .carousel-btn.next { right: 55px; } */
 /* .carousel-btn.prev { left: -40px; }
 .carousel-btn.next { right: -40px; } */
-.popular-carousel {
+/* .popular-carousel {
   position: relative;
   overflow: hidden;
-  width: 80%;            /* give it more room on desktop */
-  max-width: 700px;      /* prevent stretching too wide */
+  width: 80%;            /* give it more room on desktop 
+  max-width: 700px;      /* prevent stretching too wide 
   padding: 15px 0;
-  margin: 0 auto;        /* center horizontally */
+  margin: 0 auto;        /* center horizontally 
 }
 
 .popular-track {
@@ -313,7 +313,75 @@ a:-webkit-any-link{ text-decoration: none!important;}
 }
 
 .popular-item {
-  min-width: 90px;       /* item width */
+  min-width: 90px;       /* item width 
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.popular-item img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  transition: transform 0.3s ease;
+}
+
+.popular-item img:hover {
+  transform: scale(1.1);
+} */
+
+/* Carousel navigation buttons */
+/* .carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-60%);
+  background: #b03b6a;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  opacity: 0.7;
+  font-size: 16px;
+}
+
+.carousel-btn:hover {
+  opacity: 1;
+} */
+
+/* Positioning buttons closer to edge */
+/* .carousel-btn.prev { left: 0px; }
+.carousel-btn.next { right: 0px; } */
+.popular-carousel {
+  width: 80%;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 15px 0;
+  overflow-x: auto;                   /* enable scroll */
+  -webkit-overflow-scrolling: touch;  /* smooth on iOS */
+  scroll-behavior: smooth;            /* smooth desktop */
+  cursor: grab;
+    -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+
+
+.popular-carousel:active {
+  cursor: grabbing;
+}
+
+.popular-track {
+  display: flex;
+  gap: 21px;
+  padding: 10px;
+  user-select: none;
+}
+
+.popular-item {
+  min-width: 90px;
   text-align: center;
   flex-shrink: 0;
 }
@@ -331,29 +399,14 @@ a:-webkit-any-link{ text-decoration: none!important;}
   transform: scale(1.1);
 }
 
-/* Carousel navigation buttons */
+/* Hide arrows completely */
 .carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-60%);
-  background: #b03b6a;
-  color: #fff;
-  border: none;
-  padding: 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 10;
-  opacity: 0.7;
-  font-size: 16px;
+  display: none !important;
 }
 
-.carousel-btn:hover {
-  opacity: 1;
+.popular-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
-
-/* Positioning buttons closer to edge */
-.carousel-btn.prev { left: 0px; }
-.carousel-btn.next { right: 0px; }
     
     
 
@@ -704,136 +757,102 @@ a:-webkit-any-link{ text-decoration: none!important;}
     // }
 
 
-   //   function renderPopular(hosts){
-  //const root = document.getElementById('popular-container');
-  //root.innerHTML = '';
-  //if (!hosts || hosts.length===0) return;
-  //hosts.forEach(h => {
-    //const images = Array.isArray(h.Images) ? h.Images : [];
-   // const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-    //const displayUrl = (profileImg && profileImg.url)
-     // || (images.length > 0 && images[0] && images[0].url)
-     // || '../imgs/logo.jpg';
-
-    // 🔗 Wrap image in <a> that links to host-details.html//
-    //const a = document.createElement('a');
-    //a.href = `host-details.html?user_id=${encodeURIComponent(h.id)}`;
-    //const img = document.createElement('img');
-    //img.src = displayUrl;
-    //img.alt = h.name || 'Host';
-    //a.appendChild(img);
-    //root.appendChild(a);
- // });
-//}
-/*250825: Carousel integration in Popular Host Sec */
-//       function renderPopular(hosts) {
-//   const track = document.getElementById('popular-container');
-//   track.innerHTML = '';
-//   if (!hosts || hosts.length === 0) return;
-
+//      function renderPopular(hosts){
+//   const root = document.getElementById('popular-container');
+//   root.innerHTML = '';
+//   if (!hosts || hosts.length===0) return;
 //   hosts.forEach(h => {
 //     const images = Array.isArray(h.Images) ? h.Images : [];
-//     const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+//    const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
 //     const displayUrl = (profileImg && profileImg.url)
-//       || (images.length > 0 && images[0] && images[0].url)
-//       || '../imgs/logo.jpg';
+//      || (images.length > 0 && images[0] && images[0].url)
+//      || '../imgs/logo.jpg';
 
-//     const item = document.createElement('div');
-//     item.className = 'popular-item';
-//     item.innerHTML = `
-//       <a href="host-details.html?user_id=${encodeURIComponent(h.id)}">
-//         <img src="${displayUrl}" alt="${h.name || 'Host'}" />
-//         <div style="font-size:12px; margin-top:5px; color:#555;">${h.name || ''}</div>
-//       </a>
-//     `;
-//     track.appendChild(item);
-//   });
-
-//   // --- Carousel logic ---
-//   const prevBtn = document.querySelector('.carousel-btn.prev');
-//   const nextBtn = document.querySelector('.carousel-btn.next');
-
-//   const items = track.querySelectorAll('.popular-item');
-//   const itemWidth = items[0].offsetWidth + 18; // width + gap
-//   let position = 0;
-
-//   function updateCarousel() {
-//     track.style.transform = `translateX(${position}px)`;
-//   }
-
-//   prevBtn.onclick = () => {
-//     position += itemWidth * 2; // move 2 items left
-//     if (position > 0) {
-//       // loop back to end
-//       position = -(itemWidth * (items.length - 7));
-//     }
-//     updateCarousel();
-//   };
-
-//   nextBtn.onclick = () => {
-//     position -= itemWidth * 2; // move 2 items right
-//     if (Math.abs(position) > itemWidth * (items.length - 7)) {
-//       // loop back to start
-//       position = 0;
-//     }
-//     updateCarousel();
-//   };
-
-//   // Optional: Auto-loop every 3s
-//   setInterval(() => { nextBtn.click(); }, 3000);
+//     🔗 Wrap image in <a> that links to host-details.html//
+//     const a = document.createElement('a');
+//     a.href = `host-details.html?user_id=${encodeURIComponent(h.id)}`;
+//     const img = document.createElement('img');
+//     img.src = displayUrl;
+//     img.alt = h.name || 'Host';
+//     a.appendChild(img);
+//     root.appendChild(a);
+//  );
 // }
+
 /*250825: 2nd time Carousel integration in Popular Host Sec */
-function renderPopular(hosts) {
-  const track = document.getElementById('popular-container');
-  track.innerHTML = '';
-  if (!hosts || hosts.length === 0) return;
+    function enablePopularDrag() {
+    const carousel = document.querySelector(".popular-carousel");
+    let isDown = false;
+    let startX;
+    let scrollLeft;
 
-  hosts.forEach(h => {
-    const images = Array.isArray(h.Images) ? h.Images : [];
-    const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-    const displayUrl = (profileImg && profileImg.url)
-      || (images.length > 0 && images[0] && images[0].url)
-      || '../imgs/logo.jpg';
+    // Mouse events
+    carousel.addEventListener("mousedown", (e) => {
+      isDown = true;
+      carousel.classList.add("active");
+      startX = e.pageX - carousel.offsetLeft;
+      scrollLeft = carousel.scrollLeft;
+    });
 
-    const item = document.createElement('div');
-    item.className = 'popular-item';
-    item.innerHTML = `
-      <a href="host-details.html?user_id=${encodeURIComponent(h.id)}">
-        <img src="${displayUrl}" alt="${h.name || 'Host'}" />
-        <div style="font-size:12px; margin-top:5px; color:#555;">${h.name || ''}</div>
-      </a>
-    `;
-    track.appendChild(item);
-  });
+    carousel.addEventListener("mouseleave", () => {
+      isDown = false;
+      carousel.classList.remove("active");
+    });
 
-  // --- Carousel logic ---
-  const prevBtn = document.querySelector('.carousel-btn.prev');
-  const nextBtn = document.querySelector('.carousel-btn.next');
+    carousel.addEventListener("mouseup", () => {
+      isDown = false;
+      carousel.classList.remove("active");
+    });
 
-  const items = track.querySelectorAll('.popular-item');
-  const itemWidth = items[0].offsetWidth + 18; // width + gap
-  let position = 0;
+    carousel.addEventListener("mousemove", (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - carousel.offsetLeft;
+      const walk = (x - startX) * 2; // scroll speed multiplier
+      carousel.scrollLeft = scrollLeft - walk;
+    });
 
-  function updateCarousel() {
-    track.style.transform = `translateX(${position}px)`;
+    // Touch events (mobile)
+    carousel.addEventListener("touchstart", (e) => {
+      isDown = true;
+      startX = e.touches[0].pageX - carousel.offsetLeft;
+      scrollLeft = carousel.scrollLeft;
+    });
+
+    carousel.addEventListener("touchend", () => {
+      isDown = false;
+    });
+
+    carousel.addEventListener("touchmove", (e) => {
+      if (!isDown) return;
+      const x = e.touches[0].pageX - carousel.offsetLeft;
+      const walk = (x - startX) * 2;
+      carousel.scrollLeft = scrollLeft - walk;
+    });
   }
 
-  prevBtn.onclick = () => {
-    position += itemWidth * 2; // move 2 items left
-    if (position > 0) {
-      position = -(itemWidth * (items.length - 7));
-    }
-    updateCarousel();
-  };
+  // Call after Popular Hosts are rendered
+  function renderPopular(hosts) {
+    const root = document.getElementById('popular-container');
+    root.innerHTML = '';
+    if (!hosts || hosts.length === 0) return;
 
-  nextBtn.onclick = () => {
-    position -= itemWidth * 2; // move 2 items right
-    if (Math.abs(position) > itemWidth * (items.length - 7)) {
-      position = 0;
-    }
-    updateCarousel();
-  };
-}
+    hosts.forEach(h => {
+      const images = Array.isArray(h.Images) ? h.Images : [];
+      const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+      const displayUrl = (profileImg && profileImg.url)
+        || (images.length > 0 && images[0] && images[0].url)
+        || '../imgs/logo.jpg';
+
+      const item = document.createElement('div');
+      item.className = 'popular-item';
+      item.innerHTML = `<img src="${displayUrl}" alt="${h.name || 'Host'}">`;
+      root.appendChild(item);
+    });
+
+    enablePopularDrag(); // 👈 enable drag/swipe after rendering
+  }
+
 
 
     function filterAndRender(query) {
