@@ -8,21 +8,23 @@
   <script src="js/config.js"></script>
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
   <style>
+    body, html { user-select: none;  overflow-x: hidden;}
     body { margin:0; font-family: 'Segoe UI', sans-serif; background:linear-gradient(to bottom, #f8c6d8, #fddae3); }
     .container { max-width:440px; margin:0 auto; padding:16px; }
     .header { font-size:22px; font-weight:800; color:#fff; padding:14px; text-align:center; background:#d6006d; border-radius:12px; }
     .search { margin:12px 0; }
     .search input { width:100%; padding:12px; border:1px solid #ffd4e6; border-radius:12px; background:#fff; }
     .list { display:flex; flex-direction:column; gap:12px; }
-    .card { display:flex; gap:9px; padding:12px; background:#fff; border-radius:12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); align-items:center; }
-    .card img { width:60px; height:60px; border-radius:10px; object-fit:cover; }
+    .card { display: flex; gap: 5px;padding: 5px;background: #fff;border-radius: 12px;box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);align-items: center;
+    /* margin-right: 0px; */width: 100%; }
+    .card img { width:50px; height:50px; border-radius:10px; object-fit:cover; }
     .info { flex:1; }
     .name { font-weight:700; color:#0f172a; font-size:15px; display:flex; align-items:center; gap:8px; }
     .meta { font-size:12px; color:#475569; }
     .status { font-size:12px; color:#475569; margin-top:4px; }
     .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:#9ca3af; }
     .dot.online { background:#22c55e; }
-    .actions { display:flex; gap:8px; }
+    .actions { display:flex; gap:6px; margin-right: 3px; }
     .btn { background:#d6006d; color:#fff; border:none; padding: 6px 6px; border-radius:10px; cursor:pointer; margin-left: -4px; font-size:12px; }
     .badge { background:#ef4444; color:#fff; border-radius:12px; padding:2px 6px; font-size:11px; font-weight:700; line-height:1; }
       .goog-logo-link,
@@ -37,25 +39,28 @@
     .goog-te-gadget {
       color: #66666600 !important;
     }
+    
     .footer-nav {
-      position: static;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(3%);
-      background: #f84d91;
-      width: 100%;
-      max-width: 400px;
-      height: 60px;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0 10px;
-      box-shadow: 0 -2px 10px #00000030;
-      z-index: 1000;
-      margin-top: 66px;
+      position: fixed;
+        bottom: 0;
+        /* left: 50%; */
+        transform: translateX(0%);
+        background: #f84d91;
+        width: 100%;
+        max-width: 450px;
+        height: 50px;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        display: flex
+;
+        justify-content: space-around;
+        align-items: center;
+        /* padding: 0 10px; */
+        box-shadow: 0 -2px 10px #00000030;
+        z-index: 1000;
+        margin-bottom: 0px;
     }
+    
 
     .footer-item {
       width: 40px;
@@ -101,24 +106,24 @@
     border-radius: 10px;
     object-fit: cover;
 }
-    .footer-nav {
-      position: static;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-3%);
-      background: #f84d91;
-      width: 100%;
-      max-width: 400px;
-      height: 60px;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0 10px;
-      box-shadow: 0 -2px 10px #00000030;
-      z-index: 1000;
-      margin-top: 50px;
+    
+      .footer-nav {
+      
+        transform: translateX(-7%);
+        background: #f84d91;
+        width: 100%;
+        max-width: 400px;
+        height: 60px;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: 0 10px;
+        box-shadow: 0 -2px 10px #00000030;
+        z-index: 1000;
+        /* margin-bottom: 0; */
+    
     }
     }
     
