@@ -1,49 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Host Page</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
   <script src="../js/config.js"></script>
-  <script src="../js/webrtc-config.js"></script>
-  <script src="../js/incoming-call.js"></script>
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
-
+  <script src="../js/incoming-call.js"></script>
+  <script src="../js/outgoing-call.js"></script>
   <style>
-    body, html { user-select: none; }
     body {
       margin: 0;
       font-family: 'Roboto', sans-serif;
       background: #fff;
       color: #333;
     }
+
     header {
       font-size: 22px;
       font-weight: bold;
       color: #b03b6a;
       padding: 15px 10px;
       border-bottom: 1px solid #ddd;
-      position: relative;
     }
-    .header-right {
-      position: absolute;
-      top: 15px;
-      right: 10px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
+
+    .search-container {
+      padding: 10px 15px;
     }
-    .header-left { margin: 0 45% 0; }
-    .recharge {
-      background: #de5289;
-      color: #fff;
-      padding: 4px 10px;
-      border-radius: 15px;
-      font-size: 12px;
-    }
-    .search-container { padding: 10px 15px; }
+
     .search-container input {
       width: 100%;
       padding: 10px;
@@ -51,53 +37,7 @@
       border-radius: 12px;
       font-size: 16px;
     }
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 10px;
-      font-weight: bold;
-    }
-    .tabs span {
-      cursor: pointer;
-      color: #b03b6a;
-      padding-bottom: 3px;
-    }
-    .tabs .active { border-bottom: 2px solid #b03b6a; }
-    .banner {
-      width: 60%;
-      margin: 20px auto;
-      background-color: #fba3cc;
-      border-radius: 15px;
-      /*background-image: url('https://via.placeholder.com/300x150/ff99cc/ffffff?text=Banner');*/
-      background-size: cover;
-      background-position: center;
-    }
-    .banner img {
-      width: 75%;
-      margin: 0 10% 0;
-    }
-    .section-title {
-      padding: 0 15px;
-      margin-top: 20px;
-      font-weight: bold;
-      font-size: 18px;
-      text-align: center;
-    }
-    .popular-users {
-      display: flex;
-      overflow-x: auto;
-      padding: 10px 15px;
-      gap: 10px;
-      justify-content: center;
-    }
-    .popular-users img {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid #ccc;
-    }
+
     .host-card {
       background: #f5f5f5;
       margin: 15px;
@@ -106,48 +46,24 @@
       display: flex;
       align-items: flex-start;
       gap: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
+
     .host-card img {
       width: 70px;
       height: 70px;
       border-radius: 10px;
       object-fit: cover;
-      transition: transform 0.3s ease;
     }
-    .host-card img:hover {
-      transform: scale(1.6);
-      margin-left: 1.5em;
-      margin-top: 1em;
-      z-index: 1;
+
+    .host-details {
+      flex: 1;
     }
-    .premium-badge {
-      display:inline-block;
-      margin-left:8px;
-      background:#ffd700;
-      color:#7a5b00;
-      padding:2px 8px;
-      border-radius:12px;
-      font-size:11px;
-      font-weight:700;
+
+    .host-details h4 {
+      margin: 0 0 5px;
     }
-    .host-details { flex: 1; }
-    .host-details h4 { margin: 0 0 5px; }
-    img.flag {
-      width: 2em;
-      position: absolute;
-      top: 0.4em;
-      margin-left: 0.2em;
-      animation: wave-flag 1.5s infinite ease-in-out;
-      transform-origin: left center;
-    }
-    @keyframes wave-flag {
-      0% { transform: rotateZ(0deg); }
-      25% { transform: rotateZ(2deg); }
-      50% { transform: rotateZ(0deg); }
-      75% { transform: rotateZ(-2deg); }
-      100% { transform: rotateZ(0deg); }
-    }
+
     .call-btn {
       background: #de5289;
       border: none;
@@ -158,606 +74,199 @@
       font-size: 14px;
       margin-top: 10px;
     }
+
     .bottom-nav {
-    position: fixed;
-    bottom: 0;              /* stick to bottom */
-    left: 0;
-    right: 0;
-     background: #f74e8f; /* pink background bar */
-    width: 100%;
-  
-    display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    padding: 15px 10px;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* shadow upwards */
-    z-index: 999;
-}
-
-
-
-.bottom-nav::-webkit-scrollbar { display: none; } /* hide scrollbar */
-    
-    .footer-text {
-      font-size: 35px;
-      font-weight: bold;
-      color: #ec74ac;
-      padding-top: 0.5em;
-      text-align: center;
-      opacity: 0.8;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #f74e8f;
+      width: 100%;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      padding: 15px 10px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+      z-index: 999;
     }
-       
+
     .nav-item {
-    background: #ff89b0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 20px;
-    transition: all 0.3s ease;
-    margin-bottom: 8px;
-    padding-bottom: 0px;
-    
-}
-
-.nav-item:hover {
-  background: #ff6fa0;
-  transform: scale(1.1);
-}
-
-.nav-item.active {
-  background: white;        /* active button = white */
-  color: #f74e8f;           /* icon pink */
-  width: 65px;              /* bigger */
-  height: 65px;
-  margin-top: -25px;        /* lift above bar */
-  box-shadow: 0 0 12px rgba(0,0,0,0.2);
-}
-    .nav-item.active::after {
-      content: "";
-      width: 6px;
-      height: 6px;
-      background: white;
+      background: #ff89b0;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 20px;
     }
 
+    .nav-item.active {
+      background: white;
+      color: #f74e8f;
+      width: 65px;
+      height: 65px;
+      margin-top: -25px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+    }
 
-    img.img-flag {
-    width: 35px;
-    height: 35px;
-    position: absolute;
-    margin-top: 0em;
-    left: 17em;
-}
-    
-    .footer-item a {
-  text-decoration: none!important; /* removes underline */
-  color: inherit;        /* keeps original icon/text color */
-}
-    
-    .footer-item a img {
-  text-decoration: none!important; /* no underline on icons */
-  border: none;          /* prevents blue border on some browsers */
-}
-a:-webkit-any-link{ text-decoration: none!important;}
-
-/* Popular carousel container */
-.popular-carousel {
-  position: relative;
-  overflow: hidden;
-  width: 50%;
-  padding: 15px 0;
-  margin: 0 auto;  /* center horizontally */
-
-  /* display: flex; */
-  justify-content: center;
-}
-
-.popular-track {
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-  gap: 25px;
-  will-change: transform;
-
-}
-
-.popular-item {
-  min-width: 100px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.popular-item img {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #ccc;
-  transition: transform 0.3s ease;
-}
-
-.popular-item img:hover {
-  transform: scale(1.1);
-}
-
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background: #b03b6a;
-  color: #fff;
-  border: none;
-  padding: 8px 10px;
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 10;
-  opacity: 0.7;
-}
-
-.carousel-btn:hover {
-  opacity: 1;
-}
-
-/* .carousel-btn.prev { left: 55px; }
-.carousel-btn.next { right: 55px; } */
-.carousel-btn.prev { left: -40px; }
-.carousel-btn.next { right: -40px; }
-    
-    
-
-    @media (max-width: 500px) {
-      .banner { width: 90%; height: 0%; }
-      .host-card {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      .host-card img { margin-bottom: 10px; }
-      /* .call-btn { width: 100%; } */
-      .bottom-nav { width: 95%; padding: 12px 5px; }
-      .nav-item { font-size: 18px; }
-      .header-right {
-        flex-direction: column;
-        align-items: flex-end;
-        top: 8px;
-        right: 5px;
-      }
-      .header-left { margin: 0; }
-     
-  .popular-item img {
-    width: 55px;
-    height: 55px;
-  }
-  .popular-track {
-  display: flex;
-  transition: transform 0.5s ease-in-out;
-  gap: 20px;
-  will-change: transform;
-
-}
-}
-    
-
-    /* Modal & Loader */
-    .modal { display:none; position:fixed; z-index:2000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); }
-    .modal.show { display:flex; align-items:center; justify-content:center; }
-    .modal-content { background:#fff; padding:24px 28px; border-radius:14px; width:90%; max-width:380px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.3); }
-    .modal-icon { font-size:56px; margin-bottom:14px; }
-    .modal-icon.success { color:#4CAF50; } .modal-icon.error { color:#f44336; }
-    .modal-title { font-size:20px; font-weight:700; margin-bottom:8px; }
-    .modal-message { font-size:14px; color:#666; margin-bottom:18px; }
-    .modal-btn { background:#b03b6a; color:#fff; border:none; padding:9px 22px; border-radius:24px; cursor:pointer; }
-    .page-loader { position:fixed; inset:0; background:rgba(255,255,255,0.9); display:none; align-items:center; justify-content:center; z-index:3000; }
-    .page-loader.show { display:flex; }
-    .spinner { width:48px; height:48px; border:5px solid #f3f3f3; border-top:5px solid #b03b6a; border-radius:50%; animation:spin 1s linear infinite; }
-    @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
+    a {
+      text-decoration: none;
+    }
   </style>
 </head>
+
 <body>
-  <!-- Modal for messages -->
-  <div id="messageModal" class="modal">
-    <div class="modal-content">
-      <div id="modalIcon" class="modal-icon"></div>
-      <div id="modalTitle" class="modal-title"></div>
-      <div id="modalMessage" class="modal-message"></div>
-      <button id="modalBtn" class="modal-btn" onclick="closeModal()">OK</button>
-    </div>
-  </div>
-
-  <!-- Page Loader -->
-  <div id="pageLoader" class="page-loader">
-    <div class="spinner"></div>
-  </div>
-
   <header>
-    <div class="header-left">
-      Host <img src="../imgs1/India-Waved-Flag-icon.png" class="flag" alt="Indian Flag"/>
-    </div>
-    <div class="header-right">
-      
-      <a href="payment.html?amount=1000"><div class="recharge"><i class="fas fa-phone"></i> ₹1000</div></a>
-    </div>
+    <div>Host</div>
   </header>
-
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Search host name..." />
-  </div>
-
-  <div class="banner">
-    <div class="footer-text">TM</div>
-    <img src="../imgs1/female11.png" alt="Banner"/>
-  </div>
-
-  <!-- <div class="section-title">Popular Hosts</div>
-  <div id="popular-container" class="popular-users"></div> -->
-    <div class="section-title">Popular Hosts</div>
-<div class="popular-carousel">
-  <button class="carousel-btn prev"><i class="fas fa-chevron-left"></i></button>
-  <div id="popular-container" class="popular-track"></div>
-  <button class="carousel-btn next"><i class="fas fa-chevron-right"></i></button>
-</div>
-
- <div id="host-container">Loading hosts...</div>
- 
+  <div class="search-container"><input type="text" id="searchInput" placeholder="Search host name..."
+      oninput="filterAndRender(this.value)" /></div>
+  <div id="host-container"></div>
   <div class="bottom-nav">
-    <div class="nav-item"><i class="fas fa-video"></i></div>
-    <a href="mychats.html"><div class="nav-item"><i class="fas fa-comment-alt"></i></div></a>
-    <a href="user-host-list.html"><div class="nav-item active"><i class="fas fa-home"></i></div></a>
-    <a href="notifications.html"><div class="nav-item"><i class="fas fa-bell"></i></div></a>
-    <a href="userprofile.html"><div class="nav-item"><i class="fas fa-user"></i></div></a>
+    <a href="#">
+      <div class="nav-item"><i class="fas fa-video"></i></div>
+    </a>
+    <a href="mychats.html">
+      <div class="nav-item"><i class="fas fa-comment-alt"></i></div>
+    </a>
+    <a href="user-host-list.html">
+      <div class="nav-item active"><i class="fas fa-home"></i></div>
+    </a>
+    <a href="notifications.html">
+      <div class="nav-item"><i class="fas fa-bell"></i></div>
+    </a>
+    <a href="userprofile.html">
+      <div class="nav-item"><i class="fas fa-user"></i></div>
+    </a>
   </div>
 
-  <!-- Incoming Call Overlay -->
-  <div id="incomingOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);display:none;align-items:center;justify-content:center;z-index:3000;">
-    <div style="background:#fff;padding:18px;border-radius:12px;min-width:280px;max-width:90%;text-align:center;">
-      <div style="font-weight:700;color:#b03b6a;margin-bottom:8px;">Incoming Call</div>
-      <div id="incomingFrom" style="font-size:14px;color:#444;margin-bottom:12px;"></div>
-      <div style="display:flex;gap:10px;justify-content:center;">
-        <button id="ovlAccept" class="modal-btn">Accept</button>
-        <button id="ovlReject" class="modal-btn" style="background:#f44336;">Reject</button>
-      </div>
-    </div>
-  </div>
-
-<script>
+  <script>
     const API_TOKEN = localStorage.getItem("userToken");
     let allHosts = [];
-    let me = { id: null, name: null, profileId: null };
+    let me = {};
     let socket;
 
-    function showModal(type, title, message) {
-      const modal = document.getElementById('messageModal');
-      const icon = document.getElementById('modalIcon');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalMessage = document.getElementById('modalMessage');
-      icon.className = `modal-icon ${type}`;
-      icon.innerHTML = type === 'success' ? '✓' : '✗';
-      modalTitle.textContent = title;
-      modalMessage.textContent = message;
-      modal.classList.add('show');
-    }
-    function closeModal() { document.getElementById('messageModal').classList.remove('show'); }
-    function showPageLoader() { document.getElementById('pageLoader').classList.add('show'); }
-    function hidePageLoader() { document.getElementById('pageLoader').classList.remove('show'); }
-
-    async function loadHosts() {
-      const container = document.getElementById("host-container");
+    // This is the correct `startCall` function.
+    async function startCall(host) {
       try {
-        if (!API_TOKEN) {
-          showModal('error', 'Authentication Required', 'Please login to view hosts.');
-          setTimeout(() => { window.location.href = 'userlogin.html'; }, 1200);
-          return;
-        }
-        showPageLoader();
-        // get my profile for socket register
-        const myRes = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.SHOW_PROFILE), {
-          method: 'GET', headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${API_TOKEN}` }
+        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+          body: JSON.stringify({ sender_id: me.id, receiver_id: host.id })
         });
+        const roomData = await roomResp.json();
+        if (!roomResp.ok) throw new Error("Failed to create room");
+
+        if (window.outgoingCall) {
+          window.outgoingCall.startOutgoingCall(host, roomData.data.name);
+          return; // CRITICAL: This is the fix.
+        }
+      } catch (err) {
+        console.error("Error starting call:", err);
+        alert("Could not start the call.");
+      }
+    }
+
+    async function startChat(host) {
+      try {
+        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_TOKEN}` },
+          body: JSON.stringify({ sender_id: me.id, receiver_id: Number(host.id) })
+        });
+        const roomData = await roomResp.json();
+        let roomName = roomData?.data?.name || `room_${Math.min(me.id, host.id)}_${Math.max(me.id, host.id)}`;
+
+        if (socket) {
+          socket.emit('chat-invite', { from: me.user_profile_id, fromName: me.name, to: String(host.user_profile_id), roomName });
+        }
+        window.location.href = `../room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name || 'Me')}&peer=${encodeURIComponent(host.name || 'Host')}`;
+      } catch (e) {
+        alert("Could not start chat.");
+      }
+    }
+
+    // This is the correct `initSocket` function.
+    function initSocket() {
+      if (socket) return;
+      const SOCKET_URL = API_CONFIG.getBaseUrl();
+      socket = io(SOCKET_URL, { path: '/socket.io' });
+      window.socket = socket;
+
+      socket.on('connect', () => {
+        console.log(`Socket connected on User page with ID: ${socket.id}`);
+        if (me.user_profile_id) {
+          socket.emit('register', me.user_profile_id, me.id);
+        }
+      });
+    }
+
+    async function loadPage() {
+      if (!API_TOKEN) {
+        window.location.href = 'userlogin.html';
+        return;
+      }
+      try {
+        const myRes = await fetch(API_CONFIG.getAuthUrl('/show-profile'), { headers: { 'Authorization': `Bearer ${API_TOKEN}` } });
         const myData = await myRes.json();
-        if (myRes.ok && myData?.data) {
-          me.id = myData.data.id; me.name = myData.data.name; me.profileId = myData.data.user_profile_id;
-          // localStorage.setItem('userId', me.id);
-        }
+        if (!myRes.ok) throw new Error("Could not fetch your profile.");
 
-        const res = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.USER_AUH.GET_HOST_ALL), {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_TOKEN}`
-          }
-        });
+        me = myData.data;
+        window.MY_USERNAME = me.user_profile_id;
+        window.MY_USER_ID = me.id;
 
+        initSocket();
+
+        const res = await fetch(API_CONFIG.getAuthUrl('/host-list-for-user'), { headers: { "Authorization": `Bearer ${API_TOKEN}` } });
         const data = await res.json();
-
-        if (!res.ok) {
-          throw new Error(data.message || `HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error("Could not fetch hosts.");
 
         allHosts = data.data || [];
         renderHosts(allHosts);
-
-        // load popular for top strip
-        try {
-          const popResp = await fetch(API_CONFIG.getAuthUrl('/host-list-popular'), { method:'GET', headers:{ 'Authorization': `Bearer ${API_TOKEN}` } });
-          const popData = await popResp.json();
-          if (popResp.ok && Array.isArray(popData?.data)) renderPopular(popData.data);
-        } catch(_){ renderPopular(allHosts.filter(h=>h.is_popular)); }
-        hidePageLoader();
-        initSocket();
-        // showModal('success', 'Loaded', 'Hosts loaded successfully.');
       } catch (err) {
-        console.error("Error loading hosts:", err);
-        hidePageLoader();
-        container.innerHTML = "<p>Could not load hosts.</p>";
-        showModal('error', 'Load Failed', err.message || 'Please try again.');
+        console.error("Error loading page:", err);
       }
-    }
-
-    // Initiate a call: create a call log and navigate to room
-    async function startCall(host){
-      try {
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(host.id);
-        // Create/get dynamic room via API
-        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), {
-          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id })
-        });
-        const roomData = await roomResp.json();
-        const roomName = roomData?.data?.name || `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
-        const resp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.CALL_CREATE), {
-          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id, roomName, startedAt: Date.now() })
-        });
-        try { 
-          const out = await resp.json();
-           if (out?.data?.id) {
-             localStorage.setItem('activeCallId', out.data.id); localStorage.setItem('activeCallStart', String(Date.now())); 
-            } } catch(_){ }
-        // notify callee via socket with canonical room name
-        try { 
-          // if (socket && me.profileId && host.user_profile_id) {
-            socket.emit('call-user', { from: me.profileId, to: host.user_profile_id, roomName });
-          // }
-        } catch(_){}
-        window.location.href = `../room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&mode=video`;
-      } catch(e){ window.location.href = `../room.html?room=${encodeURIComponent('room_'+(host.user_profile_id||host.id))}&name=${encodeURIComponent(host.name||'Host')}`; }
-    }
-
-    // Initiate a chat: obtain canonical room then navigate to chat page
-    async function startChat(host){
-      try {
-        const sender_id = me.id;
-        const receiver_id = Number(host.id);
-        const roomResp = await fetch(API_CONFIG.getAuthUrl(API_CONFIG.ENDPOINTS.AUTH.ROOM_CREATE), {
-          method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id })
-        });
-        const roomData = await roomResp.json();
-        let roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : '';
-        if (!roomName) {
-          roomName = `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
-        }
-
-        // Notify the host to join this chat room
-        try { 
-          if (socket && me.profileId && host.user_profile_id)
-           socket.emit('chat-invite', { from: me.profileId, fromName: me.name, to: String(host.user_profile_id), roomName }); 
-        } catch(_){ }
-        window.location.href = `../room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(host.name||'Host')}&mode=chat`;
-      } catch(e){
-        alert("connection is not avalable");
-      }
-    }
-
-    function initSocket(){
-      try {
-        const SOCKET_URL = API_CONFIG.getBaseUrl();
-        socket = io(SOCKET_URL, { path: '/socket.io', upgrade:false, transports:['polling'] });
-        if (me.profileId) socket.emit('register', me.profileId, String(me.id||''));
-        socket.on('incoming-call', ({ from, fromUserId, suggestedRoom }) => {
-          console.log('Incoming call received in user-host-list:', { from, fromUserId, suggestedRoom });
-          // Use the incoming call handler if available, otherwise fallback to inline handling
-          if (window.incomingCallHandler) {
-            window.incomingCallHandler.showIncomingCall({ from, fromUserId, suggestedRoom });
-          } else {
-            // Fallback to inline handling
-            const ovl = document.getElementById('incomingOverlay');
-            if (ovl) {
-              document.getElementById('incomingFrom').textContent = `From: ${from}`;
-              ovl.style.display='flex';
-              document.getElementById('ovlAccept').onclick = ()=> { ovl.style.display='none'; window.location.href = `../room-video.html?room=${encodeURIComponent(suggestedRoom||('room_'+from))}&name=${encodeURIComponent(me.name||'Me')}&mode=video`; };
-              document.getElementById('ovlReject').onclick = ()=> { ovl.style.display='none'; try { socket.emit('reject-call', { from: from, to: me.profileId }); } catch(_){} };
-            }
-          }
-        });
-
-        // When someone invites me to chat, open the chat page with the same room
-        socket.on('incoming-chat', ({ from, fromName, roomName }) => {
-          const accept = confirm(`${fromName || from} invited you to chat. Join?`);
-          if (accept) {
-            window.location.href = `../room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(fromName||'User')}&mode=chat`;
-          }
-        });
-        
-        // Initialize incoming call handler after socket is ready
-        if (window.incomingCallHandler) {
-          console.log('Incoming call handler already initialized');
-        } else {
-          console.log('Initializing incoming call handler...');
-          // The incoming-call.js script should have already created the handler
-        }
-      } catch(_){ }
     }
 
     function renderHosts(hosts) {
       const container = document.getElementById("host-container");
       container.innerHTML = "";
       if (!hosts.length) {
-        container.innerHTML = "<p>No hosts found.</p>";
+        container.innerHTML = "<p style='text-align:center;'>No hosts available.</p>";
         return;
       }
       hosts.forEach(host => {
-        const images = Array.isArray(host.Images) ? host.Images : [];
-        const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-        const displayUrl = (profileImg && profileImg.url)
-          || (images.length > 0 && images[0] && images[0].url)
-          || '../imgs/logo.jpg';
-        const isPremium = Boolean(host.is_premium);
-        container.innerHTML += `
+        const displayUrl = host.Images?.find(img => img.image_type === 'profile_photo')?.url || '../imgs/logo.jpg';
+        const cardWrapper = document.createElement('div');
+        cardWrapper.innerHTML = `
           <div class="host-card">
             <img src="${displayUrl}" alt="${host.name}">
             <div class="host-details">
-              <h4>${host.name || ''} ${isPremium ? '<span class=\"premium-badge\">👑 Premium</span>' : ''}</h4>
-
-              <img src="../imgs/IndiaWavedFlag.png" class="img-flag"/>
-
-
+              <h4>${host.name || 'Host'}</h4>
               <p>${host.phone || ''}</p>
               <div>
-                <button class="call-btn" onclick='startCall(${JSON.stringify({ id: host.id, name: host.name, user_profile_id: host.user_profile_id })})'>Call</button>
-                <button class="call-btn" style="margin-left:8px;background:#8b5cf6" onclick='startChat(${JSON.stringify({ id: host.id, name: host.name, user_profile_id: host.user_profile_id })})'>Chat</button>
-                <a class="call-btn" style="margin-left:8px;background:#0ea5e9; text-decoration:none; display:inline-block;" href="host-details.html?user_id=${encodeURIComponent(host.id)}">View</a>
+                <button class="call-btn" data-action="call">Call</button>
+                <button class="call-btn" style="background:#8b5cf6" data-action="chat">Chat</button>
+                <a class="call-btn" style="background:#0ea5e9;" href="host-details.html?user_id=${host.id}">View</a>
               </div>
             </div>
-          </div>
-        `;
+          </div>`;
+        const cardElement = cardWrapper.firstElementChild;
+        cardElement.querySelector('[data-action="call"]').addEventListener('click', () => startCall(host));
+        cardElement.querySelector('[data-action="chat"]').addEventListener('click', () => startChat(host));
+        container.appendChild(cardElement);
       });
     }
-
-    // function renderPopular(hosts){
-    //   const root = document.getElementById('popular-container');
-    //   root.innerHTML = '';
-    //   if (!hosts || hosts.length===0) return;
-    //   hosts.forEach(h => {
-    //     const images = Array.isArray(h.Images) ? h.Images : [];
-    //     const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-    //     const displayUrl = (profileImg && profileImg.url)
-    //       || (images.length > 0 && images[0] && images[0].url)
-    //       || '../imgs/logo.jpg';
-    //     const img = document.createElement('img');
-    //     img.src = displayUrl; img.alt = h.name || 'Host';
-    //     root.appendChild(img);
-    //   });
-    // }
-
-
-   //   function renderPopular(hosts){
-  //const root = document.getElementById('popular-container');
-  //root.innerHTML = '';
-  //if (!hosts || hosts.length===0) return;
-  //hosts.forEach(h => {
-    //const images = Array.isArray(h.Images) ? h.Images : [];
-   // const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-    //const displayUrl = (profileImg && profileImg.url)
-     // || (images.length > 0 && images[0] && images[0].url)
-     // || '../imgs/logo.jpg';
-
-    // 🔗 Wrap image in <a> that links to host-details.html//
-    //const a = document.createElement('a');
-    //a.href = `host-details.html?user_id=${encodeURIComponent(h.id)}`;
-    //const img = document.createElement('img');
-    //img.src = displayUrl;
-    //img.alt = h.name || 'Host';
-    //a.appendChild(img);
-    //root.appendChild(a);
- // });
-//}
-/*250825: Carousel integration in Popular Host Sec */
-      function renderPopular(hosts) {
-  const track = document.getElementById('popular-container');
-  track.innerHTML = '';
-  if (!hosts || hosts.length === 0) return;
-
-  hosts.forEach(h => {
-    const images = Array.isArray(h.Images) ? h.Images : [];
-    const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
-    const displayUrl = (profileImg && profileImg.url)
-      || (images.length > 0 && images[0] && images[0].url)
-      || '../imgs/logo.jpg';
-
-    const item = document.createElement('div');
-    item.className = 'popular-item';
-    item.innerHTML = `
-      <a href="host-details.html?user_id=${encodeURIComponent(h.id)}">
-        <img src="${displayUrl}" alt="${h.name || 'Host'}" />
-        <div style="font-size:12px; margin-top:5px; color:#555;">${h.name || ''}</div>
-      </a>
-    `;
-    track.appendChild(item);
-  });
-
-  // --- Carousel logic ---
-  const prevBtn = document.querySelector('.carousel-btn.prev');
-  const nextBtn = document.querySelector('.carousel-btn.next');
-
-  const items = track.querySelectorAll('.popular-item');
-  const itemWidth = items[0].offsetWidth + 18; // width + gap
-  let position = 0;
-
-  function updateCarousel() {
-    track.style.transform = `translateX(${position}px)`;
-  }
-
-  prevBtn.onclick = () => {
-    position += itemWidth * 2; // move 2 items left
-    if (position > 0) {
-      // loop back to end
-      position = -(itemWidth * (items.length - 7));
-    }
-    updateCarousel();
-  };
-
-  nextBtn.onclick = () => {
-    position -= itemWidth * 2; // move 2 items right
-    if (Math.abs(position) > itemWidth * (items.length - 7)) {
-      // loop back to start
-      position = 0;
-    }
-    updateCarousel();
-  };
-
-  // Optional: Auto-loop every 3s
-  setInterval(() => { nextBtn.click(); }, 3000);
-}
-
-
-
 
     function filterAndRender(query) {
-      const normalized = (query || '').toString().toLowerCase().trim();
-      if (!normalized) {
-        renderHosts(allHosts);
-        return;
-      }
-      const filtered = allHosts.filter(h => {
-        const name = (h.name || '').toString().toLowerCase();
-        const phone = (h.phone || '').toString().toLowerCase();
-        return name.includes(normalized) || phone.includes(normalized);
-      });
-      const container = document.getElementById("host-container");
-      if (!filtered.length) {
-        container.innerHTML = "<p>No matching hosts.</p>";
-        return;
-      }
-      renderHosts(filtered);
+      const normalized = (query || '').toLowerCase().trim();
+      renderHosts(normalized ? allHosts.filter(h => (h.name || '').toLowerCase().includes(normalized)) : allHosts);
     }
 
-    // Wire up search input
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        filterAndRender(e.target.value);
-      });
-    }
-
-    window.onload = loadHosts;
+    window.onload = loadPage;
   </script>
-
-
 </body>
+
 </html>
