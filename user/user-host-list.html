@@ -18,6 +18,7 @@
       font-family: 'Roboto', sans-serif;
       background: #fff;
       color: #333;
+      overflow-x: hidden;
     }
     header {
       font-size: 22px;
@@ -249,14 +250,14 @@
 a:-webkit-any-link{ text-decoration: none!important;}
 
 /* Popular carousel container */
-.popular-carousel {
+/* .popular-carousel {
   position: relative;
   overflow: hidden;
   width: 50%;
   padding: 15px 0;
   margin: 0 auto;  /* center horizontally */
 
-  /* display: flex; */
+  /* display: flex; 
   justify-content: center;
 }
 
@@ -285,30 +286,74 @@ a:-webkit-any-link{ text-decoration: none!important;}
 
 .popular-item img:hover {
   transform: scale(1.1);
+} */
+
+
+
+
+/* .carousel-btn.prev { left: 55px; }
+.carousel-btn.next { right: 55px; } */
+/* .carousel-btn.prev { left: -40px; }
+.carousel-btn.next { right: -40px; } */
+.popular-carousel {
+  position: relative;
+  overflow: hidden;
+  width: 80%;            /* give it more room on desktop */
+  max-width: 700px;      /* prevent stretching too wide */
+  padding: 15px 0;
+  margin: 0 auto;        /* center horizontally */
 }
 
+.popular-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+  gap: 21px;
+  will-change: transform;
+  margin-left: 1em;
+}
+
+.popular-item {
+  min-width: 90px;       /* item width */
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.popular-item img {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ccc;
+  transition: transform 0.3s ease;
+}
+
+.popular-item img:hover {
+  transform: scale(1.1);
+}
+
+/* Carousel navigation buttons */
 .carousel-btn {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-60%);
   background: #b03b6a;
   color: #fff;
   border: none;
-  padding: 8px 10px;
+  padding: 10px;
   border-radius: 50%;
   cursor: pointer;
   z-index: 10;
   opacity: 0.7;
+  font-size: 16px;
 }
 
 .carousel-btn:hover {
   opacity: 1;
 }
 
-/* .carousel-btn.prev { left: 55px; }
-.carousel-btn.next { right: 55px; } */
-.carousel-btn.prev { left: -40px; }
-.carousel-btn.next { right: -40px; }
+/* Positioning buttons closer to edge */
+.carousel-btn.prev { left: 0px; }
+.carousel-btn.next { right: 0px; }
     
     
 
@@ -331,7 +376,7 @@ a:-webkit-any-link{ text-decoration: none!important;}
       }
       .header-left { margin: 0; }
      
-  .popular-item img {
+  /* .popular-item img {
     width: 55px;
     height: 55px;
   }
@@ -341,7 +386,20 @@ a:-webkit-any-link{ text-decoration: none!important;}
   gap: 20px;
   will-change: transform;
 
-}
+} */
+ .popular-carousel {
+    width: 95%;
+  }
+
+      .popular-track {
+        gap: 0px;
+        margin-left: 1em;
+    }
+
+  .popular-item img {
+    width: 55px;
+    height: 55px;
+  }
 }
     
 
@@ -668,7 +726,64 @@ a:-webkit-any-link{ text-decoration: none!important;}
  // });
 //}
 /*250825: Carousel integration in Popular Host Sec */
-      function renderPopular(hosts) {
+//       function renderPopular(hosts) {
+//   const track = document.getElementById('popular-container');
+//   track.innerHTML = '';
+//   if (!hosts || hosts.length === 0) return;
+
+//   hosts.forEach(h => {
+//     const images = Array.isArray(h.Images) ? h.Images : [];
+//     const profileImg = images.find(img => (img && img.image_type) === 'profile_photo');
+//     const displayUrl = (profileImg && profileImg.url)
+//       || (images.length > 0 && images[0] && images[0].url)
+//       || '../imgs/logo.jpg';
+
+//     const item = document.createElement('div');
+//     item.className = 'popular-item';
+//     item.innerHTML = `
+//       <a href="host-details.html?user_id=${encodeURIComponent(h.id)}">
+//         <img src="${displayUrl}" alt="${h.name || 'Host'}" />
+//         <div style="font-size:12px; margin-top:5px; color:#555;">${h.name || ''}</div>
+//       </a>
+//     `;
+//     track.appendChild(item);
+//   });
+
+//   // --- Carousel logic ---
+//   const prevBtn = document.querySelector('.carousel-btn.prev');
+//   const nextBtn = document.querySelector('.carousel-btn.next');
+
+//   const items = track.querySelectorAll('.popular-item');
+//   const itemWidth = items[0].offsetWidth + 18; // width + gap
+//   let position = 0;
+
+//   function updateCarousel() {
+//     track.style.transform = `translateX(${position}px)`;
+//   }
+
+//   prevBtn.onclick = () => {
+//     position += itemWidth * 2; // move 2 items left
+//     if (position > 0) {
+//       // loop back to end
+//       position = -(itemWidth * (items.length - 7));
+//     }
+//     updateCarousel();
+//   };
+
+//   nextBtn.onclick = () => {
+//     position -= itemWidth * 2; // move 2 items right
+//     if (Math.abs(position) > itemWidth * (items.length - 7)) {
+//       // loop back to start
+//       position = 0;
+//     }
+//     updateCarousel();
+//   };
+
+//   // Optional: Auto-loop every 3s
+//   setInterval(() => { nextBtn.click(); }, 3000);
+// }
+/*250825: 2nd time Carousel integration in Popular Host Sec */
+function renderPopular(hosts) {
   const track = document.getElementById('popular-container');
   track.innerHTML = '';
   if (!hosts || hosts.length === 0) return;
@@ -706,7 +821,6 @@ a:-webkit-any-link{ text-decoration: none!important;}
   prevBtn.onclick = () => {
     position += itemWidth * 2; // move 2 items left
     if (position > 0) {
-      // loop back to end
       position = -(itemWidth * (items.length - 7));
     }
     updateCarousel();
@@ -715,17 +829,11 @@ a:-webkit-any-link{ text-decoration: none!important;}
   nextBtn.onclick = () => {
     position -= itemWidth * 2; // move 2 items right
     if (Math.abs(position) > itemWidth * (items.length - 7)) {
-      // loop back to start
       position = 0;
     }
     updateCarousel();
   };
-
-  // Optional: Auto-loop every 3s
-  setInterval(() => { nextBtn.click(); }, 3000);
 }
-
-
 
 
     function filterAndRender(query) {
