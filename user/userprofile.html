@@ -137,17 +137,94 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      background-color: #b23b75;
+      background: #f74e8f; /* pink background bar */
       display: flex;
       justify-content: space-evenly;
-      padding: 10px 0;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
+      align-items: center;
+      padding: 10px 10px;
+      /* border-top-left-radius: 20px;
+      border-top-right-radius: 20px; */
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2); /* shadow upwards */
+    z-index: 999;
     }
     .bottom-nav i {
-      color: white;
+      /* color: white; */
       font-size: 22px;
     }
+   
+
+
+.bottom-nav::-webkit-scrollbar { display: none; } /* hide scrollbar */
+    
+    .footer-text {
+      font-size: 35px;
+      font-weight: bold;
+      color: #ec74ac;
+      padding-top: 0.5em;
+      text-align: center;
+      opacity: 0.8;
+    }
+       
+    .nav-item {
+    background: #ff89b0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+    padding-bottom: 0px;
+    
+}
+
+.nav-item:hover {
+  background: #ff6fa0;
+  transform: scale(1.1);
+}
+
+.nav-item.active {
+  background: white;        /* active button = white */
+  color: #f74e8f;           /* icon pink */
+  width: 65px;              /* bigger */
+  height: 65px;
+  margin-top: -25px;        /* lift above bar */
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
+}
+    .nav-item.active::after {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+
+    img.img-flag {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    margin-top: 0em;
+    left: 17em;
+}
+    
+    .footer-item a {
+  text-decoration: none!important; /* removes underline */
+  color: inherit;        /* keeps original icon/text color */
+}
+    
+    .footer-item a img {
+  text-decoration: none!important; /* no underline on icons */
+  border: none;          /* prevents blue border on some browsers */
+}
+a:-webkit-any-link{ text-decoration: none!important;}
     .nav-item {
       cursor: pointer;
     }
@@ -155,6 +232,12 @@
       .item {
         font-size: 14px;
       }
+    }
+    @media(max-width:767px){
+      footer img {
+    width: 22em;
+    opacity: 0.3;
+}
     }
   </style>
 </head>
