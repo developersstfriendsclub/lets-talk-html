@@ -1,296 +1,307 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Users </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Users</title>
   <link rel="icon" href="/assets/imgs/favicon.png">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <script src="js/config.js"></script>
   <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+  <script src="js/incoming-call.js"></script>
+  <script src="js/outgoing-call.js"></script>
   <style>
-    body { margin:0; font-family: 'Segoe UI', sans-serif; background:linear-gradient(to bottom, #f8c6d8, #fddae3); }
-    .container { max-width:440px; margin:0 auto; padding:16px; }
-    .header { font-size:22px; font-weight:800; color:#fff; padding:14px; text-align:center; background:#d6006d; border-radius:12px; }
-    .search { margin:12px 0; }
-    .search input { width:100%; padding:12px; border:1px solid #ffd4e6; border-radius:12px; background:#fff; }
-    .list { display:flex; flex-direction:column; gap:12px; }
-    .card { display:flex; gap:9px; padding:12px; background:#fff; border-radius:12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); align-items:center; }
-    .card img { width:60px; height:60px; border-radius:10px; object-fit:cover; }
-    .info { flex:1; }
-    .name { font-weight:700; color:#0f172a; font-size:15px; display:flex; align-items:center; gap:8px; }
-    .meta { font-size:12px; color:#475569; }
-    .status { font-size:12px; color:#475569; margin-top:4px; }
-    .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; background:#9ca3af; }
-    .dot.online { background:#22c55e; }
-    .actions { display:flex; gap:8px; }
-    .btn { background:#d6006d; color:#fff; border:none; padding: 6px 6px; border-radius:10px; cursor:pointer; margin-left: -4px; font-size:12px; }
-    .badge { background:#ef4444; color:#fff; border-radius:12px; padding:2px 6px; font-size:11px; font-weight:700; line-height:1; }
-      .goog-logo-link,
-    .goog-te-gadget span {
-      display: none !important;
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #f8c6d8, #fddae3);
     }
 
-    #google_translate_element {
-      color: transparent !important;
+    .container {
+      max-width: 440px;
+      margin: 0 auto;
+      padding: 16px;
     }
 
-    .goog-te-gadget {
-      color: #66666600 !important;
+    .header {
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      padding: 14px;
+      text-align: center;
+      background: #d6006d;
+      border-radius: 12px;
     }
-    .footer-nav {
-      position: static;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(3%);
-      background: #f84d91;
+
+    .search {
+      margin: 12px 0;
+    }
+
+    .search input {
       width: 100%;
-      max-width: 400px;
-      height: 60px;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
+      padding: 12px;
+      border: 1px solid #ffd4e6;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .list {
       display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0 10px;
-      box-shadow: 0 -2px 10px #00000030;
-      z-index: 1000;
-      margin-top: 66px;
+      flex-direction: column;
+      gap: 12px;
     }
 
-    .footer-item {
-      width: 40px;
-      height: 40px;
-      background: #ffffffaa;
-      border-radius: 50%;
+    .card {
       display: flex;
-      justify-content: center;
+      gap: 9px;
+      padding: 12px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
       align-items: center;
-      box-shadow: 0 2px 5px #00000020;
-      cursor: pointer;
     }
 
-    .footer-item img {
-      width: 20px;
-      height: 20px;
-    }
-
-    .footer-center {
+    .card img {
       width: 60px;
       height: 60px;
-      background: #fff;
-      border-radius: 50%;
-      position: absolute;
-      top: -25px;
-      left: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 4px 8px #00000030;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2;
+      border-radius: 10px;
+      object-fit: cover;
     }
 
-    .footer-center img {
-      width: 30px;
-      height: 30px;
+    .info {
+      flex: 1;
     }
-    @media (max-width:768px){
-      .card img {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-    object-fit: cover;
-}
-    .footer-nav {
-      position: static;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-3%);
-      background: #f84d91;
-      width: 100%;
-      max-width: 400px;
-      height: 60px;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
+
+    .name {
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 15px;
       display: flex;
-      justify-content: space-around;
       align-items: center;
-      padding: 0 10px;
-      box-shadow: 0 -2px 10px #00000030;
-      z-index: 1000;
-      margin-top: 50px;
+      gap: 8px;
     }
+
+    .status {
+      font-size: 12px;
+      color: #475569;
+      margin-top: 4px;
     }
-    
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      background: #9ca3af;
+    }
+
+    .dot.online {
+      background: #22c55e;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      background: #d6006d;
+      color: #fff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .badge {
+      background: #ef4444;
+      color: #fff;
+      border-radius: 12px;
+      padding: 2px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    a {
+      text-decoration: none;
+    }
   </style>
+</head>
+
+<body>
+  <div class="header">Users</div>
+  <div class="container">
+    <div class="search"><input placeholder="Search user..." oninput="onSearch(this.value)" /></div>
+    <div id="list" class="list"></div>
+  </div>
+
   <script>
     let allUsers = [];
-    let me = { id: null, profileId: null, name: null };
-    let online = new Set();
+    let me = {};
+    let onlineUsers = new Set();
     let socket;
-    let unreadCounts = {}; // key: user_profile_id (string) -> number
+    let unreadCounts = {};
 
-    function storageKey(){ return `unreadCounts_${String(me.profileId||'')}`; }
-    function loadUnread(){
-      try {
-        const raw = localStorage.getItem(storageKey());
-        unreadCounts = raw ? JSON.parse(raw) : {};
-      } catch(_) { unreadCounts = {}; }
-    }
-    function saveUnread(){
-      try { localStorage.setItem(storageKey(), JSON.stringify(unreadCounts)); } catch(_){}
-    }
+    function storageKey() { return `unreadCounts_${String(me.user_profile_id || '')}`; }
+    function loadUnread() { try { unreadCounts = JSON.parse(localStorage.getItem(storageKey()) || '{}'); } catch (e) { unreadCounts = {}; } }
+    function saveUnread() { localStorage.setItem(storageKey(), JSON.stringify(unreadCounts)); }
 
-    async function startCall(user){
+    // MODIFICATION START: Replaced the old startCall function with the new version.
+    // This version uses the `outgoing-call.js` helper to show a popup and wait for a response.
+    async function startCall(user) {
       try {
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(user.id);
-        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id }) });
+        const token = localStorage.getItem('authToken');
+        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ sender_id: me.id, receiver_id: user.id })
+        });
         const roomData = await roomResp.json();
-        const roomName = roomData?.data?.name || `room_${Math.min(sender_id,receiver_id)}_${Math.max(sender_id,receiver_id)}`;
-        window.location.href = `room-video.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}`;
-      } catch(_){
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(user.id);
-        const a = Math.min(sender_id, receiver_id), b = Math.max(sender_id, receiver_id);
-        const fallback = (Number.isFinite(a)&&Number.isFinite(b))?`room_${a}_${b}`:`room_${user.user_profile_id||user.id}`;
-        window.location.href = `room-video.html?room=${encodeURIComponent(fallback)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}`;
+        if (!roomResp.ok) throw new Error("Failed to create room");
+
+        if (window.outgoingCall) {
+          // Pass the full user object (for name/avatar) and the room name to the helper.
+          window.outgoingCall.startOutgoingCall(user, roomData.data.name);
+          // The 'return' is critical. It stops this function from navigating immediately.
+          return;
+        }
+      } catch (err) {
+        console.error("Error starting call:", err);
+        alert("Could not start the call.");
+      }
+    }
+    // MODIFICATION END
+
+    async function startChat(user) {
+      try {
+        const token = localStorage.getItem('authToken');
+        const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ sender_id: me.id, receiver_id: Number(user.id) })
+        });
+        const roomData = await roomResp.json();
+        let roomName = roomData?.data?.name || `room_${Math.min(me.id, user.id)}_${Math.max(me.id, user.id)}`;
+
+        if (socket) {
+          socket.emit('chat-invite', { from: me.user_profile_id, fromName: me.name, to: String(user.user_profile_id), roomName });
+        }
+
+        unreadCounts[String(user.user_profile_id || '')] = 0;
+        saveUnread();
+        window.location.href = `room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name || 'Me')}&peer=${encodeURIComponent(user.name || 'User')}`;
+      } catch (e) {
+        alert("Could not start chat.");
       }
     }
 
-    async function startChat(user){
-      try {
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(user.id);
-        let roomName = '';
-        try {
-          const roomResp = await fetch(API_CONFIG.getAuthUrl('/room/create'), {
-            method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ sender_id, receiver_id })
-          });
-          const roomData = await roomResp.json();
-          roomName = (roomData && roomData.data && typeof roomData.data.name === 'string') ? roomData.data.name : '';
-        } catch(_) {}
-        if (!roomName) {
-          const a = Math.min(sender_id, receiver_id), b = Math.max(sender_id, receiver_id);
-          roomName = (Number.isFinite(a) && Number.isFinite(b)) ? `room_${a}_${b}` : `room_${user.user_profile_id||user.id}`;
+    // MODIFICATION START: Replaced the old socket logic with a reliable version.
+    // This connects and then registers the user, fixing the "User not found" error.
+    function initSocket() {
+      if (socket) return;
+      const SOCKET_URL = API_CONFIG.getBaseUrl();
+      socket = io(SOCKET_URL, { path: '/socket.io' });
+      window.socket = socket; // Make it globally available for helper scripts
+
+      socket.on('connect', () => {
+        console.log(`Socket connected on Host page with ID: ${socket.id}`);
+        // Register this user with the server as soon as connection is established.
+        if (me.user_profile_id) {
+          socket.emit('register', me.user_profile_id, me.id);
         }
-        try {
-          if (socket && me.profileId && user.user_profile_id) {
-            socket.emit('chat-invite', { from: String(me.profileId), fromName: me.name, to: String(user.user_profile_id), roomName });
-          }
-        } catch(_){}
-        // Clear unread count for this user since we are opening the chat
-        try {
-          const key = String(user.user_profile_id||'');
-          if (key) { unreadCounts[key] = 0; saveUnread(); }
-        } catch(_){ }
-        window.location.href = `room-chat.html?room=${encodeURIComponent(roomName)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}&mode=chat`;
-      } catch(_){
-        const sender_id = Number(me.id || localStorage.getItem('userId'));
-        const receiver_id = Number(user.id);
-        const a = Math.min(sender_id, receiver_id), b = Math.max(sender_id, receiver_id);
-        const fallback = (Number.isFinite(a)&&Number.isFinite(b))?`room_${a}_${b}`:`room_${user.user_profile_id||user.id}`;
-        window.location.href = `room-chat.html?room=${encodeURIComponent(fallback)}&name=${encodeURIComponent(me.name||'Me')}&peer=${encodeURIComponent(user.name||'User')}&mode=chat`;
+      });
+
+      socket.on('user-list', (userList) => {
+        onlineUsers = new Set(userList || []);
+        render(allUsers); // Re-render to show online status changes.
+      });
+
+      socket.on('incoming-chat', ({ from }) => {
+        const key = String(from || '');
+        if (key) {
+          unreadCounts[key] = (unreadCounts[key] || 0) + 1;
+          saveUnread();
+          render(allUsers);
+        }
+      });
+    }
+    // MODIFICATION END
+
+    async function loadPage() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        window.location.href = 'login.html';
+        return;
+      }
+      try {
+        const myRes = await fetch(API_CONFIG.getAuthUrl('/show-profile'), { headers: { 'Authorization': `Bearer ${token}` } });
+        const myData = await myRes.json();
+        if (!myRes.ok) throw new Error("Could not fetch host profile");
+
+        me = myData.data;
+        window.MY_USERNAME = me.user_profile_id;
+        window.MY_USER_ID = me.id;
+
+        initSocket();
+        loadUnread();
+
+        const res = await fetch(API_CONFIG.getAuthUrl('/user-list-for-host'), { headers: { "Authorization": `Bearer ${token}` } });
+        const data = await res.json();
+        if (!res.ok) throw new Error("Could not fetch users");
+        allUsers = data.data || [];
+        render(allUsers);
+      } catch (err) {
+        console.error("Error loading page:", err);
       }
     }
 
     function render(list) {
       const root = document.getElementById('list');
       root.innerHTML = '';
-      if (!list || list.length===0) { root.innerHTML = '<p style="text-align:center;color:#475569;">No users found.</p>'; return; }
+      if (!list || !list.length) {
+        root.innerHTML = '<p style="text-align:center;color:#475569;">No users found.</p>';
+        return;
+      }
       list.forEach(u => {
-        const img = (u.Images && u.Images.length>0 && u.Images[0].url) ? u.Images[0].url : 'imgs/logo11.png';
-        const el = document.createElement('div');
-        el.className = 'card';
-        const onlineDot = online.has(String(u.user_profile_id||'')) ? 'online' : '';
-        const unread = Number(unreadCounts[String(u.user_profile_id||'')] || 0);
-        el.innerHTML = `
-          <img src="${img}" alt="${u.name||'User'}"/>
-          <div class="info">
-            <div class="name">${u.name||'User'} ${unread>0?`<span class="badge">${unread}</span>`:''}</div>
-            <div class="meta">${u.email||''}</div>
-            <div class="status"><span class="dot ${onlineDot}"></span>${onlineDot?'Online':'Offline'}</div>
-          </div>
-          <div class="actions">
-            <button class="btn" onclick='startCall(${JSON.stringify(u)})'>Call</button>
-            <button class="btn" onclick='startChat(${JSON.stringify(u)})'>Chat</button>
-          </div>`;
-        root.appendChild(el);
+        const img = u.Images?.find(img => img.image_type === 'profile_photo')?.url || 'imgs/logo11.png';
+        const isOnline = onlineUsers.has(u.user_profile_id);
+        const unread = unreadCounts[String(u.user_profile_id || '')] || 0;
+
+        const cardWrapper = document.createElement('div');
+        cardWrapper.innerHTML = `
+                    <div class="card">
+                        <img src="${img}" alt="${u.name || 'User'}"/>
+                        <div class="info">
+                            <div class="name">${u.name || 'User'} ${unread > 0 ? `<span class="badge">${unread}</span>` : ''}</div>
+                            <div class="status">
+                                <span class="dot ${isOnline ? 'online' : ''}"></span>
+                                ${isOnline ? 'Online' : 'Offline'}
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn" data-action="call">Call</button>
+                            <button class="btn" data-action="chat">Chat</button>
+                        </div>
+                    </div>`;
+
+        const cardElement = cardWrapper.firstElementChild;
+        cardElement.querySelector('[data-action="call"]').addEventListener('click', () => startCall(u));
+        cardElement.querySelector('[data-action="chat"]').addEventListener('click', () => startChat(u));
+        root.appendChild(cardElement);
       });
     }
 
-    async function loadUsers() {
-      const token = localStorage.getItem('authToken') || localStorage.getItem('userToken');
-      if (!token) { window.location.href='User/userlogin.html'; return; }
-      try {
-        const myRes = await fetch(API_CONFIG.getAuthUrl('/show-profile'), { headers: { 'Authorization': `Bearer ${token}` } });
-        const myData = await myRes.json();
-        if (myRes.ok && myData?.data) { me.id = myData.data.id; me.profileId = myData.data.user_profile_id; me.name = myData.data.name; }
-      } catch(_){ }
-      // Load unread counts after we know our profile id
-      loadUnread();
-      const res = await fetch(API_CONFIG.getAuthUrl('/user-list-for-host'), { headers: { 'Authorization': `Bearer ${token}` } });
-      const data = await res.json();
-      allUsers = data?.data || [];
-      render(allUsers);
-      // Initialize presence via socket if available
-      try {
-        socket = io(API_CONFIG.getBaseUrl(), { path:'/socket.io', upgrade:false, transports:['polling'] });
-        if (me.profileId) {
-          socket.emit('register', me.profileId, String(me.id||''));
-        }
-        // Online presence list
-        socket.on('user-list', (names) => {
-          try {
-            online = new Set((names||[]).map(x => String(x)));
-            render(allUsers);
-          } catch(_){}
-        });
-        // Incoming chat invites
-        socket.on('incoming-chat', ({ from, fromName, roomName }) => {
-          try {
-            const key = String(from||'');
-            if (key) {
-              unreadCounts[key] = Number(unreadCounts[key] || 0) + 1;
-              saveUnread();
-              render(allUsers);
-            }
-          } catch(_){ }
-        });
-      } catch(_){ }
+    function onSearch(v) {
+      const query = (v || '').toLowerCase().trim();
+      render(query ? allUsers.filter(u => (u.name || '').toLowerCase().includes(query)) : allUsers);
     }
-    
-    function onSearch(v){ const q=(v||'').toLowerCase(); if(!q) return render(allUsers); render(allUsers.filter(u=> (u.name||'').toLowerCase().includes(q) || (u.email||'').toLowerCase().includes(q))); }
-    document.addEventListener('DOMContentLoaded', loadUsers);
 
-     function googleTranslateElementInit() {
-    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
-  }
+    document.addEventListener('DOMContentLoaded', loadPage);
   </script>
-</head>
-<body>
-  <div class="header">Users</div>
-  <div class="container">
-      <div id="google_translate_element"></div>
-    <div class="search"><input placeholder="Search user..." oninput="onSearch(this.value)"/></div>
-    <div id="list" class="list"></div>
-      <!-- Footer Navigation -->
-  <div class="footer-nav">
-    <div class="footer-item"><a href="call-list.html"><img src="icons/video.png" alt="Video"></a></div>
-    <div class="footer-item"><a href="my-chats.html"><img src="icons/chat.png" alt="Chat"></a></div>
-
-    <div class="footer-center">
-     <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
-    </div>
-
-    <div class="footer-item"><a href="notifications.html" class="blink-bell">
-    <img src="icons/bell.png" alt="Notification">
-  </a></div>  
-    <div class="footer-item"><a href="profile1.html"><img src="icons/user.png" alt="Profile"></a></div>
-  </div>
-  </div>
-
 </body>
+
 </html>
-
-
