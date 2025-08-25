@@ -1091,7 +1091,13 @@ class VideoCallRoom {
       this.log('Received offer...');
       if (!this.pc) await this.startCallProcess();
 
+      // await this.pc.setRemoteDescription(new RTCSessionDescription(offer));
+      if (this.pc.signalingState !== "stable") {
+        this.log(`Skipping offer, current state is ${this.pc.signalingState}`);
+        return;
+      }
       await this.pc.setRemoteDescription(new RTCSessionDescription(offer));
+
       this.processIceQueue();
 
       const answer = await this.pc.createAnswer();
@@ -1100,11 +1106,23 @@ class VideoCallRoom {
       this.log('Answer sent.');
     });
 
+    // this.socket.on('room-answer', async ({ answer }) => {
+    //   this.log('Received answer.');
+    //   await this.pc.setRemoteDescription(new RTCSessionDescription(answer));
+    //   this.processIceQueue();
+    // });
+
     this.socket.on('room-answer', async ({ answer }) => {
       this.log('Received answer.');
-      await this.pc.setRemoteDescription(new RTCSessionDescription(answer));
-      this.processIceQueue();
+
+      if (!this.pc.currentRemoteDescription) {
+        await this.pc.setRemoteDescription(new RTCSessionDescription(answer));
+        this.processIceQueue();
+      } else {
+        this.log("Ignoring duplicate answer, already in stable state.");
+      }
     });
+
 
     this.socket.on('room-ice-candidate', async ({ candidate }) => {
       try {
