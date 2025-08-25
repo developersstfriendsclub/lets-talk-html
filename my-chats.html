@@ -40,25 +40,27 @@
     .goog-te-gadget {
       color: #66666600 !important;
     }
-    .footer-nav {
-      position: static;
-      bottom: 0;
-      left: 0;
-      transform: translateX(1%);
-      background: #f84d91;
-      width: 100%;
-      max-width: 445px;
-      height: 60px;
-      border-top-left-radius: 16px;
-      border-top-right-radius: 16px;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 0 10px;
-      box-shadow: 0 -2px 10px #00000030;
-      z-index: 1000;
-      margin-top: 66px;
+      .footer-nav {
+      position: fixed;
+        bottom: 0;
+        /* left: 50%; */
+        transform: translateX(0%);
+        background: #f84d91;
+        width: 100%;
+        max-width: 450px;
+        height: 50px;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        display: flex
+;
+        justify-content: space-around;
+        align-items: center;
+        /* padding: 0 10px; */
+        box-shadow: 0 -2px 10px #00000030;
+        z-index: 1000;
+        margin-bottom: 0px;
     }
+    
 
     .footer-item {
       width: 40px;
@@ -97,6 +99,9 @@
       width: 30px;
       height: 30px;
     }
+    .card:nth-last-child(1) {
+    margin-bottom: 4em;
+}
     @media (max-width:768px){
       .card img {
     width: 50px;
@@ -104,7 +109,8 @@
     border-radius: 10px;
     object-fit: cover;
 }
-    .footer-nav {
+    
+      .footer-nav {
       
         transform: translateX(-7%);
         background: #f84d91;
@@ -281,8 +287,8 @@
     <div class="footer-item"><a href="call-list.html"><img src="icons/video.png" alt="Video"></a></div>
     <div class="footer-item"><a href="my-chats.html"><img src="icons/chat.png" alt="Chat"></a></div>
 
-    <div class="footer-center">
-     <a href="host-users.html"> <img src="imgs/logo11.png" alt="Main" /></a>
+   <div class="footer-center">
+     <a href="host-users-list.html"> <img src="imgs/logo11.png" alt="Main" /></a>
     </div>
 
     <div class="footer-item"><a href="notifications.html" class="blink-bell">
